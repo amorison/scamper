@@ -1,0 +1,11 @@
+pub mod basic_house;
+pub mod basic_info;
+pub mod benefits;
+pub mod care;
+pub mod class;
+pub mod dependencies;
+pub mod income_house;
+pub mod kinship;
+pub mod maternity;
+pub mod tasks;
+pub mod work;

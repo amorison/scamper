@@ -1,0 +1,22 @@
+use crate::full_model::{Model, person::Id};
+
+// FIXME: should these take a IdHouse directly instead?
+fn hh_income(p_id: Id, model: &Model) -> (f64, usize) {
+    let person = model.population.get(&p_id).unwrap();
+    let house = model.houses.get(&person.house).unwrap();
+    let occupants = house.basic.occupants();
+    let income = occupants
+        .iter()
+        .map(|id| model.population.get(id).unwrap().work.income)
+        .sum();
+    (income, occupants.len())
+}
+
+pub fn household_income(p_id: Id, model: &Model) -> f64 {
+    hh_income(p_id, model).0
+}
+
+pub fn household_income_per_capita(p_id: Id, model: &Model) -> f64 {
+    let (income, noccupants) = hh_income(p_id, model);
+    income / noccupants as f64
+}

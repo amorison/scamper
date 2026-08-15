@@ -1,0 +1,91 @@
+use crate::{
+    ModelPars,
+    agents::agent_modules::work::WorkStatus,
+    full_model::{Model, person::Person},
+};
+
+fn update_person_income(person: &mut Person, pars: &ModelPars) {
+    match person.work.status {
+        WorkStatus::Child | WorkStatus::Teenager | WorkStatus::Student => person.work.income = 0.0,
+        WorkStatus::FixedShiftEmployed | WorkStatus::FlexibleShiftEmployed => {
+            if person.maternity.is_in_maternity() {
+                let mut maternity_income = person.work.income;
+                if person.maternity.duration() == 0 {
+                    person.work.wage = 0.0;
+                    maternity_income =
+                        pars.work.maternity_leave_income_reduction * person.work.income;
+                } else if person.maternity.duration() > 2 {
+                    maternity_income = maternity_income.min(pars.work.min_statutory_maternity_pay);
+                }
+                person.work.income = maternity_income;
+            } else {
+                // FIXME: should be effectively worked hours
+                person.work.income = person.work.wage * person.work.available_working_hours as f64;
+                // FIXME: what is this?
+                person.work.last_income =
+                    person.work.wage * pars.work.weekly_hours[person.care.index()] as f64;
+            }
+        }
+        WorkStatus::Retired => {
+            person.work.income = person.work.pension;
+        }
+        WorkStatus::Unemployed => person.work.income = 0.0,
+    }
+
+    person.work.disposable_income = person.work.income;
+}
+
+pub fn update_income(model: &mut Model, pars: &ModelPars) {
+    // Compute income from work based on last period job market and informal care
+    // FIXME: include formal care if necessary?
+
+    for person in model.population.values_mut() {
+        update_person_income(person, pars);
+    }
+
+    for house in model.houses.values_mut().filter(|h| h.basic.is_occupied()) {
+        house.income.household_income = house
+            .basic
+            .occupants()
+            .iter()
+            .map(|p| model.population.get(p).unwrap().work.income)
+            .sum();
+        house.income.income_per_capita =
+            house.income.household_income / house.basic.occupants().len() as f64;
+    }
+
+    // Compute disposable income (i.e. after taxes and benefits)
+    for person in model
+        .population
+        .values_mut()
+        .filter(|p| p.work.income > 0.0)
+    {
+        let mut employee_pension_contribution = 0.0;
+        if person.work.disposable_income > 162.0 {
+            if person.work.disposable_income < 893.0 {
+                employee_pension_contribution = (person.work.disposable_income - 162.0) * 0.12;
+            } else {
+                employee_pension_contribution = (893.0 - 162.0) * 0.12;
+                employee_pension_contribution += (person.work.disposable_income - 893.0) * 0.02;
+            }
+        }
+        person.work.disposable_income -= employee_pension_contribution;
+
+        let mut tax = 0.0;
+        let mut residual_income = person.work.disposable_income;
+        for (i, &taxb) in pars.work.tax_brackets.iter().enumerate() {
+            if residual_income > taxb {
+                let taxable = residual_income - taxb;
+                tax += taxable * pars.work.taxation_rates[i];
+                residual_income -= taxable;
+            }
+        }
+        person.work.disposable_income -= tax;
+    }
+
+    for person in model.population.values_mut() {
+        // FIXME: make sure this is updated in the correct order
+        person.work.disposable_income += person.benefits.benefits;
+        person.work.cumulative_income += person.work.disposable_income;
+    }
+}

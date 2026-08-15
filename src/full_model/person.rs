@@ -1,0 +1,111 @@
+pub(crate) mod build;
+
+use std::sync::atomic::{AtomicU64, Ordering};
+
+use crate::{
+    agents::{
+        agent_modules::{
+            basic_info::{BasicInfo, Gender},
+            benefits::Benefits,
+            care::Care,
+            class::Class,
+            dependencies::Dependency,
+            kinship::Kinship,
+            maternity::Maternity,
+            tasks::TaskPerson,
+            work::Work,
+        },
+        tasks::TaskKind,
+    },
+    full_model::{
+        Model,
+        house::{House, IdHouse},
+        person::build::PersonAwaitingHouse,
+    },
+    utilities::{Age, HourInWeek},
+};
+
+static ID: AtomicU64 = AtomicU64::new(0);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Id(u64);
+
+impl Id {
+    fn new() -> Id {
+        Id(ID.fetch_add(1, Ordering::Relaxed))
+    }
+}
+
+/// Agent type.
+pub struct Person {
+    id: Id,
+    pub basic: BasicInfo,
+    pub kinship: Kinship,
+    pub maternity: Maternity,
+    pub work: Work,
+    pub care: Care,
+    pub class: Class,
+    pub benefits: Benefits,
+    pub dependency: Dependency,
+    pub task: TaskPerson,
+    pub house: IdHouse,
+}
+
+impl Person {
+    pub fn baby(gender: Gender, house: IdHouse) -> Self {
+        PersonAwaitingHouse::new(gender, Age::new()).with_house(house)
+    }
+
+    pub fn id(&self) -> Id {
+        self.id
+    }
+
+    // FIXME: make sure to use this where appropriate
+    pub fn partner<'a>(&self, model: &'a Model) -> Option<&'a Self> {
+        self.kinship
+            .partner()
+            .map(|id| model.population.get(&id).unwrap())
+    }
+
+    // FIXME: make sure to use this where appropriate
+    pub fn house<'a>(&self, model: &'a Model) -> &'a House {
+        model.houses.get(&self.house).unwrap()
+    }
+
+    pub fn how_busy_at(&self, hour: HourInWeek) -> f64 {
+        self.task.how_busy_at(hour)
+    }
+
+    // FIXME: use where appropriate
+    pub fn is_female(&self) -> bool {
+        matches!(self.basic.gender, Gender::Female)
+    }
+
+    // FIXME: use where appropriate
+    pub fn is_male(&self) -> bool {
+        matches!(self.basic.gender, Gender::Male)
+    }
+}
+
+#[derive(Default)]
+pub struct TaskTally {
+    pub child_care: u32,
+    pub social_care: u32,
+    pub work: u32,
+}
+
+pub fn weekly_todo_tally(p_id: Id, model: &Model) -> TaskTally {
+    let person = model.population.get(&p_id).unwrap();
+    let mut tally = TaskTally::default();
+
+    person.task.todo.iter().flatten().for_each(|t_id| {
+        let task = model.tasks.get(t_id).unwrap();
+        match task.kind {
+            TaskKind::ChildCare => tally.child_care += 1,
+            TaskKind::SocialCare => tally.social_care += 1,
+            TaskKind::Work => tally.work += 1,
+        }
+    });
+
+    tally
+}
