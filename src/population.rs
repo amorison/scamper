@@ -84,20 +84,22 @@ impl Population {
         let person = self
             .living
             .remove(&id)
-            .expect("{id:?} is not a living person");
+            .unwrap_or_else(|| panic!("{id:?} is not a living person"));
         // FIXME: can this be left to grow or will need to be pruned as well?
         let dead = person.into();
         self.dead.insert(id, dead);
     }
 
     pub fn alive(&self, id: Id) -> &Person {
-        self.living.get(&id).expect("{id:?} is not a living person")
+        self.living
+            .get(&id)
+            .unwrap_or_else(|| panic!("{id:?} is not a living person"))
     }
 
     pub fn alive_mut(&mut self, id: Id) -> &mut Person {
         self.living
             .get_mut(&id)
-            .expect("{id:?} is not a living person")
+            .unwrap_or_else(|| panic!("{id:?} is not a living person"))
     }
 
     pub fn alives<'a>(&'a self, order: &PopIterOrder) -> impl Iterator<Item = &'a Person> {
@@ -109,7 +111,7 @@ impl Population {
             let person = self
                 .living
                 .get_mut(&id)
-                .expect("{id:?} is not a living person");
+                .unwrap_or_else(|| panic!("{id:?} is not a living person"));
             f(person)
         });
     }
@@ -121,7 +123,7 @@ impl Population {
             let p = self
                 .dead
                 .get(&id)
-                .expect("{id:?} is neither a living nor a dead person");
+                .unwrap_or_else(|| panic!("{id:?} is neither a living nor a dead person"));
             AliveOrDead::Dead(p)
         }
     }
