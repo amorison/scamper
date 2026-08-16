@@ -5,7 +5,7 @@ use crate::{
 };
 
 pub fn change_status(p_id: Id, new_status: WorkStatus, model: &mut Model) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     person.work.status = new_status;
     care_supply_changed(p_id, model);
 }

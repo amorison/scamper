@@ -8,7 +8,7 @@ use crate::{
 };
 
 pub fn age_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
 
     if person.maternity.is_in_maternity() {
         person.maternity.step();

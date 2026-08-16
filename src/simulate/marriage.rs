@@ -13,6 +13,7 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     simulate::move_house::{Proximity, move_people_to_empty_house, move_people_to_house},
     utilities::{Age, try_rand_yearly2monthly},
 };
@@ -27,12 +28,12 @@ pub struct MarriageCache {
     eligible_women: Vec<Id>,
 }
 
-pub fn marriage_pre_calc(model: &mut Model, pars: &ModelPars) {
+pub fn marriage_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     model.marriage_cache.share_men_no_children.resize(20, 0.0);
     model.marriage_cache.share_men_no_children.fill(0.0);
 
     let mut n_all = vec![0.0; 20];
-    for person in model.population.values().filter(|p| p.is_male()) {
+    for person in model.pop.alives(order).filter(|p| p.is_male()) {
         let ac = age_class(person);
         n_all[ac] += 1.0;
         // FIXME: only looks at dependent persons (which usually are underage and living in the same
@@ -50,8 +51,8 @@ pub fn marriage_pre_calc(model: &mut Model, pars: &ModelPars) {
 
     model.marriage_cache.eligible_women.clear();
     model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter(|p| {
             p.is_female()
                 && p.kinship.is_single()
@@ -70,8 +71,8 @@ fn age_factor(agem: Age, agef: Age, pars: &ModelPars) -> f64 {
 }
 
 fn marry_weight(man_id: Id, woman_id: Id, model: &Model, pars: &ModelPars) -> f64 {
-    let man = model.population.get(&man_id).unwrap();
-    let woman = model.population.get(&woman_id).unwrap();
+    let man = model.pop.alive(man_id);
+    let woman = model.pop.alive(woman_id);
     if living_together(man, woman) || related_1st_degree(man, woman) {
         return 0.0;
     }
@@ -125,7 +126,7 @@ pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
 }
 
 pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
-    let man = model.population.get(&man_id).unwrap();
+    let man = model.pop.alive(man_id);
 
     assert!(man.basic.alive);
 
@@ -188,12 +189,12 @@ pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
     join_couple(man_id, woman_id, model, pars);
 
     // dependents become joint dependents
-    let man = model.population.get(&man_id).unwrap();
+    let man = model.pop.alive(man_id);
     let dep_man = man.dependency.dependents.clone();
     for child_id in dep_man {
         set_as_guardian_dependent(woman_id, child_id, model);
     }
-    let woman = model.population.get(&woman_id).unwrap();
+    let woman = model.pop.alive(woman_id);
     let dep_woman = woman.dependency.dependents.clone();
     for child_id in dep_woman {
         set_as_guardian_dependent(man_id, child_id, model);
@@ -205,8 +206,8 @@ pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
 
 fn gather_dependents_single(person: &Person, model: &Model) -> Vec<Id> {
     // for now simply all dependents
-    for dep_id in &person.dependency.dependents {
-        let dep = model.population.get(dep_id).unwrap();
+    for &dep_id in &person.dependency.dependents {
+        let dep = model.pop.alive(dep_id);
         assert_eq!(person.house, dep.house);
         assert_eq!(dep.dependency.guardians, vec![person.id()]);
     }
@@ -230,8 +231,8 @@ fn join_couple(man_id: Id, woman_id: Id, model: &mut Model, pars: &ModelPars) ->
         vec![woman_id, man_id]
     };
 
-    let man = model.population.get(&man_id).unwrap();
-    let woman = model.population.get(&woman_id).unwrap();
+    let man = model.pop.alive(man_id);
+    let woman = model.pop.alive(woman_id);
     people_to_move.extend(gather_dependents_single(man, model));
     people_to_move.extend(gather_dependents_single(woman, model));
 

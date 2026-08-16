@@ -34,7 +34,7 @@ fn divorce_probability(raw_rate: f64, rank: Rank, model: &Model) -> f64 {
 }
 
 pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
-    let man = model.population.get(&man_id).unwrap();
+    let man = model.pop.alive(man_id);
     assert!(man.is_male());
     let wife_id = man.kinship.partner().expect("a single man cannot divorce");
 
@@ -52,17 +52,17 @@ pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> b
     if try_rand_yearly2monthly(divorce_prob, &mut model.rng) {
         resolve_partnership(man_id, wife_id, model);
 
-        let wife = model.population.get(&wife_id).unwrap();
+        let wife = model.pop.alive(wife_id);
         if wife.work.is_student() {
             student_start_working(wife_id, model, pars);
         }
 
-        let man = model.population.get(&man_id).unwrap();
+        let man = model.pop.alive(man_id);
         let mut people_to_move = vec![man_id];
         let deps = man.dependency.dependents.clone();
         for child_id in deps {
-            let child = model.population.get(&child_id).unwrap();
-            assert!(child.basic.alive);
+            let child = model.pop.alive(child_id);
+            // FIXME: this was here before: assert!(child.basic.alive);
             let man_custody = child.kinship.father == Some(man_id)
                 && (child.kinship.mother != Some(wife_id)
                     || model

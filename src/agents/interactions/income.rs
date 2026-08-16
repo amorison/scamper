@@ -2,12 +2,12 @@ use crate::full_model::{Model, person::Id};
 
 // FIXME: should these take a IdHouse directly instead?
 fn hh_income(p_id: Id, model: &Model) -> (f64, usize) {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     let house = model.houses.get(&person.house).unwrap();
     let occupants = house.basic.occupants();
     let income = occupants
         .iter()
-        .map(|id| model.population.get(id).unwrap().work.income)
+        .map(|&id| model.pop.alive(id).work.income)
         .sum();
     (income, occupants.len())
 }

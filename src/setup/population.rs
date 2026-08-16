@@ -22,6 +22,7 @@ use crate::{
         data::AgePyramid,
         person::{Id, Person, build::PersonAwaitingHouse},
     },
+    population::PopIterOrder,
     utilities::{Age, Date, DayInWeek, HourInDay},
 };
 
@@ -94,8 +95,11 @@ pub fn set_as_provider_providee(
 
 pub fn create_pyramid_population<R: Rng>(
     pars: &ModelPars,
+    order: &mut PopIterOrder,
     rng: &mut R,
 ) -> Vec<PersonAwaitingHouse> {
+    // FIXME: double check order is reproducible, including in how the returned
+    // vector is used
     let pyramid = AgePyramid::read_from(&pars.data_files.ini_age);
 
     let npop = pars.population.init_size as usize;
@@ -112,6 +116,7 @@ pub fn create_pyramid_population<R: Rng>(
         };
         let age = rand_age(&pyramid, gender, rng);
         let person = PersonAwaitingHouse::new(gender, age);
+        order.insert(person.id());
         if age < Age::years(18) {
             population.insert(person.id(), person);
         } else {
@@ -155,9 +160,7 @@ pub fn create_pyramid_population<R: Rng>(
 
     let mut pm_in_age_range = Vec::with_capacity(potential_mothers.len());
 
-    let all_ids: Vec<_> = population.keys().copied().collect();
-
-    for p_id in all_ids {
+    for p_id in order.ids() {
         let person = population.get_mut(&p_id).unwrap();
         let child_age = person.basic.age;
         let age_years = child_age.year_month().0;
@@ -197,7 +200,10 @@ pub fn create_pyramid_population<R: Rng>(
 
     assert_eq!(population.len(), pars.population.init_size as usize);
 
-    population.into_values().collect()
+    order
+        .ids()
+        .map(|id| population.remove(&id).unwrap())
+        .collect()
 }
 
 pub fn init_class<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
@@ -345,8 +351,8 @@ fn init_wealth(model: &mut Model, pars: &ModelPars) {
             .basic
             .occupants()
             .iter()
-            .map(|id| {
-                let person = model.population.get(id).unwrap();
+            .map(|&id| {
+                let person = model.pop.alive(id);
                 person.work.cumulative_income
             })
             .sum();
@@ -361,13 +367,13 @@ fn init_wealth(model: &mut Model, pars: &ModelPars) {
                 .basic
                 .occupants()
                 .iter()
-                .filter_map(|id| {
-                    let member = model.population.get_mut(id).unwrap();
-                    (member.work.cumulative_income > 0.0).then_some(*id)
+                .filter_map(|&id| {
+                    let member = model.pop.alive(id);
+                    (member.work.cumulative_income > 0.0).then_some(id)
                 })
                 .collect();
             for id in earning_members {
-                let member = model.population.get_mut(&id).unwrap();
+                let member = model.pop.alive_mut(id);
                 member.work.wealth = member.work.cumulative_income / house.income.cumulative_income
                     * house.income.wealth;
             }
@@ -376,24 +382,24 @@ fn init_wealth(model: &mut Model, pars: &ModelPars) {
                 .basic
                 .occupants()
                 .iter()
-                .filter_map(|id| {
-                    let member = model.population.get_mut(id).unwrap();
-                    (!member.dependency.is_dependent()).then_some(*id)
+                .filter_map(|&id| {
+                    let member = model.pop.alive_mut(id);
+                    (!member.dependency.is_dependent()).then_some(id)
                 })
                 .collect();
             let nmembers = indep_members.len() as f64;
-            for id in &indep_members {
-                let member = model.population.get_mut(id).unwrap();
+            for id in indep_members {
+                let member = model.pop.alive_mut(id);
                 member.work.wealth = house.income.wealth / nmembers;
             }
         }
     }
 }
 
-pub fn init_jobs(model: &mut Model, pars: &ModelPars) {
+pub fn init_jobs(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let hired_agents: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| p.work.is_worker().then_some(p.id()))
         .collect();
 
@@ -410,10 +416,10 @@ fn need_care(person: &Person, pars: &ModelPars) -> bool {
         || social_care_demand_per_day(person, pars) > 0
 }
 
-pub fn init_care(model: &mut Model, pars: &ModelPars) {
+pub fn init_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let need_care: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         // skip adolescents/adults that don't need care
         .filter_map(|p| need_care(p, pars).then_some(p.id()))
         .collect();

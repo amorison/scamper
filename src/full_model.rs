@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use rand::{rngs::Xoshiro256PlusPlus, seq::SliceRandom};
+use rand::rngs::Xoshiro256PlusPlus;
 
 use crate::{
     ModelPars,
@@ -15,8 +15,9 @@ use crate::{
             Pre51Mortality, Unemployment, WealthDistribution,
         },
         house::{House, IdHouse},
-        person::{Id, Person},
+        person::Id,
     },
+    population::{PopIterOrder, Population},
     setup::{
         map::{create_towns, initialise_houses_in_town},
         map_pop::assign_couples_to_houses,
@@ -58,12 +59,8 @@ pub struct Model {
     pub town_size: usize,
     /// Houses, located in towns.
     pub houses: HashMap<IdHouse, House>,
-    /// The entire population. FIXME: where should dead people be kept?
-    pub population: HashMap<Id, Person>,
-    /// Shuffled list of population ids.
-    pub shuffled_pop: Vec<Id>, // FIXME: make sure this is used where relevant
-    /// Babies born in the current time step (moved to population at the end).
-    pub babies: Vec<Person>,
+    /// The entire population.
+    pub pop: Population,
     /// Probability distribution of shifts.
     pub shift_pool: Vec<Shift>,
 
@@ -95,7 +92,7 @@ pub struct Model {
 }
 
 /// Create a model instance from parameters.
-pub fn create_model(pars: &ModelPars) -> Model {
+pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
     // FIXME: allow fixed seed for testing, check for warm-up need
     let mut rng: Xoshiro256PlusPlus = rand::make_rng();
 
@@ -104,9 +101,8 @@ pub fn create_model(pars: &ModelPars) -> Model {
         .map(|town| (town.id(), town))
         .collect();
 
-    // FIXME: how to make that first order reproducible? Might be ok when we use identity hash.
-    let population = create_pyramid_population(pars, &mut rng);
-    let shuffled_pop = population.iter().map(|p| p.id()).collect();
+    let (pop, mut order) = Population::for_npersons(pars.population.init_size as usize);
+    let population = create_pyramid_population(pars, &mut order, &mut rng);
 
     let fert_post51 = Post51Fertility::read_from(&pars.data_files.fertility);
 
@@ -114,9 +110,7 @@ pub fn create_model(pars: &ModelPars) -> Model {
         towns,
         town_size: 0,
         houses: HashMap::new(), // FIXME: check capacity
-        population: HashMap::with_capacity(population.len()),
-        shuffled_pop,
-        babies: Vec::new(),
+        pop,
         shift_pool: Vec::new(),
         tasks: HashMap::with_capacity(population.len() * 5), // FIXME: check pre alloc is useful
         rng,
@@ -142,138 +136,120 @@ pub fn create_model(pars: &ModelPars) -> Model {
     initialise_houses_in_town(&mut model, population.len());
     assign_couples_to_houses(population, &mut model);
 
-    for person in model.population.values_mut() {
+    model.pop.for_each(&order, |person| {
         init_class(person, pars, &mut model.rng);
         init_work(person, pars, &mut model.rng);
-    }
+    });
 
-    init_jobs(&mut model, pars);
-    init_care(&mut model, pars);
+    init_jobs(&mut model, &order, pars);
+    init_care(&mut model, &order, pars);
 
-    model
-}
-
-/// Remove individual that died from the population.
-pub fn remove_dead(model: &mut Model) {
-    // Unclear what needs to be done here
-    // Update shuffled pop only?
-    // Also have dead in different bucket?
-    // FIXME: either way, this should be enforced to be called right after death is handled
-    todo!()
+    (model, order)
 }
 
 /// Perform one model step.
-pub fn step_model(model: &mut Model, date: Date, pars: &ModelPars) {
-    // avoid order effects
-    // FIXME: could be done when dealing with dead people
-    // FIXME: ensure this is used everywhere for iteration that's order-dependent
-    model.shuffled_pop = model.population.keys().copied().collect();
-    model.shuffled_pop.shuffle(&mut model.rng);
-    // FIXME: avoid this clone
-    let pop = model.shuffled_pop.clone();
-
+pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars: &ModelPars) {
     // pre-calc various population properties
-    social_pre_calc(model);
+    social_pre_calc(model, order);
     social_care_pre_calc(model, pars);
     divorce_pre_calc(model, pars);
-    birth_pre_calc(model, pars);
-    death_pre_calc(model, pars);
-    job_pre_calc(date, model, pars);
+    birth_pre_calc(model, order, pars);
+    death_pre_calc(model, order, pars);
+    job_pre_calc(date, model, order, pars);
 
     // run transitions
     // FIXME: move the `select_` into the transition themselves
 
     // death
-    for &p_id in &pop {
+    for p_id in order.ids() {
         death(p_id, date, model, pars);
     }
-    remove_dead(model);
+    order.register_dead(&mut model.pop);
 
     // adoption
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_assign_guardian(person, model) {
-            assign_guardian(p_id, model);
+            assign_guardian(p_id, model, order);
         }
     }
 
     // birth
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_birth(person, model, pars) {
             birth(p_id, date, model, pars);
         }
     }
 
     // aging
-    for &p_id in &pop {
+    for p_id in order.ids() {
         age_transition(p_id, model, pars);
     }
 
-    update_income(model, pars);
-    update_wealth(model, pars);
+    update_income(model, order, pars);
+    update_wealth(model, order, pars);
 
     house_ownership(model, pars);
 
     // hiring
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_unemployed(person) {
             unemployed_transition(p_id, date, model, pars);
         }
     }
 
     // firing
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_employed(person) {
             employed_transition(p_id, model, pars);
         }
     }
 
     // social care
-    for &p_id in &pop {
+    for p_id in order.ids() {
         social_care_transition(p_id, model, pars);
     }
 
-    compute_benefits(model, pars);
+    compute_benefits(model, order, pars);
 
     // relocate
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_relocate(person, model) {
             relocate(p_id, model, pars);
         }
     }
 
     // sort new adults into students and workers
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_social_transition(person, pars) {
             social_transition(p_id, model, pars);
         }
     }
 
     // divorce
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_divorce(person) {
             divorce(p_id, date, model, pars);
         }
     }
 
     // marriage
-    marriage_pre_calc(model, pars);
-    for &p_id in &pop {
-        let person = model.population.get(&p_id).unwrap();
+    marriage_pre_calc(model, order, pars);
+    for p_id in order.ids() {
+        let person = model.pop.alive(p_id);
         if select_marriage(person, pars) {
             marriage(p_id, model, pars);
         }
     }
 
-    distribute_care(model, pars);
+    distribute_care(model, order, pars);
 
-    for baby in model.babies.drain(..) {
-        model.population.insert(baby.id(), baby);
-    }
+    // include babies in the population iteration
+    order.register_new(&mut model.pop, &mut model.rng);
 }

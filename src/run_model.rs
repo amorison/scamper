@@ -22,13 +22,13 @@ pub fn main(pars: ModelPars) -> io::Result<()> {
     };
     pars.save_to(&out_pars)?;
 
-    let mut model = create_model(&pars);
+    let (mut model, mut order) = create_model(&pars);
 
     let mut date = Date::new(pars.population.start_year);
     let finish = Date::new(pars.population.end_year);
 
     while date < finish {
-        step_model(&mut model, date, &pars);
+        step_model(&mut model, &mut order, date, &pars);
 
         date = date.next_month();
     }

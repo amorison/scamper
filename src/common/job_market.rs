@@ -9,6 +9,7 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     utilities::{Date, DayInWeek, HourInWeek, calc_rate_bias},
 };
 
@@ -60,12 +61,13 @@ pub struct Shares {
 
 // TODO: fuse with class shares in social transition?
 /// Count SES and age bands for active population.
-pub fn calc_age_class_shares(model: &Model) -> Shares {
+pub fn calc_age_class_shares(model: &Model, order: &PopIterOrder) -> Shares {
     let mut class = [0.0; N_CLASSES];
     let mut age_band = [[0.0; N_AGE_BANDS]; N_CLASSES];
 
     // FIXME: double check that this is always called for the active subset of population
-    for person in model.population.values().filter(|p| is_active(p)) {
+    // in the Julia code
+    for person in model.pop.alives(order).filter(|p| is_active(p)) {
         let r = person.class.rank_idx();
         let a = person.basic.age.band();
         class[r] += 1.0;
@@ -113,7 +115,7 @@ pub fn compute_ur_by_class_age(
 
 fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut Model) {
     change_status(p_id, WorkStatus::FixedShiftEmployed, model);
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     person.work.unemployment_months = 0;
     person.work.month_hired = month;
     person.work.wage = compute_wage(person, &mut model.rng, pars);
@@ -170,7 +172,7 @@ pub fn assign_jobs(hired_agents: &[Id], month: Date, pars: &ModelPars, model: &m
         model.employed_pop_cache.insert(p_id);
 
         if model.rng.random_bool(pars.work.social_care_worker_prob) {
-            let person = model.population.get_mut(&p_id).unwrap();
+            let person = model.pop.alive_mut(p_id);
             // FIXME: need to set to `false` when losing job
             person.work.social_worker = true;
             model.social_workers_cache.insert(p_id);

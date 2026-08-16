@@ -45,6 +45,6 @@ pub fn assign_couples_to_houses(mut population: Vec<PersonAwaitingHouse>, model:
         let house = model.houses.get_mut(&h_id).unwrap();
         house.basic.add_occupant(p_id);
 
-        model.population.insert(p_id, person);
+        model.pop.insert(person);
     }
 }

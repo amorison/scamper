@@ -1,13 +1,46 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use rand::{Rng, seq::SliceRandom};
 
-use crate::full_model::person::{DeadPerson, Id, Person};
+use crate::{
+    agents::agent_modules::kinship::Kinship,
+    full_model::person::{DeadPerson, Id, Person},
+};
 
-//TODO: trait to access what's common to both
+#[derive(Clone, Copy)]
 pub enum AliveOrDead<'a> {
     Alive(&'a Person),
     Dead(&'a DeadPerson),
+}
+
+impl<'a> AliveOrDead<'a> {
+    pub fn id(self) -> Id {
+        match self {
+            AliveOrDead::Alive(person) => person.id(),
+            AliveOrDead::Dead(dead_person) => dead_person.id(),
+        }
+    }
+
+    pub fn kinship(self) -> &'a Kinship {
+        match self {
+            AliveOrDead::Alive(person) => &person.kinship,
+            AliveOrDead::Dead(dead_person) => &dead_person.kinship,
+        }
+    }
+
+    pub fn is_alive(self) -> bool {
+        match self {
+            AliveOrDead::Alive(_) => true,
+            AliveOrDead::Dead(_) => false,
+        }
+    }
+
+    pub fn is_alive_and<F: FnOnce(&Person) -> bool>(self, predicate: F) -> bool {
+        match self {
+            AliveOrDead::Alive(person) => predicate(person),
+            AliveOrDead::Dead(_) => false,
+        }
+    }
 }
 
 pub struct Population {
@@ -33,6 +66,11 @@ impl Population {
             ids: Vec::with_capacity(npersons / 2 * 3),
         };
         (pop, order)
+    }
+
+    /// Number of living persons.
+    pub fn size(&self) -> usize {
+        self.living.len()
     }
 
     /// Add an individual to the population.
@@ -63,14 +101,14 @@ impl Population {
     }
 
     pub fn alives<'a>(&'a self, order: &PopIterOrder) -> impl Iterator<Item = &'a Person> {
-        order.ids.iter().map(|&id| self.alive(id))
+        order.ids().map(|id| self.alive(id))
     }
 
     pub fn for_each<F: FnMut(&mut Person)>(&mut self, order: &PopIterOrder, mut f: F) {
-        order.ids.iter().for_each(|id| {
+        order.ids().for_each(|id| {
             let person = self
                 .living
-                .get_mut(id)
+                .get_mut(&id)
                 .expect("{id:?} is not a living person");
             f(person)
         });
@@ -100,6 +138,15 @@ impl PopIterOrder {
             self.ids.push(id);
         }
         self.shuffle(rng);
+    }
+
+    // FIXME: make available only in create_pyramid_population for initial construction
+    pub fn insert(&mut self, id: Id) {
+        self.ids.push(id);
+    }
+
+    pub fn ids(&self) -> impl Iterator<Item = Id> {
+        self.ids.iter().copied()
     }
 
     pub fn register_dead(&mut self, pop: &mut Population) {

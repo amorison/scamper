@@ -19,11 +19,12 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::{AliveOrDead, PopIterOrder},
     utilities::{Age, HourInWeek},
 };
 
 pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     if person.basic.age == Age::years(pars.task_care.stop_baby_care_age)
         || person.basic.age == Age::years(pars.task_care.stop_child_care_age)
     {
@@ -50,17 +51,15 @@ pub fn care_supply_changed(p_id: Id, model: &mut Model) {
 }
 
 /// Try to assign cares for open care tasks.
-pub fn distribute_care(model: &mut Model, pars: &ModelPars) {
+pub fn distribute_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     // Tasks can be rejected, and more important tasks can override
     // already assigned tasks, so we iterate a couple of times.
 
-    // FIXME: rm need for this clone
-    let pop = model.shuffled_pop.clone();
     for _ in 0..pars.task_care.n_iter_care_dist {
         // collect all open tasks
-        let mut asked_tasks = HashMap::with_capacity(model.population.len());
-        for &p_id in &pop {
-            let caree = model.population.get(&p_id).unwrap();
+        let mut asked_tasks = HashMap::with_capacity(model.pop.size() * 3);
+        for p_id in order.ids() {
+            let caree = model.pop.alive(p_id);
             if caree.task.open_tasks.is_empty() {
                 continue;
             }
@@ -84,7 +83,7 @@ fn is_for_school_care(task: &Task) -> bool {
 }
 
 fn assign_school_care(p_id: Id, model: &mut Model) {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     if person.basic.age < Age::years(4) || person.basic.age >= Age::years(16) {
         return;
     }
@@ -116,14 +115,14 @@ fn available_care_time(agent: &Person, pars: &ModelPars) -> f64 {
 }
 
 /// Add agent to list if minimum requirements are met.
-fn check_and_add_carer(list: &mut Vec<Id>, agent: &Person, pars: &ModelPars) {
+fn check_and_add_carer(list: &mut Vec<Id>, agent: AliveOrDead, pars: &ModelPars) {
     // TODO: check location (max dist?)
     // FIXME: list should be a set for cheaper check?
-    if available_care_time(agent, pars) <= 0.0 || list.contains(&agent.id()) {
-        return;
+    if agent
+        .is_alive_and(|agent| available_care_time(agent, pars) > 0.0 && !list.contains(&agent.id()))
+    {
+        list.push(agent.id());
     }
-
-    list.push(agent.id());
 }
 
 // FIXME: double check no off-by-one since this is an index
@@ -146,24 +145,24 @@ fn related_status(of_agent: &Person, to_agent: &Person) -> usize {
 fn create_carer_list(agent: &Person, model: &Model, pars: &ModelPars) -> Vec<Id> {
     let mut potential_carers = Vec::new();
 
-    for id_occ in agent.house(model).basic.occupants() {
-        let occ = model.population.get(id_occ).unwrap();
+    for &id_occ in agent.house(model).basic.occupants() {
+        let occ = model.pop.get(id_occ);
         check_and_add_carer(&mut potential_carers, occ, pars);
     }
 
     for parent_id in agent.kinship.parents() {
-        let parent = model.population.get(&parent_id).unwrap();
+        let parent = model.pop.get(parent_id);
         check_and_add_carer(&mut potential_carers, parent, pars);
     }
 
-    for child_id in &agent.kinship.children {
-        let child = model.population.get(child_id).unwrap();
+    for &child_id in &agent.kinship.children {
+        let child = model.pop.get(child_id);
         check_and_add_carer(&mut potential_carers, child, pars);
     }
 
-    let (full, half) = siblings(agent, model);
-    for sibling_id in full.union(&half) {
-        let sibling = model.population.get(sibling_id).unwrap();
+    let (full, half) = siblings(AliveOrDead::Alive(agent), model);
+    for &sibling_id in full.union(&half) {
+        let sibling = model.pop.get(sibling_id);
         check_and_add_carer(&mut potential_carers, sibling, pars);
     }
 
@@ -198,7 +197,7 @@ fn task_ask_weight(
 
 /// Return all open tasks of the given kind at a randomly selected day.
 fn get_chunk_of_open_tasks(p_id: Id, task_kind: TaskKind, model: &mut Model) -> Vec<IdTask> {
-    let agent = model.population.get_mut(&p_id).unwrap();
+    let agent = model.pop.alive_mut(p_id);
     let tasks: Vec<_> = agent
         .task
         .open_tasks
@@ -254,7 +253,7 @@ fn assign_open_tasks(
         add_asked_tasks(p_id, work_tasks, asked_tasks);
     }
 
-    let agent = model.population.get(&p_id).unwrap();
+    let agent = model.pop.alive(p_id);
     if agent.task.open_tasks.is_empty() {
         return;
     }
@@ -279,11 +278,11 @@ fn assign_open_tasks(
     assign_school_care(p_id, model);
 
     for tt in [TaskKind::ChildCare, TaskKind::SocialCare] {
-        let agent = model.population.get(&p_id).unwrap();
+        let agent = model.pop.alive(p_id);
         let tt_weights: Vec<_> = potential_carers
             .iter()
-            .map(|carer_id| {
-                let potential_carer = model.population.get(carer_id).unwrap();
+            .map(|&carer_id| {
+                let potential_carer = model.pop.alive(carer_id);
                 task_ask_weight(potential_carer, agent, tt, model, pars)
             })
             .collect();
@@ -306,8 +305,8 @@ fn assign_open_tasks(
             let weights: Vec<_> = potential_carers
                 .iter()
                 .enumerate()
-                .map(|(i, p_carer)| {
-                    let carer = model.population.get(p_carer).unwrap();
+                .map(|(i, &p_carer)| {
+                    let carer = model.pop.alive(p_carer);
                     tt_weights[i] * availability_weight(carer, &tasks, pars)
                 })
                 .collect();
@@ -326,7 +325,7 @@ fn assign_open_tasks(
 
 /// Importance of the task to the carer.
 fn task_importance(task: &Task, agent: &Person, model: &Model, pars: &ModelPars) -> f64 {
-    let owner = model.population.get(&task.owner).unwrap();
+    let owner = model.pop.alive(task.owner);
     let rel = related_status(agent, owner);
     pars.task_care.care_weight_related[rel][task.kind.weight_index()] * task.urgency
 }
@@ -426,7 +425,7 @@ fn task_accept_prob(
 /// Check for all tasks whether to accept.
 fn check_accept_tasks(p_id: Id, tasks: &[IdTask], model: &mut Model, pars: &ModelPars) {
     for &t_id in tasks {
-        let agent = model.population.get(&p_id).unwrap();
+        let agent = model.pop.alive(p_id);
         let task = model.tasks.get(&t_id).unwrap();
         let tasks_to_give_up = task_accept_plan(agent, task, model, pars);
         let prob = task_accept_prob(task, &tasks_to_give_up, agent, model, pars);

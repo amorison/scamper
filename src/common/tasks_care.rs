@@ -43,7 +43,7 @@ fn child_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {
 }
 
 pub fn init_care_tasks(p_id: Id, pars: &ModelPars, model: &mut Model) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let sc = social_care_demand_per_day(person, pars);
     let cc = child_care_demand_per_day(person, pars);
 

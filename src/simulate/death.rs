@@ -8,6 +8,7 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     simulate::{dependencies::process_death_deps, tasks_care::process_death_task_care},
     utilities::{Age, Date, sum_class_bias, try_rand_yearly2monthly},
 };
@@ -51,7 +52,7 @@ fn death_probability(base_rate: f64, person: &Person, model: &Model, pars: &Mode
 
 fn set_dead(p_id: Id, model: &mut Model) {
     // FIXME: maybe take out of population and put somewhere else?
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     person.basic.alive = false;
 
     let house = model.houses.get_mut(&person.house).unwrap();
@@ -64,6 +65,7 @@ fn set_dead(p_id: Id, model: &mut Model) {
     process_death_task_care(p_id, model);
     process_death_deps(p_id, model);
 
+    model.pop.mark_as_dead(p_id);
     // Comment in Julia: dependents are being taken care of by assignGuardian!
     // FIXME: check that it is indeed the case
 }
@@ -77,14 +79,14 @@ pub struct DeathCache {
     care_bias: [f64; N_CLASSES],
 }
 
-pub fn death_pre_calc(model: &mut Model, pars: &ModelPars) {
+pub fn death_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let mut care_need_shares = [[0.0; N_CARE_LEVELS]; N_CLASSES];
     let mut s_m = 0.0;
     let mut s_f = 0.0;
     let mut n_m = 0.0;
     let mut n_f = 0.0;
 
-    for person in model.population.values() {
+    for person in model.pop.alives(order) {
         let die_prob = age_die_prob(person.basic.age, person.basic.gender, pars);
         match person.basic.gender {
             Gender::Female => {
@@ -144,7 +146,7 @@ fn age_die_prob(age: Age, gender: Gender, pars: &ModelPars) -> f64 {
 }
 
 fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
 
     if person.basic.age >= Age::years(150) {
         return true;
@@ -179,10 +181,8 @@ fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool 
 }
 
 // FIXME: currently leaves dead agents in population
-pub fn death(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
-    let dead = death_due(p_id, date, model, pars);
-    if dead {
+pub fn death(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
+    if death_due(p_id, date, model, pars) {
         set_dead(p_id, model);
     }
-    dead
 }

@@ -123,7 +123,7 @@ impl Default for Work {
 }
 
 pub fn lose_job(p_id: Id, model: &mut Model) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     person.work.month_hired = Date::new(0);
     person.work.income = 0.0;
     person.work.working_hours = 0;

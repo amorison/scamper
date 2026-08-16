@@ -53,6 +53,7 @@ pub struct Person {
 
 pub struct DeadPerson {
     id: Id,
+    // FIXME: is basic needed? Either way, rm basic.alive
     pub basic: BasicInfo,
     pub kinship: Kinship,
 }
@@ -68,9 +69,7 @@ impl Person {
 
     // FIXME: make sure to use this where appropriate
     pub fn partner<'a>(&self, model: &'a Model) -> Option<&'a Self> {
-        self.kinship
-            .partner()
-            .map(|id| model.population.get(&id).unwrap())
+        self.kinship.partner().map(|id| model.pop.alive(id))
     }
 
     // FIXME: make sure to use this where appropriate
@@ -106,6 +105,12 @@ impl From<Person> for DeadPerson {
     }
 }
 
+impl DeadPerson {
+    pub fn id(&self) -> Id {
+        self.id
+    }
+}
+
 #[derive(Default)]
 pub struct TaskTally {
     pub child_care: u32,
@@ -114,7 +119,7 @@ pub struct TaskTally {
 }
 
 pub fn weekly_todo_tally(p_id: Id, model: &Model) -> TaskTally {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     let mut tally = TaskTally::default();
 
     person.task.todo.iter().flatten().for_each(|t_id| {

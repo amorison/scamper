@@ -48,7 +48,7 @@ pub fn move_people_to_empty_house(
     model: &mut Model,
 ) -> Option<IdHouse> {
     // first person determines search area
-    let person0 = model.population.get(&ids[0]).unwrap();
+    let person0 = model.pop.alive(ids[0]);
     let t_id = person0.house(model).basic.town();
 
     let mut new_house = None;

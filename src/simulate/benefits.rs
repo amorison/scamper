@@ -9,26 +9,27 @@ use crate::{
         house::House,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     utilities::Age,
 };
 
-pub fn compute_benefits(model: &mut Model, pars: &ModelPars) {
-    for agent in model.population.values_mut() {
+pub fn compute_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
+    model.pop.for_each(order, |agent| {
         agent.benefits.benefits = 0.0;
         agent.benefits.highest_disability = false;
         agent.benefits.uc = false;
-    }
+    });
 
-    child_benefits(model, pars);
-    disability_benefits(model, pars);
-    universal_credit(model, pars);
-    pension_credit(model, pars);
+    child_benefits(model, order, pars);
+    disability_benefits(model, order, pars);
+    universal_credit(model, order, pars);
+    pension_credit(model, order, pars);
 }
 
-fn child_benefits(model: &mut Model, pars: &ModelPars) {
+fn child_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let income_threshold = pars.benefit.child_benefit_income_threshold;
-    for p_id in &model.shuffled_pop {
-        let parent = model.population.get_mut(p_id).unwrap();
+    for p_id in order.ids() {
+        let parent = model.pop.alive_mut(p_id);
         if !parent.dependency.has_dependents() {
             continue;
         }
@@ -39,10 +40,10 @@ fn child_benefits(model: &mut Model, pars: &ModelPars) {
 
         if let Some(partner_id) = parent.kinship.partner() {
             let eligible = parent.work.income < income_threshold;
-            let partner = model.population.get(&partner_id).unwrap();
+            let partner = model.pop.alive(partner_id);
             let partner_income = partner.work.income;
             if eligible || partner_income < income_threshold {
-                let parent = model.population.get_mut(p_id).unwrap();
+                let parent = model.pop.alive_mut(p_id);
                 parent.benefits.benefits += potential_benefits / 2.0;
             }
         } else {
@@ -53,14 +54,12 @@ fn child_benefits(model: &mut Model, pars: &ModelPars) {
     }
 }
 
-fn disability_benefits(model: &mut Model, pars: &ModelPars) {
+fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     // FIXME: clarify indexing of care levels from pars.
     // Arrays in pars should probably have a N_CARE_LEVELS size with repetition where needed to
     // reduce confusion since indexing is not trivial here.
-    // FIXME: do we need to iterate in a fixed shuffled order here? No randomness involved for
-    // reproducibility it seems.
-    for p_id in &model.shuffled_pop {
-        let person = model.population.get_mut(p_id).unwrap();
+    for p_id in order.ids() {
+        let person = model.pop.alive_mut(p_id);
 
         // children
         if person.basic.age < Age::years(16) && person.care.need_level > 0 {
@@ -111,9 +110,8 @@ fn is_uc_eligible_student(person: &Person, model: &Model, pars: &ModelPars) -> b
             || person.basic.age >= Age::years(pars.work.age_retirement)
             || person.care.need_level > 0
             || person
-                .kinship
-                .partner()
-                .is_some_and(|partner_id| model.population.get(&partner_id).unwrap().benefits.uc))
+                .partner(model)
+                .is_some_and(|partner| partner.benefits.uc))
 }
 
 fn is_uc_eligible_young(person: &Person, model: &Model) -> bool {
@@ -126,14 +124,14 @@ fn is_uc_eligible_young(person: &Person, model: &Model) -> bool {
             || has_own_children_at_home(person, model))
 }
 
-fn universal_credit(model: &mut Model, pars: &ModelPars) {
+fn universal_credit(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     // condition 1: age between 18 and 64
     // condition 2: low income or unemployed
     // condition 3: savings less than 16_000
 
     let eligible_adults: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| is_uc_eligible_adult(p, pars).then_some(p.id()))
         .collect();
 
@@ -143,8 +141,8 @@ fn universal_credit(model: &mut Model, pars: &ModelPars) {
 
     // need to do that afterwards, so that partners have been processed
     let eligible_y_std: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| {
             (is_uc_eligible_student(p, model, pars) || is_uc_eligible_young(p, model))
                 .then_some(p.id())
@@ -163,8 +161,8 @@ fn universal_credit(model: &mut Model, pars: &ModelPars) {
     // - Two children under 10
     // - Any other child under 16
     let eligible_housing: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| {
             let house = p.house(model);
             let eligible =
@@ -187,7 +185,7 @@ fn universal_credit(model: &mut Model, pars: &ModelPars) {
         })
         .collect();
     for (p_id, benefit) in eligible_housing {
-        let person = model.population.get_mut(&p_id).unwrap();
+        let person = model.pop.alive_mut(p_id);
         person.benefits.benefits += benefit;
     }
 }
@@ -201,7 +199,7 @@ fn n_dependents(house: &House, model: &Model) -> usize {
         .basic
         .occupants()
         .iter()
-        .map(|p_id| model.population.get(p_id).unwrap())
+        .map(|&p_id| model.pop.alive(p_id))
         .filter(|&p| is_dep(p))
         .count()
 }
@@ -211,7 +209,7 @@ fn n_mildly_disabled_dependents(house: &House, model: &Model) -> usize {
         .basic
         .occupants()
         .iter()
-        .map(|p_id| model.population.get(p_id).unwrap())
+        .map(|&p_id| model.pop.alive(p_id))
         .filter(|&p| is_dep(p) && p.care.need_level > 0 && !p.benefits.highest_disability)
         .count()
 }
@@ -221,24 +219,23 @@ fn n_crit_disabled_dependents(house: &House, model: &Model) -> usize {
         .basic
         .occupants()
         .iter()
-        .map(|p_id| model.population.get(p_id).unwrap())
+        .map(|&p_id| model.pop.alive(p_id))
         .filter(|&p| is_dep(p) && p.benefits.highest_disability)
         .count()
 }
 
 fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get(&p_id).unwrap();
-    let (partner_fw, partner_income, partner_below25) =
-        if let Some(partner_id) = person.kinship.partner() {
-            let partner = model.population.get(&partner_id).unwrap();
-            (
-                partner.work.financial_wealth,
-                partner.work.income,
-                partner.basic.age < Age::years(25),
-            )
-        } else {
-            (0.0, 0.0, false)
-        };
+    let person = model.pop.alive(p_id);
+    let (partner_fw, partner_income, partner_below25) = if let Some(partner) = person.partner(model)
+    {
+        (
+            partner.work.financial_wealth,
+            partner.work.income,
+            partner.basic.age < Age::years(25),
+        )
+    } else {
+        (0.0, 0.0, false)
+    };
 
     let total_wealth = person.work.financial_wealth + partner_fw;
     if total_wealth >= pars.benefit.capital_high_threshold {
@@ -284,7 +281,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
         }
     };
 
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     if benefit > 0.0 {
         person.benefits.uc = true;
     }
@@ -431,15 +428,15 @@ fn calc_pension_credit(
     Some((person.id(), benefits, guarantee_credit))
 }
 
-fn pension_credit(model: &mut Model, pars: &ModelPars) {
+fn pension_credit(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let eligible: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| calc_pension_credit(p, model, pars))
         .collect();
 
     for (p_id, benefits, guarantee_credit) in eligible {
-        let person = model.population.get_mut(&p_id).unwrap();
+        let person = model.pop.alive_mut(p_id);
         person.benefits.benefits += benefits;
         person.benefits.guarantee_credit = guarantee_credit;
     }
@@ -452,8 +449,8 @@ fn compute_max_rooms(house: &House, model: &Model) -> usize {
     let mut n_children = 0;
     let mut n_couples = 0;
 
-    for o_id in house.basic.occupants() {
-        let occ = model.population.get(o_id).unwrap();
+    for &o_id in house.basic.occupants() {
+        let occ = model.pop.alive(o_id);
         if let Some(partner) = occ.partner(model) {
             if living_together(occ, partner) {
                 n_couples += 1;

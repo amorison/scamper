@@ -18,11 +18,12 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     utilities::Age,
 };
 
 pub fn process_change_1yr_deps(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     if person.basic.age == Age::years(pars.work.age_independence) {
         set_as_independent(p_id, model);
     }
@@ -32,11 +33,11 @@ pub fn process_death_deps(p_id: Id, model: &mut Model) {
     set_as_independent(p_id, model);
     set_as_self_providing(p_id, model);
 
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let providees = mem::take(&mut person.dependency.providees);
 
     for prov_id in providees {
-        let providee = model.population.get_mut(&prov_id).unwrap();
+        let providee = model.pop.alive_mut(prov_id);
         providee.dependency.provider = None;
     }
 }
@@ -46,24 +47,23 @@ fn has_valid_guardian(person: &Person, model: &Model) -> bool {
         .dependency
         .guardians
         .iter()
-        .map(|id| model.population.get(id).unwrap())
-        .any(|p| p.basic.alive)
+        .any(|&id| model.pop.get(id).is_alive())
 }
 
 pub fn select_assign_guardian(person: &Person, model: &Model) -> bool {
     person.basic.alive && !can_live_alone(person) && !has_valid_guardian(person, model)
 }
 
-pub fn assign_guardian(p_id: Id, model: &mut Model) -> bool {
+pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> bool {
     let mut g_id = find_family_guardian(p_id, model);
     if g_id.is_none() {
-        g_id = find_other_guardian(model);
+        g_id = find_other_guardian(model, order);
     }
 
     // Get rid of previous (possibly dead) guardians. This implies that relatives of a non-related
     // former legal guardian that are now excluded due to age won't get a chance again in the
     // future.
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     person.dependency.guardians.clear();
 
     if let Some(guard_id) = g_id {
@@ -75,12 +75,14 @@ pub fn assign_guardian(p_id: Id, model: &mut Model) -> bool {
 }
 
 fn is_potential_guardian(p_id: Id, model: &Model) -> bool {
-    let person = model.population.get(&p_id).unwrap();
-    person.basic.alive && person.basic.age >= Age::years(18)
+    model
+        .pop
+        .get(p_id)
+        .is_alive_and(|p| p.basic.age >= Age::years(18))
 }
 
 fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     let parents = person.kinship.parents();
 
     for &g_id in &parents {
@@ -98,8 +100,8 @@ fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
     // Relative of biological parents, any of those might already
     // be guardians but in that case they will be dead.
     for &parent_id in &parents {
-        let parent = model.population.get(&parent_id).unwrap();
-        for g_id in parent.kinship.parents() {
+        let parent = model.pop.get(parent_id);
+        for g_id in parent.kinship().parents() {
             if is_potential_guardian(g_id, model) {
                 return Some(g_id);
             }
@@ -114,8 +116,8 @@ fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
 
     // Possible overlap with previous, but doesn't matter.
     for &guardian_id in &person.dependency.guardians {
-        let guardian = model.population.get(&guardian_id).unwrap();
-        for g_id in guardian.kinship.parents() {
+        let guardian = model.pop.get(guardian_id);
+        for g_id in guardian.kinship().parents() {
             if is_potential_guardian(g_id, model) {
                 return Some(g_id);
             }
@@ -131,10 +133,10 @@ fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
     None
 }
 
-fn find_other_guardian(model: &mut Model) -> Option<Id> {
+fn find_other_guardian(model: &mut Model, order: &PopIterOrder) -> Option<Id> {
     let candidates: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| {
             (p.is_female()
                 && can_live_alone(p)
@@ -148,7 +150,7 @@ fn find_other_guardian(model: &mut Model) -> Option<Id> {
 }
 
 fn adopt(guard_id: Id, p_id: Id, model: &mut Model) {
-    let guardian = model.population.get(&guard_id).unwrap();
+    let guardian = model.pop.alive(guard_id);
     let maybe_partner = guardian.kinship.partner();
     move_to_house(p_id, guardian.house, model);
     set_as_guardian_dependent(guard_id, p_id, model);

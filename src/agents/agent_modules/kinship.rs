@@ -1,8 +1,11 @@
 use std::collections::HashSet;
 
-use crate::full_model::{
-    Model,
-    person::{Id, Person},
+use crate::{
+    full_model::{
+        Model,
+        person::{Id, Person},
+    },
+    population::AliveOrDead,
 };
 
 pub struct Partnership {
@@ -90,33 +93,28 @@ pub fn are_parent_child(p1: &Person, p2: &Person) -> bool {
     p1.kinship.parent_of(p2.id()) || p2.kinship.parent_of(p1.id())
 }
 
-/// Number of full and half siblings.
-pub fn n_siblings(p1: &Person, model: &Model) -> (usize, usize) {
-    let (full, half) = siblings(p1, model);
-    (full.len(), half.len())
-}
-
+// FIXME: this currently collect siblings that are alive or dead, check
+// that this is what we need.
+// FIXME: check if we use the separation between full and half siblings
 /// Sets of full and half siblings.
-pub fn siblings(p1: &Person, model: &Model) -> (HashSet<Id>, HashSet<Id>) {
+pub fn siblings(p1: AliveOrDead, model: &Model) -> (HashSet<Id>, HashSet<Id>) {
     let mut full = HashSet::new();
     let mut half = HashSet::new();
 
     let mut parents = Vec::with_capacity(2);
-    if let Some(father_id) = p1.kinship.father {
+    if let Some(father_id) = p1.kinship().father {
         parents.push(father_id);
     }
-    if let Some(mother_id) = p1.kinship.mother {
+    if let Some(mother_id) = p1.kinship().mother {
         parents.push(mother_id);
     }
 
     for parent_id in parents {
-        // FIXME: what if parent is dead? Should we keep dead people in memory
-        // until all the children are dead?
-        let parent = model.population.get(&parent_id).unwrap();
-        for child_id in parent.kinship.children.iter().copied() {
-            let child = model.population.get(&child_id).unwrap();
-            if p1.kinship.sibling_with(&child.kinship) {
-                if p1.kinship.full_sibling_with(&child.kinship) {
+        let parent = model.pop.get(parent_id);
+        for child_id in parent.kinship().children.iter().copied() {
+            let child = model.pop.get(child_id);
+            if p1.kinship().sibling_with(child.kinship()) {
+                if p1.kinship().full_sibling_with(child.kinship()) {
                     full.insert(child_id);
                 } else {
                     half.insert(child_id);

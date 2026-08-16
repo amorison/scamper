@@ -4,6 +4,7 @@ use rand_distr::{LogNormal, Normal};
 use crate::{
     ModelPars,
     full_model::{Model, person::Person},
+    population::PopIterOrder,
 };
 
 /// Set initial and final wage depending on social class.
@@ -23,25 +24,25 @@ pub fn set_wage_progression<R: Rng>(person: &mut Person, rng: &mut R, pars: &Mod
 }
 
 /// Set agent wealth dependent on cumulative income.
-pub fn assign_wealth_by_inc_percentile(model: &mut Model, pars: &ModelPars) {
+pub fn assign_wealth_by_inc_percentile(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let mut pop: Vec<_> = model
-        .population
-        .values_mut()
-        .filter(|p| p.work.cumulative_income > 0.0)
+        .pop
+        .alives(order)
+        .filter_map(|p| {
+            (p.work.cumulative_income > 0.0).then_some((p.id(), p.work.cumulative_income))
+        })
         .collect();
-    pop.sort_unstable_by(|p1, p2| {
-        let inc1 = p1.work.cumulative_income;
-        let inc2 = p2.work.cumulative_income;
-        inc1.partial_cmp(&inc2).unwrap()
-    });
+    // FIXME: make sure to remove unstable sorts everywhere it's possible
+    pop.sort_by(|p1, p2| p1.1.partial_cmp(&p2.1).unwrap());
 
     let pop_length = pop.len();
     let dk_distr = Normal::new(0.0, pars.work.wage_var).unwrap();
     let w_ptile = model.wealth_percentiles.percentiles();
 
-    for (i, agent) in pop.into_iter().enumerate() {
+    for (i, (id, _)) in pop.into_iter().enumerate() {
         let percentile = (100 * i) / pop_length;
         let dk = model.rng.sample(dk_distr);
+        let agent = model.pop.alive_mut(id);
         agent.work.wealth = w_ptile[percentile] * dk.exp();
     }
 }

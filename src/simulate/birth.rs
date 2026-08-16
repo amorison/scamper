@@ -15,6 +15,7 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     utilities::{Age, Date, calc_rate_bias, try_rand_yearly2monthly},
 };
 
@@ -41,10 +42,10 @@ pub struct BirthCache {
     n_children_bias: [[f64; 5]; N_CLASSES],
 }
 
-pub fn birth_pre_calc(model: &mut Model, pars: &ModelPars) {
+pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let mut pot_mothers: Vec<_> = model
-        .population
-        .values()
+        .pop
+        .alives(order)
         .filter_map(|p| is_potential_mother(p, model, pars).then_some(p.id()))
         .collect();
     mem::swap(&mut pot_mothers, &mut model.birth_cache.potential_mothers);
@@ -53,7 +54,7 @@ pub fn birth_pre_calc(model: &mut Model, pars: &ModelPars) {
     // FIXME: probably don't need to go to 150
     model.birth_cache.p_potential_mother.resize(150, 0.0);
     let mut cbp = vec![0.0; 150];
-    for person in model.population.values() {
+    for person in model.pop.alives(order) {
         if is_fertile_woman(person, pars) {
             let iy = person.basic.age.year_month().0 as usize;
             cbp[iy] += 1.0;
@@ -69,7 +70,7 @@ pub fn birth_pre_calc(model: &mut Model, pars: &ModelPars) {
         model.birth_cache.pre51_fert_scaling += model.birth_cache.p_potential_mother[iage] * fert51;
     }
     model.birth_cache.pre51_fert_scaling =
-        model.population.len() as f64 / model.birth_cache.pre51_fert_scaling;
+        model.pop.size() as f64 / model.birth_cache.pre51_fert_scaling;
 
     cbp.into_iter()
         .enumerate()
@@ -81,7 +82,7 @@ pub fn birth_pre_calc(model: &mut Model, pars: &ModelPars) {
         .birth_cache
         .potential_mothers
         .iter()
-        .map(|id| model.population.get(id).unwrap())
+        .map(|&id| model.pop.alive(id))
         .for_each(|p| n_per_class[p.class.rank_idx()] += 1.0);
 
     let npotmoms = model.birth_cache.potential_mothers.len().max(1) as f64;
@@ -93,7 +94,7 @@ pub fn birth_pre_calc(model: &mut Model, pars: &ModelPars) {
         .birth_cache
         .potential_mothers
         .iter()
-        .map(|id| model.population.get(id).unwrap())
+        .map(|&id| model.pop.alive(id))
         .for_each(|p| pncpmc[p.class.rank_idx()][p.kinship.n_children().min(4)] += 1.0);
     for ic in 0..N_CLASSES {
         for nc in 0..5 {
@@ -141,7 +142,7 @@ fn compute_birth_prob(woman: &Person, model: &Model, pars: &ModelPars, date: Dat
 }
 
 fn effects_of_maternity(woman_id: Id, model: &mut Model) {
-    let woman = model.population.get_mut(&woman_id).unwrap();
+    let woman = model.pop.alive_mut(woman_id);
 
     woman.maternity.start();
 
@@ -164,7 +165,7 @@ pub fn select_birth(person: &Person, model: &Model, pars: &ModelPars) -> bool {
 }
 
 pub fn birth(woman_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
-    let woman = model.population.get(&woman_id).unwrap();
+    let woman = model.pop.alive(woman_id);
     let birth_prob = compute_birth_prob(woman, model, pars, date);
 
     // FIXME: all these should be true by design
@@ -191,9 +192,8 @@ pub fn birth(woman_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
             .basic
             .add_occupant(baby_id);
 
-        // Temporarily put the baby in the population
-        // FIXME: maybe it's fine to keep it there if looping with `shuffled_pop`?
-        model.population.insert(baby_id, baby);
+        // Note: the baby is not iterated over until the next loop.
+        model.pop.insert(baby);
 
         set_as_parent_child(baby_id, woman_id, model);
         if let Some(partner_id) = maybe_partner {
@@ -209,10 +209,5 @@ pub fn birth(woman_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
         }
 
         set_as_provider_providee(woman_id, baby_id, model);
-
-        // take the newborn back out, to be added later
-        // FIXME: might not be necessary
-        let baby = model.population.remove(&baby_id).unwrap();
-        model.babies.push(baby);
     }
 }

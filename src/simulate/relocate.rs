@@ -23,11 +23,11 @@ pub fn select_relocate(person: &Person, model: &Model) -> bool {
 pub fn relocate(p_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
     if model.rng.random_bool(pars.work.move_out_prob) {
         let mut people_to_move = vec![p_id];
-        let person = model.population.get(&p_id).unwrap();
-        for dep_id in &person.dependency.dependents {
-            let dep = model.population.get(dep_id).unwrap();
+        let person = model.pop.alive(p_id);
+        for &dep_id in &person.dependency.dependents {
+            let dep = model.pop.alive(dep_id);
             if living_together(person, dep) {
-                people_to_move.push(*dep_id);
+                people_to_move.push(dep_id);
             }
         }
 

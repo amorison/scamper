@@ -2,6 +2,7 @@ use crate::{
     ModelPars,
     agents::agent_modules::work::WorkStatus,
     full_model::{Model, person::Person},
+    population::PopIterOrder,
 };
 
 fn update_person_income(person: &mut Person, pars: &ModelPars) {
@@ -35,31 +36,31 @@ fn update_person_income(person: &mut Person, pars: &ModelPars) {
     person.work.disposable_income = person.work.income;
 }
 
-pub fn update_income(model: &mut Model, pars: &ModelPars) {
+pub fn update_income(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     // Compute income from work based on last period job market and informal care
     // FIXME: include formal care if necessary?
 
-    for person in model.population.values_mut() {
+    model.pop.for_each(order, |person| {
         update_person_income(person, pars);
-    }
+    });
 
     for house in model.houses.values_mut().filter(|h| h.basic.is_occupied()) {
         house.income.household_income = house
             .basic
             .occupants()
             .iter()
-            .map(|p| model.population.get(p).unwrap().work.income)
+            .map(|&p| model.pop.alive(p).work.income)
             .sum();
         house.income.income_per_capita =
             house.income.household_income / house.basic.occupants().len() as f64;
     }
 
     // Compute disposable income (i.e. after taxes and benefits)
-    for person in model
-        .population
-        .values_mut()
-        .filter(|p| p.work.income > 0.0)
-    {
+    for p_id in order.ids() {
+        let person = model.pop.alive_mut(p_id);
+        if person.work.income <= 0.0 {
+            continue;
+        }
         let mut employee_pension_contribution = 0.0;
         if person.work.disposable_income > 162.0 {
             if person.work.disposable_income < 893.0 {
@@ -83,9 +84,9 @@ pub fn update_income(model: &mut Model, pars: &ModelPars) {
         person.work.disposable_income -= tax;
     }
 
-    for person in model.population.values_mut() {
+    model.pop.for_each(order, |person| {
         // FIXME: make sure this is updated in the correct order
         person.work.disposable_income += person.benefits.benefits;
         person.work.cumulative_income += person.work.disposable_income;
-    }
+    });
 }

@@ -6,7 +6,7 @@ use crate::full_model::{
 
 /// Associate a house to a person, remove person from previous house.
 pub fn move_to_house(p_id: Id, h_id: IdHouse, model: &mut Model) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let prev_house = person.house;
 
     if prev_house == h_id {

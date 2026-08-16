@@ -92,7 +92,7 @@ impl TaskPerson {
 
 pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {
     let task = model.tasks.get_mut(&task_id).unwrap();
-    let owner = model.population.get_mut(&task.owner()).unwrap();
+    let owner = model.pop.alive_mut(task.owner());
     owner.task.open_tasks.remove(&task_id);
     owner.task.assigned_tasks.insert(task_id);
     task.worker = None;
@@ -100,32 +100,32 @@ pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {
 
 pub fn mark_task_unassigned(task_id: IdTask, model: &mut Model) {
     let task = model.tasks.get_mut(&task_id).unwrap();
-    let owner = model.population.get_mut(&task.owner()).unwrap();
+    let owner = model.pop.alive_mut(task.owner());
     owner.task.assigned_tasks.remove(&task_id);
     owner.task.open_tasks.insert(task_id);
     task.worker = None;
 }
 
 pub fn remove_all_tasks(p_id: Id, model: &mut Model) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let assigned_tasks = mem::take(&mut person.task.assigned_tasks);
 
     // FIXME: is this also where we remove the tasks from model.tasks?
 
     for task_id in assigned_tasks {
         let task = model.tasks.get(&task_id).unwrap();
-        let person = model.population.get_mut(&p_id).unwrap();
+        let person = model.pop.alive_mut(p_id);
         person.task.unschedule_task(task);
         mark_task_unassigned(task_id, model);
     }
 
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     person.task.assigned_tasks.clear();
 }
 
 // FIXME: this actually empties the todo list completely.
 pub fn remove_all_care(p_id: Id, model: &mut Model) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let todo = mem::take(&mut person.task.todo);
     person.task.task_schedule = Default::default();
     person.task.care_task_hours = 0;
@@ -139,12 +139,12 @@ pub fn accept_task(task_id: IdTask, tasks_to_clear: &[IdTask], carer: Carer, mod
     let task = model.tasks.get_mut(&task_id).unwrap();
     task.worker = Some(carer);
     if let Carer::Person(p_id) = carer {
-        let person = model.population.get_mut(&p_id).unwrap();
+        let person = model.pop.alive_mut(p_id);
         person.task.schedule_task(task);
 
         for t_id in tasks_to_clear {
             let task = model.tasks.get_mut(t_id).unwrap();
-            let person = model.population.get_mut(&p_id).unwrap();
+            let person = model.pop.alive_mut(p_id);
             person.task.unschedule_task(task);
             mark_task_unassigned(*t_id, model);
         }

@@ -22,7 +22,7 @@ pub fn social_care_pre_calc(model: &mut Model, pars: &ModelPars) {
 
 /// Adjust social care need.
 pub fn social_care_transition(p_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let scaling = match person.basic.gender {
         Gender::Female => pars.care.female_age_care_scaling,
         Gender::Male => pars.care.male_age_care_scaling,

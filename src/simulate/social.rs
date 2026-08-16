@@ -15,13 +15,14 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    population::PopIterOrder,
     utilities::Age,
 };
 
 fn start_retirement(p_id: Id, model: &mut Model, pars: &ModelPars) {
     lose_job(p_id, model);
 
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let share_working_time = person.work.working_periods / pars.work.min_contribution_period as f64;
 
     let dk_dist = Normal::new(0.0, pars.work.wage_var).unwrap();
@@ -30,7 +31,7 @@ fn start_retirement(p_id: Id, model: &mut Model, pars: &ModelPars) {
 }
 
 pub fn process_change_1yr_social(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     let age = person.basic.age;
     if age == Age::years(pars.work.age_teenagers) {
         change_status(p_id, WorkStatus::Teenager, model);
@@ -49,8 +50,8 @@ pub struct SocialCache {
     pub social_class_shares: [f64; N_CLASSES],
 }
 
-pub fn social_pre_calc(model: &mut Model) {
-    for person in model.population.values() {
+pub fn social_pre_calc(model: &mut Model, order: &PopIterOrder) {
+    for person in model.pop.alives(order) {
         model.social_cache.social_class_shares[person.class.rank_idx()] += 1.0;
     }
 
@@ -77,7 +78,7 @@ fn become_student(person: &mut Person) {
 }
 
 pub fn student_start_working(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get_mut(&p_id).unwrap();
+    let person = model.pop.alive_mut(p_id);
     set_wage_progression(person, &mut model.rng, pars);
     set_as_self_providing(p_id, model);
     change_status(p_id, WorkStatus::Unemployed, model);
@@ -98,7 +99,7 @@ pub fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
 
 /// Decide whether agent goes on to study or starts working.
 pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    let person = model.population.get(&p_id).unwrap();
+    let person = model.pop.alive(p_id);
     let prob_study = if done_studying(person) {
         0.0
     } else {
@@ -106,7 +107,7 @@ pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     };
 
     if model.rng.random_bool(prob_study) {
-        let person = model.population.get_mut(&p_id).unwrap();
+        let person = model.pop.alive_mut(p_id);
         start_studying(person);
     } else {
         student_start_working(p_id, model, pars);
