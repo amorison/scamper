@@ -361,10 +361,10 @@ fn task_accept_plan(
         return tasks;
     }
 
-    // FIXME: Julia has the following. Seems like this should be !is_empty, which is
+    // FIXME: Julia has `tasks.is_empty() &&` here. This should probably be `!is_empty`, which is
     // always true at this point in the Rust code anyway.
     // tapped out, can't give up free hour
-    if tasks.is_empty() && available_care_time(agent, pars) <= 0.0 {
+    if available_care_time(agent, pars) <= 0.0 {
         return tasks;
     }
 
