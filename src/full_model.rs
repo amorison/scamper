@@ -160,6 +160,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     // run transitions
     // FIXME: move the `select_` into the transition themselves
 
+    // FIXME: should compute caches _after_ dealing with death?
     // death
     for p_id in order.ids() {
         death(p_id, date, model, pars);
