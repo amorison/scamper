@@ -62,7 +62,6 @@ pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> b
         let deps = man.dependency.dependents.clone();
         for child_id in deps {
             let child = model.pop.alive(child_id);
-            // FIXME: this was here before: assert!(child.basic.alive);
             let man_custody = child.kinship.father == Some(man_id)
                 && (child.kinship.mother != Some(wife_id)
                     || model

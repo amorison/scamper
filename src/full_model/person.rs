@@ -53,7 +53,7 @@ pub struct Person {
 
 pub struct DeadPerson {
     id: Id,
-    // FIXME: is basic needed? Either way, rm basic.alive
+    // FIXME: is basic needed?
     pub basic: BasicInfo,
     pub kinship: Kinship,
 }
