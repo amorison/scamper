@@ -27,10 +27,16 @@ pub fn main(pars: ModelPars) -> io::Result<()> {
     let mut date = Date::new(pars.population.start_year);
     let finish = Date::new(pars.population.end_year);
 
+    let npop = model.pop.size();
+    println!("{date:?} {npop}");
+
     while date < finish {
         step_model(&mut model, &mut order, date, &pars);
 
         date = date.next_month();
+
+        let npop = model.pop.size();
+        println!("{date:?} {npop}");
     }
 
     Ok(())
