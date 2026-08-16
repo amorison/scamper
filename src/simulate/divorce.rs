@@ -91,5 +91,5 @@ pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> b
 }
 
 pub fn select_divorce(person: &Person) -> bool {
-    person.basic.alive && person.is_male() && !person.kinship.is_single()
+    person.is_male() && !person.kinship.is_single()
 }

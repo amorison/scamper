@@ -51,7 +51,7 @@ fn has_valid_guardian(person: &Person, model: &Model) -> bool {
 }
 
 pub fn select_assign_guardian(person: &Person, model: &Model) -> bool {
-    person.basic.alive && !can_live_alone(person) && !has_valid_guardian(person, model)
+    !can_live_alone(person) && !has_valid_guardian(person, model)
 }
 
 pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> bool {

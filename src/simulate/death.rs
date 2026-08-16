@@ -51,9 +51,7 @@ fn death_probability(base_rate: f64, person: &Person, model: &Model, pars: &Mode
 }
 
 fn set_dead(p_id: Id, model: &mut Model) {
-    // FIXME: maybe take out of population and put somewhere else?
     let person = model.pop.alive_mut(p_id);
-    person.basic.alive = false;
 
     let house = model.houses.get_mut(&person.house).unwrap();
     house.basic.rm_occupant(p_id);
@@ -151,7 +149,6 @@ fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool 
     if person.basic.age >= Age::years(150) {
         return true;
     }
-    assert!(person.basic.alive);
 
     let (year, _) = date.year_month();
 

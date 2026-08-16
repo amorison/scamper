@@ -95,12 +95,8 @@ impl Person {
 impl From<Person> for DeadPerson {
     fn from(value: Person) -> Self {
         let Person {
-            id,
-            mut basic,
-            kinship,
-            ..
+            id, basic, kinship, ..
         } = value;
-        basic.alive = false;
         Self { id, basic, kinship }
     }
 }

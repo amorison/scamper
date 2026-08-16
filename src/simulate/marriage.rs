@@ -118,8 +118,7 @@ fn geo_distance(man: &Person, woman: &Person, model: &Model, pars: &ModelPars) -
 }
 
 pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
-    person.basic.alive
-        && person.is_male()
+    person.is_male()
         && person.kinship.is_single()
         && person.basic.age > Age::years(pars.work.age_adulthood)
         && person.care.need_level < 4
@@ -127,8 +126,6 @@ pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
 
 pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
     let man = model.pop.alive(man_id);
-
-    assert!(man.basic.alive);
 
     let age_class = age_class(man);
     let mut man_marriage_prob = if age_class >= pars.marriage.male_marriage_modifier_by_decade.len()
