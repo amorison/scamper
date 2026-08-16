@@ -400,11 +400,6 @@ fn sigmoid(x: f64, shape: f64) -> f64 {
     xs / (xs + (1.0 - x).powf(shape))
 }
 
-/// Calculate probability to accept a task of the given importance.
-fn diligence(agent: &Person, importance: f64) -> f64 {
-    importance.powf(agent.task.diligence)
-}
-
 /// Probability that a task gets accepted.
 fn task_accept_prob(
     task: &Task,
@@ -424,6 +419,8 @@ fn task_accept_prob(
     // should modify the shape of sigmoid instead
     // maybe also introduce reluctance to switch task
     // diligence(carer, sigmoid * importance)
+    // With diligence defined as
+    // importance.powf(agent.task.diligence)
 }
 
 /// Check for all tasks whether to accept.

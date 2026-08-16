@@ -18,8 +18,6 @@ pub struct TaskPerson {
     task_schedule: [[f64; 24]; 7],
     /// Tasks the agent does, sorted per day
     pub todo: [Vec<IdTask>; 7],
-    /// How eagerly the agent accepts tasks
-    pub diligence: f64,
     pub care_task_hours: u32,
 }
 
@@ -30,7 +28,6 @@ impl Default for TaskPerson {
             open_tasks: HashSet::new(),
             task_schedule: [[0.0; 24]; 7],
             todo: Default::default(),
-            diligence: 1.0,
             care_task_hours: 0,
         }
     }
