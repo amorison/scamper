@@ -51,6 +51,12 @@ pub struct Person {
     pub house: IdHouse,
 }
 
+pub struct DeadPerson {
+    id: Id,
+    pub basic: BasicInfo,
+    pub kinship: Kinship,
+}
+
 impl Person {
     pub fn baby(gender: Gender, house: IdHouse) -> Self {
         PersonAwaitingHouse::new(gender, Age::new()).with_house(house)
@@ -84,6 +90,19 @@ impl Person {
     // FIXME: use where appropriate
     pub fn is_male(&self) -> bool {
         matches!(self.basic.gender, Gender::Male)
+    }
+}
+
+impl From<Person> for DeadPerson {
+    fn from(value: Person) -> Self {
+        let Person {
+            id,
+            mut basic,
+            kinship,
+            ..
+        } = value;
+        basic.alive = false;
+        Self { id, basic, kinship }
     }
 }
 

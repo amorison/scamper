@@ -4,8 +4,6 @@ use rand::seq::SliceRandom;
 
 use crate::full_model::{Model, person::build::PersonAwaitingHouse};
 
-// FIXME: this is written as if assigning house is the last step of a person's initialisation. Check
-// whether this is reasonable.
 pub fn assign_couples_to_houses(mut population: Vec<PersonAwaitingHouse>, model: &mut Model) {
     let with_partner_or_deps: Vec<_> = population
         .extract_if(0..population.len(), |p| {

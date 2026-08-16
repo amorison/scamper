@@ -2,6 +2,7 @@ mod agents;
 pub mod cli;
 mod common;
 mod full_model;
+mod population;
 mod run_model;
 mod setup;
 mod simulate;

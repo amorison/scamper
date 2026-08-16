@@ -8,7 +8,7 @@ use rand::{
 pub struct Date(u32);
 
 /// Age
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Age(u32);
 
 /// Age interval
