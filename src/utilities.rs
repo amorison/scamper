@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use rand::{
     Rng, RngExt,
     distr::{Distribution, Uniform},
@@ -42,6 +44,13 @@ impl Date {
 
     pub fn next_month(self) -> Self {
         Self(self.0 + 1)
+    }
+}
+
+impl Display for Date {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let (year, month) = self.year_month();
+        write!(f, "{year}-{month:02}")
     }
 }
 
