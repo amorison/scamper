@@ -63,6 +63,8 @@ fn set_dead(p_id: Id, model: &mut Model) {
     process_death_task_care(p_id, model);
     process_death_deps(p_id, model);
 
+    model.social_workers_cache.remove(&p_id);
+
     model.pop.mark_as_dead(p_id);
     // Comment in Julia: dependents are being taken care of by assignGuardian!
     // FIXME: check that it is indeed the case
