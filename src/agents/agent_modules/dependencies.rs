@@ -6,6 +6,7 @@ pub struct Dependency {
     pub dependents: Vec<Id>,
     pub provider: Option<Id>,
     pub providees: Vec<Id>,
+    pub past_guardians: Vec<Id>,
 }
 
 impl Dependency {
