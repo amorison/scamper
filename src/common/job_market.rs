@@ -169,13 +169,5 @@ pub fn assign_jobs(hired_agents: &[Id], month: Date, pars: &ModelPars, model: &m
 
         let p_id = hired_agents[i];
         assign_job(p_id, month, shift, pars, model);
-        model.employed_pop_cache.insert(p_id);
-
-        if model.rng.random_bool(pars.work.social_care_worker_prob) {
-            let person = model.pop.alive_mut(p_id);
-            // FIXME: need to set to `false` when losing job
-            person.work.social_worker = true;
-            model.social_workers_cache.insert(p_id);
-        }
     }
 }

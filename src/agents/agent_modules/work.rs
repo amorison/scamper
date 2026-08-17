@@ -73,7 +73,6 @@ pub struct Work {
     /// Period worked so far in current job.
     pub job_tenure: u32,
     pub month_hired: Date,
-    pub social_worker: bool,
 }
 
 impl Work {
@@ -117,7 +116,6 @@ impl Default for Work {
             unemployment_months: 0,
             job_tenure: 0,
             month_hired: Date::new(0),
-            social_worker: false,
         }
     }
 }

@@ -17,12 +17,7 @@ pub fn weekly_care_supply(person: &Person, pars: &ModelPars) -> u32 {
         return pars.task_care.care_supply_maternity;
     }
 
-    let informal = pars.care.care_supply_by_status[person.work.status.index()];
-    if person.work.social_worker {
-        return person.work.working_hours + informal;
-    }
-
-    informal
+    pars.care.care_supply_by_status[person.work.status.index()]
 }
 
 pub fn social_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {

@@ -231,16 +231,6 @@ fn availability_weight(carer: &Person, tasks: &[IdTask], pars: &ModelPars) -> f6
     w + 1.0
 }
 
-fn supply_informal(_carers: &[Id], _model: &Model) -> f64 {
-    // FIXME: see `residualInformalSupplies` in `sim.py`
-    1.0
-}
-
-fn supply_formal(_carers: &[Id], _model: &Model) -> f64 {
-    // FIXME: see `residualInformalSupplies` in `sim.py`
-    1.0
-}
-
 /// Assign all open tasks of an agent to a potential carer.
 fn assign_open_tasks(
     p_id: Id,
@@ -258,22 +248,7 @@ fn assign_open_tasks(
         return;
     }
 
-    let potential_informal_carers = create_carer_list(agent, model, pars);
-    // FIXME: way to avoid that copy?
-    let potential_formal_carers: Vec<_> = model.social_workers_cache.iter().copied().collect();
-
-    let informal_supply = supply_informal(&potential_informal_carers, model);
-    let formal_supply = supply_formal(&potential_formal_carers, model);
-
-    let informal_factor = informal_supply.powf(pars.care.beta_informal_care);
-    let formal_factor = formal_supply.powf(pars.care.beta_formal_care);
-    let prob_informal = informal_factor / (informal_factor + formal_factor);
-    // should this choice be made inside or outside the loop?
-    let potential_carers = if model.rng.random_bool(prob_informal) {
-        potential_informal_carers
-    } else {
-        potential_formal_carers
-    };
+    let potential_carers = create_carer_list(agent, model, pars);
 
     assign_school_care(p_id, model);
 

@@ -56,10 +56,6 @@ pub fn employed_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     if model.rng.random_bool(prob_fired) {
         lose_job(p_id, model);
         change_status(p_id, WorkStatus::Unemployed, model);
-        let person = model.pop.alive_mut(p_id);
-        person.work.social_worker = false;
-        model.employed_pop_cache.remove(&p_id);
-        model.social_workers_cache.remove(&p_id);
     } else {
         let person = model.pop.alive_mut(p_id);
         person.work.job_tenure += 1;

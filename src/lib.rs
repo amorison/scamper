@@ -246,8 +246,6 @@ struct Work {
     probation_period: u32,
 
     hire_rate: f64,
-    /// Fraction of workers who are social care frontline workers.
-    social_care_worker_prob: f64,
 }
 
 impl Default for Work {
@@ -292,7 +290,6 @@ impl Default for Work {
             day_beta: 0.1,
             probation_period: 3,
             hire_rate: (4.0f64 / 3.0).ln(), // expected mean unemployment time of 4 months
-            social_care_worker_prob: 0.054,
         }
     }
 }
@@ -472,9 +469,6 @@ struct Care {
     /// Weekly care supply for child, teen, student, fixed shift, flexible shift, retired, unemployed
     care_supply_by_status: [u32; 7],
     care_quantum: u32,
-    beta_informal_care: f64,
-    beta_formal_care: f64,
-    min_decile_afford_formal_care: u32,
 }
 
 impl Default for Care {
@@ -494,9 +488,6 @@ impl Default for Care {
             free_child_care_hours_school: 32,
             care_supply_by_status: [0, 10, 24, 32, 32, 60, 48],
             care_quantum: 2,
-            beta_informal_care: 1.0,
-            beta_formal_care: 1.0,
-            min_decile_afford_formal_care: 5,
         }
     }
 }

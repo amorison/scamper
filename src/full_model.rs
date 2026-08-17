@@ -87,8 +87,6 @@ pub struct Model {
     pub social_care_cache: SocialCareCache,
     pub divorce_cache: DivorceCache,
     pub job_cache: JobCache,
-    pub employed_pop_cache: HashSet<Id>,
-    pub social_workers_cache: HashSet<Id>,
 }
 
 /// Create a model instance from parameters.
@@ -129,8 +127,6 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
         social_care_cache: SocialCareCache::default(),
         divorce_cache: DivorceCache::default(),
         job_cache: JobCache::default(),
-        employed_pop_cache: HashSet::new(),
-        social_workers_cache: HashSet::new(),
     };
 
     initialise_houses_in_town(&mut model, population.len());
