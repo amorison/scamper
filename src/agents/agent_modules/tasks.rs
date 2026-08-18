@@ -144,15 +144,16 @@ pub fn accept_task(task_id: IdTask, tasks_to_clear: &[IdTask], carer: Carer, mod
     let task = model.tasks.get_mut(&task_id).unwrap();
     task.worker = Some(carer);
     if let Carer::Person(p_id) = carer {
-        let person = model.pop.alive_mut(p_id);
-        person.task.schedule_task(task);
-
         for t_id in tasks_to_clear {
             let task = model.tasks.get_mut(t_id).unwrap();
             let person = model.pop.alive_mut(p_id);
             person.task.unschedule_task(task);
             mark_task_unassigned(*t_id, model);
         }
+
+        let task = model.tasks.get(&task_id).unwrap();
+        let person = model.pop.alive_mut(p_id);
+        person.task.schedule_task(task);
     }
 }
 
