@@ -80,6 +80,15 @@ impl Population {
         self.living.insert(id, person);
     }
 
+    // FIXME: this is required to avoid `new_ids` containing all the ids of the first generation and
+    // being added again to order when collecting babies at the end of the first step. This should
+    // be removed once setup is properly centralised and isolated.
+    /// Add an individual to the population during setup.
+    pub fn insert_setup(&mut self, person: Person) {
+        let id = person.id();
+        self.living.insert(id, person);
+    }
+
     pub fn mark_as_dead(&mut self, id: Id) {
         let person = self
             .living
