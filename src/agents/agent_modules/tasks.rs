@@ -51,7 +51,12 @@ impl TaskPerson {
             self.care_task_hours += 1;
         }
         self.task_schedule[day][hour] += task.focus();
-        assert!(self.task_schedule[day][hour] <= 1.0);
+        assert!(
+            self.task_schedule[day][hour] <= 1.0,
+            "{} == {:.} > 1.0",
+            stringify!(self.task_schedule[day][hour]),
+            self.task_schedule[day][hour]
+        );
     }
 
     pub fn unschedule_task(&mut self, task: &Task) {
