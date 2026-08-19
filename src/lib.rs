@@ -525,9 +525,9 @@ impl Default for TaskCare {
             care_supply_maternity: 98,
             accept_prob_polarity: 2.0,
             care_weight_related: [
-                [f64::INFINITY, 0.5, 50.0],
+                [1e6, 0.5, 50.0],
                 [1.0, 1.0, 50.0],
-                [f64::INFINITY, 1.0, 50.0],
+                [1e6, 1.0, 50.0],
                 [0.8, 0.5, 50.0],
                 [0.5, 0.2, 50.0],
             ],
