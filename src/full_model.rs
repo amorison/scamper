@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use rand::rngs::Xoshiro256PlusPlus;
 
@@ -15,7 +15,6 @@ use crate::{
             Pre51Mortality, Unemployment, WealthDistribution,
         },
         house::{House, IdHouse},
-        person::Id,
     },
     population::{PopIterOrder, Population},
     setup::{
