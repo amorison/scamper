@@ -138,7 +138,7 @@ fn start_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
 
     // TODO: factor out class
     let target_el = person.class.parent_rank.index();
-    let de = (target_el - irank) as f64;
+    let de = target_el as f64 - irank as f64;
     let exp_edu = (pars.work.edu_rank_sensitivity * de).exp();
     let education_effect = exp_edu / (exp_edu + pars.work.constant_education);
 
