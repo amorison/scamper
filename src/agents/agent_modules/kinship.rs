@@ -8,6 +8,7 @@ use crate::{
     population::AliveOrDead,
 };
 
+#[derive(Debug)]
 pub struct Partnership {
     with: Id,
     duration: u32,

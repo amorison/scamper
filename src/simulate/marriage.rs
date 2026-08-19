@@ -118,6 +118,8 @@ fn geo_distance(man: &Person, woman: &Person, model: &Model, pars: &ModelPars) -
 }
 
 pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
+    // FIXME: should it be age of adulthood (16), or 18?
+    // If 16, shouldn't a married person in 16-18 range become independent from their parents?
     person.is_male()
         && person.kinship.is_single()
         && person.basic.age > Age::years(pars.work.age_adulthood)
@@ -202,14 +204,18 @@ pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
 }
 
 fn gather_dependents_single(person: &Person, model: &Model) -> Vec<Id> {
-    // for now simply all dependents
-    for &dep_id in &person.dependency.dependents {
-        let dep = model.pop.alive(dep_id);
-        assert_eq!(person.house, dep.house);
-        assert_eq!(dep.dependency.guardians, vec![person.id()]);
-    }
-
-    person.dependency.dependents.clone()
+    // for now simply all dependents who already live with person
+    person
+        .dependency
+        .dependents
+        .iter()
+        .copied()
+        .filter(|&dep_id| {
+            let dep = model.pop.alive(dep_id);
+            assert_eq!(dep.dependency.guardians, vec![person.id()]);
+            living_together(person, dep)
+        })
+        .collect()
 }
 
 fn join_couple(man_id: Id, woman_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
