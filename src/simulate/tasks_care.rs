@@ -197,20 +197,22 @@ fn task_ask_weight(
 /// Return all open tasks of the given kind at a randomly selected day.
 fn get_chunk_of_open_tasks(p_id: Id, task_kind: TaskKind, model: &mut Model) -> Vec<IdTask> {
     let agent = model.pop.alive_mut(p_id);
-    let tasks: Vec<_> = agent
-        .task
-        .open_tasks
-        .iter()
-        .filter_map(|t_id| {
-            let task = model.tasks.get(t_id).unwrap();
-            (task.kind == task_kind).then_some((task.id(), task.time()))
-        })
-        .collect();
-    let tasks = if let Some(&(_, time)) = tasks.choose(&mut model.rng) {
-        tasks
+
+    // Can be simplified with `collect_into` once it is stabilised.
+    let mut tasks_of_kind = Vec::with_capacity(agent.task.open_tasks.len());
+    let tasks_iter = agent.task.open_tasks.iter().filter_map(|t_id| {
+        let task = model.tasks.get(t_id).unwrap();
+        (task.kind == task_kind).then_some((task.id(), task.time()))
+    });
+    tasks_of_kind.extend(tasks_iter);
+
+    let tasks = if let Some(&(_, time)) = tasks_of_kind.choose(&mut model.rng) {
+        let mut tasks_at_time = Vec::with_capacity(tasks_of_kind.len());
+        let tasks_at_time_iter = tasks_of_kind
             .into_iter()
-            .filter_map(|(id, t)| (time == t).then_some(id))
-            .collect()
+            .filter_map(|(id, t)| (time == t).then_some(id));
+        tasks_at_time.extend(tasks_at_time_iter);
+        tasks_at_time
     } else {
         Vec::new()
     };
