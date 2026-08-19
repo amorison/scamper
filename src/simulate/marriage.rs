@@ -190,11 +190,11 @@ pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
     // dependents become joint dependents
     let man = model.pop.alive(man_id);
     let dep_man = man.dependency.dependents.clone();
+    let woman = model.pop.alive(woman_id);
+    let dep_woman = woman.dependency.dependents.clone();
     for child_id in dep_man {
         set_as_guardian_dependent(woman_id, child_id, model);
     }
-    let woman = model.pop.alive(woman_id);
-    let dep_woman = woman.dependency.dependents.clone();
     for child_id in dep_woman {
         set_as_guardian_dependent(man_id, child_id, model);
     }
