@@ -119,8 +119,14 @@ pub fn remove_all_tasks(p_id: Id, model: &mut Model) {
 
     for task_id in assigned_tasks {
         let task = model.tasks.get(&task_id).unwrap();
-        let person = model.pop.alive_mut(p_id);
-        person.task.unschedule_task(task);
+        // FIXME: clarify whether this check should hold
+        // let Some(carer) = task.worker else {
+        //     panic!("assigned_tasks should have a worker")
+        // };
+        if let Some(Carer::Person(w_id)) = task.worker {
+            let worker = model.pop.alive_mut(w_id);
+            worker.task.unschedule_task(task);
+        }
         mark_task_unassigned(task_id, model);
     }
 
