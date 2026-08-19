@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use identity_hash::IntMap;
 use rand::rngs::Xoshiro256PlusPlus;
 
 use crate::{
@@ -42,7 +41,7 @@ use crate::{
         tasks_care::distribute_care,
         wealth::update_wealth,
     },
-    utilities::Date,
+    utilities::{Date, int_map_with_cap},
 };
 
 pub mod data;
@@ -53,18 +52,18 @@ pub mod person;
 // need what.
 pub struct Model {
     /// Towns, containing houses.
-    pub towns: HashMap<IdTown, Town>,
+    pub towns: IntMap<IdTown, Town>,
     /// Size of town grid, for plotting purposes.
     pub town_size: usize,
     /// Houses, located in towns.
-    pub houses: HashMap<IdHouse, House>,
+    pub houses: IntMap<IdHouse, House>,
     /// The entire population.
     pub pop: Population,
     /// Probability distribution of shifts.
     pub shift_pool: Vec<Shift>,
 
     /// Set of all tasks.
-    pub tasks: HashMap<IdTask, Task>,
+    pub tasks: IntMap<IdTask, Task>,
     /// Random number generator.
     pub rng: Xoshiro256PlusPlus,
 
@@ -106,10 +105,10 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
     let mut model = Model {
         towns,
         town_size: 0,
-        houses: HashMap::new(), // FIXME: check capacity
+        houses: int_map_with_cap(0), // FIXME: check capacity
         pop,
         shift_pool: Vec::new(),
-        tasks: HashMap::with_capacity(population.len() * 5), // FIXME: check pre alloc is useful
+        tasks: int_map_with_cap(population.len() * 5), // FIXME: check pre alloc is useful
         rng,
         fert_f_by_age_51: fert_post51.normalised_fertility1951(),
         fert_pre51: Pre51Fertility::read_from(&pars.data_files.pre51_fertility),

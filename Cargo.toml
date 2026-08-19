@@ -7,8 +7,13 @@ rust-version = "1.97"
 [dependencies]
 clap = { version = "4.6.5", features = ["derive"] }
 csv = "1.4.0"
+identity-hash = "0.1.0"
 jiff = "0.2.35"
 rand = "0.10.2"
 rand_distr = "0.6.0"
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.4"
+
+[profile.release]
+lto = true
+codegen-units = 1

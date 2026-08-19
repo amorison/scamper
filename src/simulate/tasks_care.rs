@@ -1,5 +1,4 @@
-use std::collections::HashMap;
-
+use identity_hash::IntMap;
 use rand::{RngExt, seq::IndexedRandom};
 
 use crate::{
@@ -20,7 +19,7 @@ use crate::{
         person::{Id, Person},
     },
     population::{AliveOrDead, PopIterOrder},
-    utilities::{Age, HourInWeek},
+    utilities::{Age, HourInWeek, int_map_with_cap},
 };
 
 pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPars) {
@@ -57,7 +56,7 @@ pub fn distribute_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
 
     for _ in 0..pars.task_care.n_iter_care_dist {
         // collect all open tasks
-        let mut asked_tasks = HashMap::with_capacity(model.pop.size() * 3);
+        let mut asked_tasks = int_map_with_cap(model.pop.size() * 3);
         for p_id in order.ids() {
             let caree = model.pop.alive(p_id);
             if caree.task.open_tasks.is_empty() {
@@ -105,7 +104,7 @@ fn assign_school_care(p_id: Id, model: &mut Model) {
 }
 
 /// Add tasks to carer's list of asked tasks.
-fn add_asked_tasks(carer: Id, tasks: Vec<IdTask>, asked_tasks: &mut HashMap<Id, Vec<IdTask>>) {
+fn add_asked_tasks(carer: Id, tasks: Vec<IdTask>, asked_tasks: &mut IntMap<Id, Vec<IdTask>>) {
     asked_tasks.entry(carer).or_default().extend(tasks);
 }
 
@@ -234,7 +233,7 @@ fn availability_weight(carer: &Person, tasks: &[IdTask], pars: &ModelPars) -> f6
 /// Assign all open tasks of an agent to a potential carer.
 fn assign_open_tasks(
     p_id: Id,
-    asked_tasks: &mut HashMap<Id, Vec<IdTask>>,
+    asked_tasks: &mut IntMap<Id, Vec<IdTask>>,
     model: &mut Model,
     pars: &ModelPars,
 ) {

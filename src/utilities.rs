@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use identity_hash::{BuildIdentityHasher, IntMap};
 use rand::{
     Rng, RngExt,
     distr::{Distribution, Uniform},
@@ -181,4 +182,9 @@ where
 pub fn try_rand_yearly2monthly<R: Rng>(p_yearly: f64, rng: &mut R) -> bool {
     let dist = Uniform::new_inclusive(1, 12).unwrap();
     rng.random_bool(p_yearly) && dist.sample(rng) == 12
+}
+
+/// Create an `IntMap` with given capacity.
+pub fn int_map_with_cap<K, V>(capacity: usize) -> IntMap<K, V> {
+    IntMap::with_capacity_and_hasher(capacity, BuildIdentityHasher::new())
 }

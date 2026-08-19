@@ -1,5 +1,6 @@
-use std::{cmp, collections::HashMap};
+use std::cmp;
 
+use identity_hash::IntMap;
 use rand::{
     Rng, RngExt,
     seq::{IndexedRandom, IteratorRandom},
@@ -23,7 +24,7 @@ use crate::{
         person::{Id, Person, build::PersonAwaitingHouse},
     },
     population::PopIterOrder,
-    utilities::{Age, Date, DayInWeek, HourInDay},
+    utilities::{Age, Date, DayInWeek, HourInDay, int_map_with_cap},
 };
 
 // FIXME: this is inefficient, sampling for the entire population in one go would be better
@@ -42,7 +43,7 @@ fn rand_age<R: Rng>(pyramid: &AgePyramid, gender: Gender, rng: &mut R) -> Age {
 pub fn set_as_parent_child(
     child_id: Id,
     parent_id: Id,
-    population: &mut HashMap<Id, PersonAwaitingHouse>,
+    population: &mut IntMap<Id, PersonAwaitingHouse>,
 ) {
     let parent = population.get_mut(&parent_id).unwrap();
     let age_parent = parent.basic.age;
@@ -67,7 +68,7 @@ pub fn set_as_parent_child(
 pub fn set_as_guardian_dependent(
     guardian: Id,
     dependent: Id,
-    population: &mut HashMap<Id, PersonAwaitingHouse>,
+    population: &mut IntMap<Id, PersonAwaitingHouse>,
 ) {
     let g = population.get_mut(&guardian).unwrap();
     g.dependency.dependents.push(dependent);
@@ -82,7 +83,7 @@ pub fn set_as_guardian_dependent(
 pub fn set_as_provider_providee(
     provider_id: Id,
     providee_id: Id,
-    population: &mut HashMap<Id, PersonAwaitingHouse>,
+    population: &mut IntMap<Id, PersonAwaitingHouse>,
 ) {
     let provider = population.get_mut(&provider_id).unwrap();
     debug_assert!(!provider.dependency.providees.contains(&providee_id));
@@ -105,7 +106,7 @@ pub fn create_pyramid_population<R: Rng>(
     let npop = pars.population.init_size as usize;
     let mut men = Vec::with_capacity(npop / 2);
     let mut women = Vec::with_capacity(npop / 2);
-    let mut population = HashMap::with_capacity(npop);
+    let mut population = int_map_with_cap(npop);
 
     // create population distributed according to pyramid
     for _ in 0..pars.population.init_size {

@@ -1,8 +1,9 @@
-use std::collections::HashMap;
-
 use rand::seq::SliceRandom;
 
-use crate::full_model::{Model, person::build::PersonAwaitingHouse};
+use crate::{
+    full_model::{Model, person::build::PersonAwaitingHouse},
+    utilities::int_map_with_cap,
+};
 
 pub fn assign_couples_to_houses(mut population: Vec<PersonAwaitingHouse>, model: &mut Model) {
     let with_partner_or_deps: Vec<_> = population
@@ -16,7 +17,7 @@ pub fn assign_couples_to_houses(mut population: Vec<PersonAwaitingHouse>, model:
     houses.shuffle(&mut model.rng);
 
     // probably a pessimistic capacity
-    let mut have_house = HashMap::with_capacity(with_partner_or_deps.len());
+    let mut have_house = int_map_with_cap(with_partner_or_deps.len());
 
     for person in with_partner_or_deps.into_iter().chain(rest.into_iter()) {
         let p_id = person.id();

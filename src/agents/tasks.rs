@@ -1,4 +1,9 @@
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::{
+    hash::Hash,
+    sync::atomic::{AtomicU64, Ordering},
+};
+
+use identity_hash::IdentityHashable;
 
 use crate::{
     full_model::person::Id,
@@ -7,7 +12,7 @@ use crate::{
 
 static ID_TASK: AtomicU64 = AtomicU64::new(0);
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IdTask(u64);
 
 impl IdTask {
@@ -15,6 +20,14 @@ impl IdTask {
         IdTask(ID_TASK.fetch_add(1, Ordering::Relaxed))
     }
 }
+
+impl Hash for IdTask {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u64(self.0);
+    }
+}
+
+impl IdentityHashable for IdTask {}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TaskKind {

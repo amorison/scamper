@@ -1,10 +1,10 @@
-use std::collections::HashMap;
-
+use identity_hash::IntMap;
 use rand::{Rng, seq::SliceRandom};
 
 use crate::{
     agents::agent_modules::kinship::Kinship,
     full_model::person::{DeadPerson, Id, Person},
+    utilities::int_map_with_cap,
 };
 
 #[derive(Clone, Copy)]
@@ -44,8 +44,8 @@ impl<'a> AliveOrDead<'a> {
 }
 
 pub struct Population {
-    living: HashMap<Id, Person>,
-    dead: HashMap<Id, DeadPerson>,
+    living: IntMap<Id, Person>,
+    dead: IntMap<Id, DeadPerson>,
     new_ids: Vec<Id>,
 }
 
@@ -58,8 +58,8 @@ impl Population {
     pub fn for_npersons(npersons: usize) -> (Population, PopIterOrder) {
         // This is a naive heuristic that might need be refined.
         let pop = Self {
-            living: HashMap::with_capacity(npersons / 2 * 3),
-            dead: HashMap::with_capacity(npersons / 2),
+            living: int_map_with_cap(npersons / 2 * 3),
+            dead: int_map_with_cap(npersons / 2),
             new_ids: Vec::with_capacity(npersons),
         };
         let order = PopIterOrder {
