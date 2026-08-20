@@ -119,9 +119,6 @@ pub fn remove_all_tasks(p_id: Id, model: &mut Model) {
         }
         mark_task_unassigned(task_id, model);
     }
-
-    let person = model.pop.alive_mut(p_id);
-    person.task.assigned_tasks.clear();
 }
 
 // FIXME: this actually empties the todo list completely.
