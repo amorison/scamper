@@ -126,7 +126,7 @@ impl DayInWeek {
 
     /// Iterate through all the days in a week (7 values).
     pub fn all_days() -> impl Iterator<Item = DayInWeek> {
-        (0..7).map(|h| Self(h))
+        (0..7).map(Self)
     }
 
     pub fn index(&self) -> usize {
@@ -151,7 +151,7 @@ impl HourInWeek {
 
     /// Iterate through all the hours in a week (168 values).
     pub fn all_hours() -> impl Iterator<Item = HourInWeek> {
-        (0..168).map(|h| HourInWeek(h))
+        (0..168).map(Self)
     }
 
     pub fn day_hour(&self) -> (DayInWeek, HourInDay) {

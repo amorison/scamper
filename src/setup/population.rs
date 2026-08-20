@@ -331,7 +331,7 @@ fn create_shifts<R: Rng>(pars: &ModelPars, rng: &mut R) -> Vec<Shift> {
             .exp();
 
         all_shifts.push(Shift {
-            days: days.into_iter().map(|d| DayInWeek::new(d)).collect(),
+            days: days.into_iter().map(DayInWeek::new).collect(),
             start: HourInDay::new(start_hour as u32),
             start_index: shift[0] as u32,
             finish: HourInDay::new(shift[0] as u32 + 8),
