@@ -64,10 +64,7 @@ pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> boo
         g_id = find_other_guardian(model, order);
     }
 
-    // FIXME: this should no longer be the case with the introduction of `past_guardians`
-    // Get rid of previous (possibly dead) guardians. This implies that relatives of a non-related
-    // former legal guardian that are now excluded due to age won't get a chance again in the
-    // future.
+    // Get rid of previous guardians.
     let person = model.pop.alive_mut(p_id);
     person.dependency.guardians.clear();
 
