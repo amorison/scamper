@@ -1,3 +1,5 @@
+use std::mem;
+
 use identity_hash::IntMap;
 use rand::{RngExt, seq::IndexedRandom};
 
@@ -31,8 +33,20 @@ pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPar
     }
 }
 
+// FIXME: misnamed since now this concerns all tasks.
 pub fn process_death_task_care(p_id: Id, model: &mut Model) {
+    // this removes tasks assigned to person.
     remove_all_care_and_tasks(p_id, model);
+
+    // this removes the tasks needed by the person.
+    let person = model.pop.alive_mut(p_id);
+    let open_tasks = mem::take(&mut person.task.open_tasks);
+    let assigned_tasks = mem::take(&mut person.task.assigned_tasks);
+    for task_id in open_tasks.into_iter().chain(assigned_tasks) {
+        model.tasks.remove(&task_id);
+    }
+
+    // FIXME: older tasks that were forgotten are not removed here
 }
 
 fn remove_all_care_and_tasks(p_id: Id, model: &mut Model) {
