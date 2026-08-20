@@ -1,4 +1,6 @@
-use std::{collections::HashSet, mem};
+use std::mem;
+
+use identity_hash::IntSet;
 
 use crate::{
     agents::tasks::{Carer, IdTask, Task},
@@ -6,14 +8,14 @@ use crate::{
         Model,
         person::{Id, Person},
     },
-    utilities::HourInWeek,
+    utilities::{HourInWeek, int_set_with_cap},
 };
 
 // FIXME: rethink how to store assigned vs open tasks
 
 pub struct TaskPerson {
-    pub assigned_tasks: HashSet<IdTask>,
-    pub open_tasks: HashSet<IdTask>,
+    pub assigned_tasks: IntSet<IdTask>,
+    pub open_tasks: IntSet<IdTask>,
     /// Focus per hour
     task_schedule: [[f64; 24]; 7],
     /// Tasks the agent does, sorted per day
@@ -24,8 +26,8 @@ pub struct TaskPerson {
 impl Default for TaskPerson {
     fn default() -> Self {
         Self {
-            assigned_tasks: HashSet::new(),
-            open_tasks: HashSet::new(),
+            assigned_tasks: int_set_with_cap(20),
+            open_tasks: int_set_with_cap(20),
             task_schedule: [[0.0; 24]; 7],
             todo: Default::default(),
             care_task_hours: 0,

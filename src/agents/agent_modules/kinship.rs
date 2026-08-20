@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use identity_hash::IntSet;
 
 use crate::{
     full_model::{
@@ -6,6 +6,7 @@ use crate::{
         person::{Id, Person},
     },
     population::AliveOrDead,
+    utilities::int_set_with_cap,
 };
 
 #[derive(Debug)]
@@ -83,8 +84,8 @@ pub fn are_parent_child(p1: &Person, p2: &Person) -> bool {
 }
 
 /// Set of siblings (full and half, alive or dead).
-pub fn siblings(p1: AliveOrDead, model: &Model) -> HashSet<Id> {
-    let mut siblings = HashSet::with_capacity(10);
+pub fn siblings(p1: AliveOrDead, model: &Model) -> IntSet<Id> {
+    let mut siblings = int_set_with_cap(10);
 
     for parent_id in p1.kinship().parents() {
         let parent = model.pop.get(parent_id);
