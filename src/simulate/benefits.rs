@@ -64,7 +64,7 @@ fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
         // children
         if person.basic.age < Age::years(16) && person.care.need_level > 0 {
             let idla = person.care.index() / 2;
-            let im = (person.care.index() + 1) / 2 - 1;
+            let im = person.care.index().div_ceil(2) - 1;
             person.benefits.benefits += pars.benefit.care_dla[idla] + pars.benefit.mobility_dla[im];
             person.benefits.highest_disability = person.care.need_level > 3;
             continue;
@@ -72,7 +72,7 @@ fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
 
         // PIP
         if person.basic.age < Age::years(pars.work.age_retirement) && person.care.need_level > 0 {
-            let ipip = (person.care.index() + 1) / 2 - 1;
+            let ipip = person.care.index().div_ceil(2) - 1;
             person.benefits.benefits += pars.benefit.care_pip[ipip];
             if person.care.need_level > 1 {
                 let im = person.care.index() / 2 - 1;
@@ -444,10 +444,10 @@ fn pension_credit(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
 
 fn compute_max_rooms(house: &House, model: &Model) -> usize {
     let mut allowed_rooms = 0;
-    let mut n_male_teens = 0;
-    let mut n_female_teens = 0;
-    let mut n_children = 0;
-    let mut n_couples = 0;
+    let mut n_male_teens: usize = 0;
+    let mut n_female_teens: usize = 0;
+    let mut n_children: usize = 0;
+    let mut n_couples: usize = 0;
 
     for &o_id in house.basic.occupants() {
         let occ = model.pop.alive(o_id);
@@ -469,9 +469,9 @@ fn compute_max_rooms(house: &House, model: &Model) -> usize {
         }
     }
 
-    allowed_rooms += (n_male_teens + 1) / 2;
-    allowed_rooms += (n_female_teens + 1) / 2;
-    allowed_rooms += (n_children + 1) / 2;
+    allowed_rooms += n_male_teens.div_ceil(2);
+    allowed_rooms += n_female_teens.div_ceil(2);
+    allowed_rooms += n_children.div_ceil(2);
     allowed_rooms -= n_couples / 2;
 
     allowed_rooms.min(4)
