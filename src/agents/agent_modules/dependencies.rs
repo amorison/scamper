@@ -10,7 +10,7 @@ pub struct Dependency {
 }
 
 impl Dependency {
-    pub fn is_dependent(&self) -> bool {
+    pub fn has_guardians(&self) -> bool {
         !self.guardians.is_empty()
     }
 

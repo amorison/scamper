@@ -26,7 +26,7 @@ pub fn house_ownership(model: &mut Model, pars: &ModelPars) {
 
         for &p_id in h.basic.occupants() {
             let agent = model.pop.alive(p_id);
-            if !agent.dependency.is_dependent() {
+            if !agent.dependency.has_guardians() {
                 n += 1.0;
                 age += agent.basic.age.years_f64();
             }

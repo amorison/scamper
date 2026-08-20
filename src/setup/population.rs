@@ -385,7 +385,7 @@ fn init_wealth(model: &mut Model, pars: &ModelPars) {
                 .iter()
                 .filter_map(|&id| {
                     let member = model.pop.alive_mut(id);
-                    (!member.dependency.is_dependent()).then_some(id)
+                    (!member.dependency.has_guardians()).then_some(id)
                 })
                 .collect();
             let nmembers = indep_members.len() as f64;

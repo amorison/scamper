@@ -32,7 +32,7 @@ pub fn can_live_alone(p: &Person) -> bool {
 }
 
 pub fn is_orphan(p: &Person) -> bool {
-    !can_live_alone(p) && !p.dependency.is_dependent()
+    !can_live_alone(p) && !p.dependency.has_guardians()
 }
 
 pub fn set_as_guardian_dependent(guardian: Id, dependent: Id, model: &mut Model) {

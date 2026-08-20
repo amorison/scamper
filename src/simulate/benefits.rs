@@ -166,7 +166,7 @@ fn universal_credit(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
         .filter_map(|p| {
             let house = p.house(model);
             let eligible =
-                p.benefits.uc && !house.income.owned_by_occupants && !p.dependency.is_dependent();
+                p.benefits.uc && !house.income.owned_by_occupants && !p.dependency.has_guardians();
             if !eligible {
                 return None;
             }
@@ -257,7 +257,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let n_crit_disabled_uc_deps = n_crit_disabled_dependents(house, model);
 
     // TODO: dependence needs to be done properly
-    if (!person.dependency.is_dependent() && n_uc_deps > 0) || person.care.need_level > 0 {
+    if (!person.dependency.has_guardians() && n_uc_deps > 0) || person.care.need_level > 0 {
         if !house.income.owned_by_occupants {
             // assuming the agent with get the housing cost element
             uc_income = (uc_income - pars.benefit.work_allowance_hs).max(0.0);
@@ -372,7 +372,7 @@ fn calc_pension_credit(
     }
 
     // other benefits are for people with dependents
-    if person.dependency.is_dependent() {
+    if person.dependency.has_guardians() {
         return Some((person.id(), benefits, guarantee_credit));
     }
 
