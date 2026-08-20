@@ -4,11 +4,9 @@ use rand::RngExt;
 
 use crate::{
     ModelPars,
-    agents::{
-        agent_modules::basic_house,
-        towns::{Location, Town},
-    },
+    agents::towns::Town,
     full_model::{Model, house::House},
+    utilities::Location,
 };
 
 pub fn create_towns(pars: &ModelPars) -> Vec<Town> {
@@ -57,7 +55,7 @@ pub fn initialise_houses_in_town(model: &mut Model, init_pop: usize) {
         for hy in 0..grid_dim {
             for hx in 0..grid_dim {
                 if model.rng.random_bool(0.6 * town.density) {
-                    let h_loc = basic_house::Location::new(hx, hy);
+                    let h_loc = Location::new(hx, hy);
                     let house = House::new(town.id(), h_loc);
                     let h_id = house.id();
                     model.houses.insert(h_id, house);

@@ -7,13 +7,11 @@ use identity_hash::IdentityHashable;
 
 use crate::{
     agents::{
-        agent_modules::{
-            basic_house::{BasicHouse, Location},
-            income_house::IncomeHouse,
-        },
+        agent_modules::{basic_house::BasicHouse, income_house::IncomeHouse},
         towns::{IdTown, Town},
     },
     full_model::Model,
+    utilities::Location,
 };
 
 static ID_HOUSE: AtomicU64 = AtomicU64::new(0);

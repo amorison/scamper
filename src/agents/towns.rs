@@ -5,7 +5,7 @@ use std::{
 
 use identity_hash::IdentityHashable;
 
-use crate::full_model::house::IdHouse;
+use crate::{full_model::house::IdHouse, utilities::Location};
 
 static ID_TOWN: AtomicU64 = AtomicU64::new(0);
 
@@ -25,23 +25,6 @@ impl Hash for IdTown {
 }
 
 impl IdentityHashable for IdTown {}
-
-#[derive(Debug, Clone, Copy)]
-pub struct Location(usize, usize);
-
-impl Location {
-    pub fn new(x: usize, y: usize) -> Self {
-        Self(x, y)
-    }
-
-    pub fn x_y(&self) -> (usize, usize) {
-        (self.0, self.1)
-    }
-
-    pub fn manhattan_dist(&self, other: &Location) -> usize {
-        self.0.abs_diff(other.0) + self.1.abs_diff(other.1)
-    }
-}
 
 pub struct Town {
     id: IdTown,

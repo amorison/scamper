@@ -159,6 +159,24 @@ impl HourInWeek {
     }
 }
 
+/// A location on a Cartesian discrete grid.
+#[derive(Clone, Copy, Debug)]
+pub struct Location(usize, usize);
+
+impl Location {
+    pub fn new(x: usize, y: usize) -> Self {
+        Self(x, y)
+    }
+
+    pub fn x_y(&self) -> (usize, usize) {
+        (self.0, self.1)
+    }
+
+    pub fn manhattan_dist(&self, other: &Location) -> usize {
+        self.0.abs_diff(other.0) + self.1.abs_diff(other.1)
+    }
+}
+
 pub fn sum_class_bias<F, const N: usize>(f: F, bias: f64) -> f64
 where
     F: Fn(usize) -> f64,

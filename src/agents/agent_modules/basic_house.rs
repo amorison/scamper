@@ -1,13 +1,4 @@
-use crate::{agents::towns::IdTown, full_model::person::Id};
-
-#[derive(Clone, Copy)]
-pub struct Location(usize, usize);
-
-impl Location {
-    pub fn new(x: usize, y: usize) -> Self {
-        Self(x, y)
-    }
-}
+use crate::{agents::towns::IdTown, full_model::person::Id, utilities::Location};
 
 pub struct BasicHouse {
     town: IdTown,
