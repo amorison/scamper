@@ -54,18 +54,8 @@ pub fn process_death_deps(p_id: Id, model: &mut Model) {
     }
 }
 
-fn has_valid_guardian(person: &Person, model: &Model) -> bool {
-    // FIXME: with the introduction of past_guardians, guardians
-    // should always be alive.
-    person
-        .dependency
-        .guardians
-        .iter()
-        .any(|&id| model.pop.get(id).is_alive())
-}
-
-pub fn select_assign_guardian(person: &Person, model: &Model) -> bool {
-    !can_live_alone(person) && !has_valid_guardian(person, model)
+pub fn select_assign_guardian(person: &Person) -> bool {
+    !can_live_alone(person) && !person.dependency.has_guardians()
 }
 
 pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> bool {

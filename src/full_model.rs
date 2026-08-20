@@ -164,7 +164,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     // adoption
     for p_id in order.ids() {
         let person = model.pop.alive(p_id);
-        if select_assign_guardian(person, model) {
+        if select_assign_guardian(person) {
             assign_guardian(p_id, model, order);
         }
     }
