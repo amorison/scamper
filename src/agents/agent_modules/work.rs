@@ -84,10 +84,6 @@ impl Work {
         self.status.is_worker()
     }
 
-    pub fn is_retired(&self) -> bool {
-        matches!(self.status, WorkStatus::Retired)
-    }
-
     pub fn is_unemployed(&self) -> bool {
         matches!(self.status, WorkStatus::Unemployed)
     }

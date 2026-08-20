@@ -83,16 +83,6 @@ impl TaskPerson {
         let (day, hour) = hour.day_hour();
         self.task_schedule[day.index()][hour.index()]
     }
-
-    /// Whether a task of the given focus can be accomodated by an agent's schedule without changes.
-    pub fn focus_fits_in_sched(&self, hour: HourInWeek, focus: f64) -> bool {
-        self.how_busy_at(hour) + focus <= 1.0
-    }
-
-    /// Whether the given task can be accomodated by an agent's schedule without changes.
-    pub fn task_fits_in_sched(&self, hour: HourInWeek, task: &Task) -> bool {
-        self.how_busy_at(hour) + task.focus() <= 1.0
-    }
 }
 
 pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {

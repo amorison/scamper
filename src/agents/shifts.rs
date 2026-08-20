@@ -1,4 +1,4 @@
-use crate::utilities::{DayInWeek, HourInDay, HourInWeek};
+use crate::utilities::{DayInWeek, HourInDay};
 
 #[derive(Debug, Clone)]
 pub struct Shift {
@@ -20,10 +20,5 @@ impl Shift {
             finish: HourInDay::new(0),
             social_index: 0.0,
         }
-    }
-
-    pub fn in_shift(&self, hiw: HourInWeek) -> bool {
-        let (day, hour) = hiw.day_hour();
-        self.days.contains(&day) && self.shift_hours.contains(&hour)
     }
 }

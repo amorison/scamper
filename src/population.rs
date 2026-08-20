@@ -28,13 +28,6 @@ impl<'a> AliveOrDead<'a> {
         }
     }
 
-    pub fn is_alive(self) -> bool {
-        match self {
-            AliveOrDead::Alive(_) => true,
-            AliveOrDead::Dead(_) => false,
-        }
-    }
-
     pub fn is_alive_and<F: FnOnce(&Person) -> bool>(self, predicate: F) -> bool {
         match self {
             AliveOrDead::Alive(person) => predicate(person),
