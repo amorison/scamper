@@ -37,10 +37,6 @@ pub struct Kinship {
 }
 
 impl Kinship {
-    pub fn has_children(&self) -> bool {
-        !self.children.is_empty()
-    }
-
     pub fn add_child(&mut self, id: Id) {
         self.children.push(id);
     }
@@ -73,10 +69,6 @@ impl Kinship {
             || self.mother.is_some() && self.mother == other.mother
     }
 
-    pub fn full_sibling_with(&self, other: &Kinship) -> bool {
-        self.father.is_some() && self.mother.is_some() && self.parents() == other.parents()
-    }
-
     pub fn parent_of(&self, id: Id) -> bool {
         self.children.contains(&id)
     }
@@ -84,10 +76,6 @@ impl Kinship {
 
 pub fn are_siblings(p1: &Person, p2: &Person) -> bool {
     p1.kinship.sibling_with(&p2.kinship)
-}
-
-pub fn are_full_siblings(p1: &Person, p2: &Person) -> bool {
-    p1.kinship.full_sibling_with(&p2.kinship)
 }
 
 pub fn are_parent_child(p1: &Person, p2: &Person) -> bool {

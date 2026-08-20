@@ -27,10 +27,6 @@ impl BasicHouse {
         self.town
     }
 
-    pub fn location(&self) -> Location {
-        self.pos
-    }
-
     pub fn occupants(&self) -> &[Id] {
         &self.occupants
     }
