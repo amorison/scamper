@@ -84,16 +84,13 @@ pub fn are_parent_child(p1: &Person, p2: &Person) -> bool {
 
 /// Set of siblings (full and half, alive or dead).
 pub fn siblings(p1: AliveOrDead, model: &Model) -> HashSet<Id> {
-    let mut siblings = HashSet::new();
+    let mut siblings = HashSet::with_capacity(10);
 
     for parent_id in p1.kinship().parents() {
         let parent = model.pop.get(parent_id);
         for child_id in parent.kinship().children.iter().copied() {
             if child_id != p1.id() {
-                let child = model.pop.get(child_id);
-                if p1.kinship().sibling_with(child.kinship()) {
-                    siblings.insert(child_id);
-                }
+                siblings.insert(child_id);
             }
         }
     }
