@@ -8,7 +8,7 @@ use crate::{
         agent_modules::kinship::siblings,
         interactions::{
             dependencies::{
-                can_live_alone, set_as_guardian_dependent, set_as_independent,
+                can_live_alone, is_orphan, set_as_guardian_dependent, set_as_independent,
                 set_as_self_providing,
             },
             housing::move_to_house,
@@ -55,7 +55,7 @@ pub fn process_death_deps(p_id: Id, model: &mut Model) {
 }
 
 pub fn select_assign_guardian(person: &Person) -> bool {
-    !can_live_alone(person) && !person.dependency.has_guardians()
+    is_orphan(person)
 }
 
 pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> bool {
