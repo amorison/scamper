@@ -164,7 +164,7 @@ pub fn accept_task(task_id: IdTask, tasks_to_clear: &[IdTask], carer: Carer, mod
 }
 
 pub fn find_tasks_at(person: &Person, hiw: HourInWeek, model: &Model) -> Vec<IdTask> {
-    if person.task.how_busy_at(hiw) <= 0.0 {
+    if person.how_busy_at(hiw) <= 0.0 {
         return Vec::new();
     }
 
