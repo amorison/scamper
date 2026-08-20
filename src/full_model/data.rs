@@ -28,7 +28,7 @@ impl AgePyramid {
 
     pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = csv::Reader::from_path(path).expect("error reading age pyramid");
-        let records: Result<Vec<AgePyramidRecord>, _> = reader.deserialize().into_iter().collect();
+        let records: Result<Vec<AgePyramidRecord>, _> = reader.deserialize().collect();
         let records = records.expect("error reading age pyramid");
         let mut male = Vec::with_capacity(records.len());
         let mut female = Vec::with_capacity(records.len());
@@ -51,8 +51,7 @@ pub struct Pre51Fertility(Vec<Pre51FertilityRecord>);
 impl Pre51Fertility {
     pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = csv::Reader::from_path(path).expect("error reading pre51 fertility");
-        let records: Result<Vec<Pre51FertilityRecord>, _> =
-            reader.deserialize().into_iter().collect();
+        let records: Result<Vec<Pre51FertilityRecord>, _> = reader.deserialize().collect();
         Self(records.expect("error reading pre51 fertility"))
     }
 
@@ -70,7 +69,7 @@ impl Post51Fertility {
             .has_headers(false)
             .from_path(path)
             .expect("error reading post51 fertility");
-        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().into_iter().collect();
+        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().collect();
         Self(records.expect("error reading post51 fertility"))
     }
 
@@ -101,8 +100,7 @@ pub struct Pre51Mortality(Vec<Pre51MortalityRecord>);
 impl Pre51Mortality {
     pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = csv::Reader::from_path(path).expect("error reading pre51 mortality");
-        let records: Result<Vec<Pre51MortalityRecord>, _> =
-            reader.deserialize().into_iter().collect();
+        let records: Result<Vec<Pre51MortalityRecord>, _> = reader.deserialize().collect();
         Self(records.expect("error reading pre51 mortality"))
     }
 
@@ -130,7 +128,7 @@ impl Post51MortalityMale {
             .has_headers(false)
             .from_path(path)
             .expect("error reading post51 male mortality");
-        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().into_iter().collect();
+        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().collect();
         Self(records.expect("error reading post51 male mortality"))
     }
 
@@ -149,7 +147,7 @@ impl Post51MortalityFemale {
             .has_headers(false)
             .from_path(path)
             .expect("error reading post51 female mortality");
-        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().into_iter().collect();
+        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().collect();
         Self(records.expect("error reading post51 female mortality"))
     }
 
@@ -170,7 +168,7 @@ impl Unemployment {
             .has_headers(false)
             .from_path(path)
             .expect("error reading unemployment");
-        let records: Result<Vec<f64>, _> = reader.deserialize().into_iter().collect();
+        let records: Result<Vec<f64>, _> = reader.deserialize().collect();
         Self(records.expect("error reading unemployment"))
     }
 
@@ -189,7 +187,7 @@ impl WealthDistribution {
             .has_headers(false)
             .from_path(path)
             .expect("error reading wealth distribution");
-        let records: Result<Vec<f64>, _> = reader.deserialize().into_iter().collect();
+        let records: Result<Vec<f64>, _> = reader.deserialize().collect();
         Self(records.expect("error reading wealth distribution"))
     }
 

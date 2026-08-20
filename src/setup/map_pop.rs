@@ -19,7 +19,7 @@ pub fn assign_couples_to_houses(mut population: Vec<PersonAwaitingHouse>, model:
     // probably a pessimistic capacity
     let mut have_house = int_map_with_cap(with_partner_or_deps.len());
 
-    for person in with_partner_or_deps.into_iter().chain(rest.into_iter()) {
+    for person in with_partner_or_deps.into_iter().chain(rest) {
         let p_id = person.id();
 
         let h_id = if let Some(h_id) = have_house.remove(&p_id) {
