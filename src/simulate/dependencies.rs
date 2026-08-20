@@ -121,8 +121,7 @@ fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
                 return Some(g_id);
             }
         }
-        let (full, half) = siblings(parent, model);
-        for &g_id in full.union(&half) {
+        for g_id in siblings(parent, model) {
             if is_potential_guardian(g_id, model) {
                 return Some(g_id);
             }
@@ -142,8 +141,7 @@ fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
                 return Some(g_id);
             }
         }
-        let (full, half) = siblings(guardian, model);
-        for &g_id in full.union(&half) {
+        for g_id in siblings(guardian, model) {
             if is_potential_guardian(g_id, model) {
                 return Some(g_id);
             }

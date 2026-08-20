@@ -159,8 +159,7 @@ fn create_carer_list(agent: &Person, model: &Model, pars: &ModelPars) -> Vec<Id>
         check_and_add_carer(&mut potential_carers, child, pars);
     }
 
-    let (full, half) = siblings(AliveOrDead::Alive(agent), model);
-    for &sibling_id in full.union(&half) {
+    for sibling_id in siblings(AliveOrDead::Alive(agent), model) {
         let sibling = model.pop.get(sibling_id);
         check_and_add_carer(&mut potential_carers, sibling, pars);
     }
