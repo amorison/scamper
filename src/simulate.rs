@@ -6,7 +6,6 @@ pub mod dependencies;
 pub mod divorce;
 pub mod housing_top_down;
 pub mod income;
-pub mod job_market;
 pub mod job_transition;
 pub mod marriage;
 pub mod move_house;
