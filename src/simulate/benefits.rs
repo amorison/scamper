@@ -173,7 +173,7 @@ fn universal_credit(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
             let town = house.town(model);
             let iroom = compute_max_rooms(house, model) - 1;
             let benefit = if p
-                .partner(&model)
+                .partner(model)
                 .map(|partner| partner.benefits.uc)
                 .unwrap_or(true)
             {
