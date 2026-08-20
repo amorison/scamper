@@ -41,10 +41,6 @@ impl Location {
     pub fn manhattan_dist(&self, other: &Location) -> usize {
         self.0.abs_diff(other.0) + self.1.abs_diff(other.1)
     }
-
-    pub fn is_adjacent(&self, other: &Location) -> bool {
-        self.0.abs_diff(other.0) <= 1 && self.1.abs_diff(other.1) <= 1
-    }
 }
 
 pub struct Town {
@@ -75,9 +71,5 @@ impl Town {
 
     pub fn manhattan_dist(&self, other: &Town) -> usize {
         self.loc.manhattan_dist(&other.loc)
-    }
-
-    pub fn is_adjacent(&self, other: &Town) -> bool {
-        self.loc.is_adjacent(&other.loc)
     }
 }

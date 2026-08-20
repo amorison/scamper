@@ -12,10 +12,6 @@ fn hh_income(p_id: Id, model: &Model) -> (f64, usize) {
     (income, occupants.len())
 }
 
-pub fn household_income(p_id: Id, model: &Model) -> f64 {
-    hh_income(p_id, model).0
-}
-
 pub fn household_income_per_capita(p_id: Id, model: &Model) -> f64 {
     let (income, noccupants) = hh_income(p_id, model);
     income / noccupants as f64

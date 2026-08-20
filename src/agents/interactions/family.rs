@@ -65,14 +65,6 @@ pub fn set_as_partners(p1_id: Id, p2_id: Id, model: &mut Model) {
     p2.kinship.partnership = Some(Partnership::new(p1_id));
 }
 
-pub fn has_alive_child(parent: &Person, model: &Model) -> bool {
-    parent
-        .kinship
-        .children
-        .iter()
-        .any(|&c_id| model.pop.get(c_id).is_alive())
-}
-
 pub fn has_young_infant(parent: &Person, model: &Model) -> bool {
     parent.kinship.children.iter().any(|&c_id| {
         model
