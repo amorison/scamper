@@ -66,8 +66,6 @@ pub struct Person {
 
 pub struct DeadPerson {
     id: Id,
-    // FIXME: is basic needed?
-    pub basic: BasicInfo,
     pub kinship: Kinship,
 }
 
@@ -107,10 +105,8 @@ impl Person {
 
 impl From<Person> for DeadPerson {
     fn from(value: Person) -> Self {
-        let Person {
-            id, basic, kinship, ..
-        } = value;
-        Self { id, basic, kinship }
+        let Person { id, kinship, .. } = value;
+        Self { id, kinship }
     }
 }
 
