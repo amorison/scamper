@@ -59,7 +59,7 @@ pub fn distribute_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
         let mut asked_tasks = int_map_with_cap(model.pop.size() * 3);
         for p_id in order.ids() {
             let caree = model.pop.alive(p_id);
-            if caree.task.open_tasks.is_empty() {
+            if !caree.task.has_open_tasks() {
                 continue;
             }
             assign_open_tasks(p_id, &mut asked_tasks, model, pars);
@@ -244,7 +244,7 @@ fn assign_open_tasks(
     }
 
     let agent = model.pop.alive(p_id);
-    if agent.task.open_tasks.is_empty() {
+    if !agent.task.has_open_tasks() {
         return;
     }
 
