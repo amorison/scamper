@@ -32,7 +32,7 @@ pub fn marriage_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPa
     model.marriage_cache.share_men_no_children.resize(20, 0.0);
     model.marriage_cache.share_men_no_children.fill(0.0);
 
-    let mut n_all = vec![0.0; 20];
+    let mut n_all = [0.0; 20];
     for person in model.pop.alives(order).filter(|p| p.is_male()) {
         let ac = age_class(person);
         n_all[ac] += 1.0;
