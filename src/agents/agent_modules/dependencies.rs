@@ -17,8 +17,4 @@ impl Dependency {
     pub fn has_dependents(&self) -> bool {
         !self.dependents.is_empty()
     }
-
-    pub fn has_providees(&self) -> bool {
-        !self.providees.is_empty()
-    }
 }
