@@ -66,6 +66,11 @@ impl Population {
         self.living.len()
     }
 
+    /// Number of dead persons.
+    pub fn ndeads(&self) -> usize {
+        self.dead.len()
+    }
+
     /// Add an individual to the population.
     pub fn insert(&mut self, person: Person) {
         let id = person.id();

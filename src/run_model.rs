@@ -36,7 +36,9 @@ pub fn main(pars: ModelPars) -> io::Result<()> {
         date = date.next_month();
 
         let npop = model.pop.size();
-        println!("{date} {npop}");
+        let ndeads = model.pop.ndeads();
+        let ntasks = model.tasks.len();
+        println!("{date}, pop size: {npop}, ndeads: {ndeads}, ntasks: {ntasks}");
     }
 
     Ok(())
