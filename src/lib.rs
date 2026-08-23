@@ -1,4 +1,5 @@
 mod agents;
+mod analysis;
 pub mod cli;
 mod common;
 mod full_model;

@@ -46,6 +46,10 @@ impl Date {
     pub fn next_month(self) -> Self {
         Self(self.0 + 1)
     }
+
+    pub fn whole_year(self) -> bool {
+        self.0 % 12 == 0
+    }
 }
 
 impl Display for Date {
