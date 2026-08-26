@@ -236,8 +236,7 @@ struct Work {
     sunday_social_index: f64,
     shift_beta: f64,
     day_beta: f64,
-    probation_period: u32,
-
+    probation_period: u32, // FIXME: unused
     hire_rate: f64,
 }
 
