@@ -181,7 +181,6 @@ impl Default for Population {
 struct Birth {
     fertility_bias: f64,
     prev_child_fertility_bias: f64,
-    growing_pop_birth_prob: f64,
     min_pregnancy_age: u32,
     max_pregnancy_age: u32,
 }
@@ -191,7 +190,6 @@ impl Default for Birth {
         Self {
             fertility_bias: 0.9,
             prev_child_fertility_bias: 0.9,
-            growing_pop_birth_prob: 0.215,
             min_pregnancy_age: 16,
             max_pregnancy_age: 50,
         }
