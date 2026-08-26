@@ -138,10 +138,6 @@ struct Population {
 
     /// From 1921 census, a population of males to be randomly generated in the given age range
     init_male_prop: f64,
-    min_start_age: u32,
-    max_start_age: u32,
-
-    start_baby_surplus: u32,
     start_prob_married: f64,
     start_prob_orphan: f64,
 
@@ -164,9 +160,6 @@ impl Default for Population {
             end_year: 2040,
             init_size: 50_000,
             init_male_prop: 0.477,
-            min_start_age: 25,
-            max_start_age: 45,
-            start_baby_surplus: 100,
             start_prob_married: 0.8,
             start_prob_orphan: 0.01,
             base_die_prob: 1e-4,
