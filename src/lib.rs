@@ -570,41 +570,6 @@ impl Default for DataFiles {
     }
 }
 
-/// Simulation setup.
-#[derive(Serialize, Deserialize)]
-#[serde(default)]
-struct Simulation {
-    /// Step size.
-    dt: u32,
-    seed: u64,
-    /// Whether to print significant intermediate info.
-    verbose: bool,
-    /// How long simulation is suspended after printing info.
-    sleep_time: f64,
-    log_file: String,
-    start_log_time: u32,
-    end_log_time: u32,
-
-    dump_agents: bool,
-    dump_houses: bool,
-}
-
-impl Default for Simulation {
-    fn default() -> Self {
-        Self {
-            dt: 1,
-            seed: 42,
-            verbose: false,
-            sleep_time: 0.0,
-            log_file: "log.tsv".to_owned(),
-            start_log_time: 0,
-            end_log_time: 10_000,
-            dump_agents: false,
-            dump_houses: false,
-        }
-    }
-}
-
 #[derive(Default, Serialize, Deserialize)]
 #[serde(default)]
 struct ModelPars {
@@ -620,7 +585,6 @@ struct ModelPars {
     task_care: TaskCare,
     housing: Housing,
     data_files: DataFiles,
-    simulation: Simulation,
 }
 
 impl ModelPars {
