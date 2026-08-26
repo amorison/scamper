@@ -63,6 +63,7 @@ struct BenefitMap {
 
 impl Default for BenefitMap {
     fn default() -> Self {
+        // FIXME: set at 0.0 in NI, is this OK?
         let local_housing_allowances = [
             vec![
                 vec![0.0, 91.81, 91.81, 91.81, 0.0, 0.0, 0.0, 0.0],
