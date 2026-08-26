@@ -452,15 +452,10 @@ struct Care {
     male_age_care_scaling: f64,
     person_care_prob: f64,
     base_care_prob: f64,
-    care_demand_in_hours: [u32; N_CARE_LEVELS],
     care_transition_rate: f64,
-    zero_year_care: u32,
     child_care_demand: u32,
-    free_child_care_hours_pre_school: u32,
-    free_child_care_hours_school: u32,
     /// Weekly care supply for child, teen, student, fixed shift, flexible shift, retired, unemployed
     care_supply_by_status: [u32; 7],
-    care_quantum: u32,
 }
 
 impl Default for Care {
@@ -472,14 +467,9 @@ impl Default for Care {
             male_age_care_scaling: 18.0,
             person_care_prob: 8e-4,
             base_care_prob: 2e-4,
-            care_demand_in_hours: [0, 14, 28, 56, 84],
             care_transition_rate: 0.7,
-            zero_year_care: 80,
             child_care_demand: 168,
-            free_child_care_hours_pre_school: 24,
-            free_child_care_hours_school: 32,
             care_supply_by_status: [0, 10, 24, 32, 32, 60, 48],
-            care_quantum: 2,
         }
     }
 }
@@ -494,7 +484,7 @@ struct TaskCare {
     stop_child_care_age: u32,
     baby_care_per_day: u32,
     child_care_per_day: u32,
-    social_care_demand_per_day: [u32; N_CARE_LEVELS], // FIXME: redundant with Care.care_demand_in_hours
+    social_care_demand_per_day: [u32; N_CARE_LEVELS],
     care_supply_maternity: u32,
     /// Effect of task importance on acceptance probability.
     accept_prob_polarity: f64,
