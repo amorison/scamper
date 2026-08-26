@@ -522,9 +522,9 @@ impl Default for TaskCare {
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 struct Housing {
-    ownership_prob_exp: f64,
-    income_ownership_shares: [f64; 10],
-    age_ownership_shares: Vec<f64>, // FIXME: related to number of ho_age_ranges
+    ownership_prob_exp: f64,            // FIXME: unused
+    income_ownership_shares: [f64; 10], // FIXME: unused
+    age_ownership_shares: Vec<f64>,     // FIXME: related to number of ho_age_ranges
     ho_age_ranges: Vec<f64>,
     ho_age_biases: Vec<f64>,
 }
