@@ -1,5 +1,5 @@
 use rand::{Rng, RngExt};
-use rand_distr::{Distribution, Uniform, weighted::WeightedAliasIndex};
+use rand_distr::Uniform;
 
 use crate::{
     ModelPars, N_AGE_BANDS, N_CLASSES,
@@ -141,18 +141,7 @@ fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut
 }
 
 pub fn assign_jobs(hired_agents: &[Id], month: Date, pars: &ModelPars, model: &mut Model) {
-    // TODO: draw without replacement?
-    // FIXME: abstract this and only build the distribution once
-    let weights = model.shift_pool.iter().map(|s| s.social_index).collect();
-    let distr = WeightedAliasIndex::new(weights).expect("error building shift sampler");
-    let shifts: Vec<_> = distr
-        .sample_iter(&mut model.rng)
-        .take(hired_agents.len())
-        .map(|i| &model.shift_pool[i])
-        .cloned()
-        .collect();
-
-    assert_eq!(hired_agents.len(), shifts.len());
+    let shifts = model.shift_pool.sample(&mut model.rng, hired_agents.len());
 
     for (i, shift) in shifts.into_iter().enumerate() {
         // FIXME: Julia version has a check if month = -1, then month = rand(1:12)

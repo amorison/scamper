@@ -4,7 +4,7 @@ use rand::rngs::Xoshiro256PlusPlus;
 use crate::{
     ModelPars,
     agents::{
-        shifts::Shift,
+        shifts::ShiftPool,
         tasks::{IdTask, Task},
         towns::{IdTown, Town},
     },
@@ -60,7 +60,7 @@ pub struct Model {
     /// The entire population.
     pub pop: Population,
     /// Probability distribution of shifts.
-    pub shift_pool: Vec<Shift>,
+    pub shift_pool: ShiftPool,
 
     /// Set of all tasks.
     pub tasks: IntMap<IdTask, Task>,
@@ -107,7 +107,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
         town_size: 0,
         houses: int_map_with_cap(0), // FIXME: check capacity
         pop,
-        shift_pool: Vec::new(),
+        shift_pool: ShiftPool::new(pars, &mut rng),
         tasks: int_map_with_cap(population.len() * 5), // FIXME: check pre alloc is useful
         rng,
         fert_f_by_age_51: fert_post51.normalised_fertility1951(),

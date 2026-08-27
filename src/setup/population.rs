@@ -1,17 +1,13 @@
 use std::cmp;
 
 use identity_hash::IntMap;
-use rand::{
-    Rng, RngExt,
-    seq::{IndexedRandom, IteratorRandom},
-};
+use rand::{Rng, RngExt, seq::IndexedRandom};
 use rand_distr::uniform::SampleRange;
 
 use crate::{
     ModelPars, N_CLASSES,
-    agents::{
-        agent_modules::{basic_info::Gender, class::Rank, kinship::Partnership, work::WorkStatus},
-        shifts::Shift,
+    agents::agent_modules::{
+        basic_info::Gender, class::Rank, kinship::Partnership, work::WorkStatus,
     },
     common::{
         income::{assign_wealth_by_inc_percentile_hh, compute_wage, set_wage_progression},
@@ -24,7 +20,7 @@ use crate::{
         person::{Id, Person, build::PersonAwaitingHouse},
     },
     population::PopIterOrder,
-    utilities::{Age, Date, DayInWeek, HourInDay, int_map_with_cap},
+    utilities::{Age, Date, int_map_with_cap},
 };
 
 // FIXME: this is inefficient, sampling for the entire population in one go would be better
@@ -260,92 +256,6 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
     person.work.job_tenure = (1..=50).sample_single(rng).unwrap();
 }
 
-fn create_shifts<R: Rng>(pars: &ModelPars, rng: &mut R) -> Vec<Shift> {
-    // FIXME: what is this 9000?
-    let f = 9e3 / pars.work.shifts_weights.iter().sum::<f64>();
-    let mut all_hours = pars.work.shifts_weights.map(|w| (f * w).round() as u32);
-
-    let mut sum_hours: u32 = all_hours.iter().sum();
-
-    // FIXME: number of shifts should scale with population size
-    let mut shifts = Vec::new();
-    for _ in 0..1000 {
-        let mut ih = 0;
-        let mut i = (0..sum_hours).sample_single(rng).unwrap();
-        while i > all_hours[ih] {
-            i = i.saturating_sub(all_hours[ih]);
-            ih += 1;
-        }
-        all_hours[ih] -= 1;
-        sum_hours -= 1;
-
-        let mut shift = vec![ih];
-
-        // extend shift hours in both directions according to weight until 8 hours are reached or
-        // weights on both sides are 0
-        while shift.len() < 8 {
-            // hours before and after ih with wraparound
-            let next_hours = ((23 + ih) % 24, (shift.last().unwrap() + 1) % 24);
-            let weights = (all_hours[next_hours.0], all_hours[next_hours.1]);
-            let total = weights.0 + weights.1;
-            if total == 0 {
-                break;
-            }
-
-            if (0..total).sample_single(rng).unwrap() < weights.0 {
-                shift.insert(0, next_hours.0);
-                all_hours[next_hours.0] -= 1;
-            } else {
-                shift.push(next_hours.1);
-                all_hours[next_hours.1] -= 1;
-            }
-            sum_hours -= 1;
-        }
-
-        shifts.push(shift);
-    }
-
-    let mut all_shifts = Vec::with_capacity(shifts.len());
-
-    for shift in shifts {
-        let mut days = Vec::with_capacity(7);
-        let mut we_soc_index = 0.0;
-        if rng.random_bool(pars.work.prob_saturday_shift) {
-            days.push(5);
-            we_soc_index -= 1.0;
-        }
-        if rng.random_bool(pars.work.prob_sunday_shift) {
-            days.push(6);
-            we_soc_index -= 1.0 + pars.work.sunday_social_index;
-        }
-        if days.is_empty() {
-            days = (0..5).collect();
-        } else {
-            days.extend((0..5).sample(rng, 5 - days.len()));
-        }
-
-        // TODO: why +7?
-        let start_hour = (shift[0] + 7) % 24;
-        let social_index = (pars.work.shift_beta * pars.work.shifts_weights[shift[0]]
-            + pars.work.day_beta * we_soc_index)
-            .exp();
-
-        all_shifts.push(Shift {
-            days: days.into_iter().map(DayInWeek::new).collect(),
-            start: HourInDay::new(start_hour as u32),
-            start_index: shift[0] as u32,
-            finish: HourInDay::new(shift[0] as u32 + 8),
-            shift_hours: shift
-                .into_iter()
-                .map(|h| HourInDay::new(h as u32))
-                .collect(),
-            social_index,
-        });
-    }
-
-    all_shifts
-}
-
 fn init_wealth(model: &mut Model, pars: &ModelPars) {
     for house in model.houses.values_mut().filter(|h| h.basic.is_occupied()) {
         house.income.cumulative_income = house
@@ -404,7 +314,6 @@ pub fn init_jobs(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
         .filter_map(|p| p.work.is_worker().then_some(p.id()))
         .collect();
 
-    model.shift_pool = create_shifts(pars, &mut model.rng);
     // FIXME: in Julia, the data passed is -1, which `assign_jobs` sets to a random month between 1
     // and 12. None of this is a valid `Date`, the date should be picked in the active period for
     // this agent.
