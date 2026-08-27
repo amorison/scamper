@@ -200,7 +200,7 @@ impl Default for Birth {
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 struct Work {
-    maternity_leave_income_reduction: f64, // FIXME: used but not present in Julia model! Also misnamed
+    maternity_leave_income_factor: f64,
     maternity_leave_duration: u32,
     min_statutory_maternity_pay: f64,
     age_teenagers: u32,
@@ -243,7 +243,7 @@ struct Work {
 impl Default for Work {
     fn default() -> Self {
         Self {
-            maternity_leave_income_reduction: 0.9, // FIXME: used but not present in Julia model!
+            maternity_leave_income_factor: 0.9, // FIXME: used but not present in Julia model!
             maternity_leave_duration: 9,
             min_statutory_maternity_pay: 151.97,
             age_teenagers: 13,

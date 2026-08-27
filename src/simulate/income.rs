@@ -13,8 +13,7 @@ fn update_person_income(person: &mut Person, pars: &ModelPars) {
                 let mut maternity_income = person.work.income;
                 if person.maternity.duration() == 0 {
                     person.work.wage = 0.0;
-                    maternity_income =
-                        pars.work.maternity_leave_income_reduction * person.work.income;
+                    maternity_income = pars.work.maternity_leave_income_factor * person.work.income;
                 } else if person.maternity.duration() > 2 {
                     maternity_income = maternity_income.min(pars.work.min_statutory_maternity_pay);
                 }
