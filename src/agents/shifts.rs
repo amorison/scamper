@@ -9,10 +9,7 @@ use crate::{
 #[derive(Debug, Clone)]
 pub struct Shift {
     pub days: Vec<DayInWeek>,
-    pub start: HourInDay,
-    pub start_index: u32,
     pub shift_hours: Vec<HourInDay>,
-    pub finish: HourInDay,
     social_index: f64,
 }
 
@@ -20,10 +17,7 @@ impl Shift {
     pub fn empty() -> Self {
         Shift {
             days: Vec::new(),
-            start: HourInDay::new(0),
-            start_index: 0,
             shift_hours: Vec::new(),
-            finish: HourInDay::new(0),
             social_index: 0.0,
         }
     }
@@ -99,17 +93,12 @@ impl ShiftPool {
                 days.extend((0..5).sample(rng, 5 - days.len()));
             }
 
-            // TODO: why +7?
-            let start_hour = (shift[0] + 7) % 24;
             let social_index = (pars.work.shift_beta * pars.work.shifts_weights[shift[0]]
                 + pars.work.day_beta * we_soc_index)
                 .exp();
 
             all_shifts.push(Shift {
                 days: days.into_iter().map(DayInWeek::new).collect(),
-                start: HourInDay::new(start_hour as u32),
-                start_index: shift[0] as u32,
-                finish: HourInDay::new(shift[0] as u32 + 8),
                 shift_hours: shift
                     .into_iter()
                     .map(|h| HourInDay::new(h as u32))
