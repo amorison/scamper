@@ -51,6 +51,7 @@ pub struct Work {
     pub final_wage: f64,
     /// Hourly income for current job.
     pub wage: f64,
+    // FIXME: seems to be weekly?
     /// Monthly income dependent on wage/work schedule.
     pub income: f64,
     pub cumulative_income: f64,
