@@ -143,23 +143,26 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
 
 /// Perform one model step.
 pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars: &ModelPars) {
+    // run transitions
+    // FIXME: move the `select_` into the transition themselves
+
+    // FIXME: make cache up-to-date by construction, otherwise
+    // this is very brittle... death needs social class shares,
+    // hence why `social_pre_calc` is called both before and
+    // after death.
+    social_pre_calc(model, order);
+    death_pre_calc(model, order, pars);
+    for p_id in order.ids() {
+        death(p_id, date, model, pars);
+    }
+    order.register_dead(&mut model.pop);
+
     // pre-calc various population properties
     social_pre_calc(model, order);
     social_care_pre_calc(model, pars);
     divorce_pre_calc(model, pars);
     birth_pre_calc(model, order, pars);
-    death_pre_calc(model, order, pars);
     job_pre_calc(date, model, order, pars);
-
-    // run transitions
-    // FIXME: move the `select_` into the transition themselves
-
-    // FIXME: should compute caches _after_ dealing with death?
-    // death
-    for p_id in order.ids() {
-        death(p_id, date, model, pars);
-    }
-    order.register_dead(&mut model.pop);
 
     // adoption
     for p_id in order.ids() {
