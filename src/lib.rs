@@ -301,11 +301,11 @@ struct Benefits {
     first_child_benefit: f64,
     other_children_benefit: f64,
 
-    care_dla: [f64; 3],     // FIXME: why 3?
-    mobility_dla: [f64; 2], // FIXME: why 2?
-    care_pip: [f64; 2],     // FIXME: why 2?
-    mobility_pip: [f64; 2], // FIXME: why 2?
-    care_aa: [f64; 2],      // FIXME: why 2?
+    care_dla: [f64; N_CARE_LEVELS],
+    mobility_dla: [f64; N_CARE_LEVELS],
+    care_pip: [f64; N_CARE_LEVELS],
+    mobility_pip: [f64; N_CARE_LEVELS],
+    care_aa: [f64; N_CARE_LEVELS],
     carers_allowance: f64,
 
     capital_high_threshold: f64,
@@ -320,7 +320,7 @@ struct Benefits {
     couple_below25: f64,
     couple_25plus: f64,
     ea_children: f64,
-    ea_disabled_children: [f64; 2], // FIXME: why 2?
+    ea_disabled_children: [f64; 2],
     lcfw_component: f64,
     carers_component: f64,
 
@@ -331,7 +331,7 @@ struct Benefits {
     disability_component_pc: f64,
     caring_component_pc: f64,
     child_component_pc: f64,
-    disabled_child_component: [f64; 2], // FIXME: why 2?
+    disabled_child_component: [f64; 2],
     housing_benefit_wealth_threshold: f64,
 }
 
@@ -341,11 +341,11 @@ impl Default for Benefits {
             child_benefit_income_threshold: 5e4,
             first_child_benefit: 21.15,
             other_children_benefit: 14.0,
-            care_dla: [23.7, 60.0, 89.6],
-            mobility_dla: [23.7, 62.55],
-            care_pip: [60.0, 89.6],
-            mobility_pip: [23.7, 62.55],
-            care_aa: [60.0, 89.6],
+            care_dla: [0.0, 23.7, 60.0, 60.0, 89.6],
+            mobility_dla: [0.0, 23.7, 23.7, 62.55, 62.55],
+            care_pip: [0.0, 60.0, 60.0, 89.6, 89.6],
+            mobility_pip: [0.0, 0.0, 23.7, 23.7, 62.55],
+            care_aa: [0.0, 0.0, 0.0, 60.0, 89.6],
             carers_allowance: 67.6,
             capital_high_threshold: 1.6e4,
             capital_low_threshold: 6e3,

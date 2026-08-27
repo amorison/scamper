@@ -55,39 +55,26 @@ fn child_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
 }
 
 fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
-    // FIXME: clarify indexing of care levels from pars.
-    // Arrays in pars should probably have a N_CARE_LEVELS size with repetition where needed to
-    // reduce confusion since indexing is not trivial here.
     for p_id in order.ids() {
         let person = model.pop.alive_mut(p_id);
+        let ic = person.care.index();
 
         // children
         if person.basic.age < Age::years(16) && person.care.need_level > 0 {
-            let idla = person.care.index() / 2;
-            let im = person.care.index().div_ceil(2) - 1;
-            person.benefits.benefits += pars.benefit.care_dla[idla] + pars.benefit.mobility_dla[im];
+            person.benefits.benefits += pars.benefit.care_dla[ic] + pars.benefit.mobility_dla[ic];
             person.benefits.highest_disability = person.care.need_level > 3;
             continue;
         }
 
         // PIP
         if person.basic.age < Age::years(pars.work.age_retirement) && person.care.need_level > 0 {
-            let ipip = person.care.index().div_ceil(2) - 1;
-            person.benefits.benefits += pars.benefit.care_pip[ipip];
-            if person.care.need_level > 1 {
-                let im = person.care.index() / 2 - 1;
-                person.benefits.benefits += pars.benefit.mobility_pip[im];
-            }
+            person.benefits.benefits += pars.benefit.care_pip[ic] + pars.benefit.mobility_pip[ic];
             person.benefits.highest_disability = person.care.need_level > 2;
         }
 
         // attendance allowance
         if person.basic.age >= Age::years(pars.work.age_retirement) && person.care.need_level > 2 {
-            person.benefits.benefits += if person.care.need_level == 3 {
-                pars.benefit.care_aa[0]
-            } else {
-                pars.benefit.care_aa[1]
-            };
+            person.benefits.benefits += pars.benefit.care_aa[ic];
             // FIXME: do not set person.benefits.highest_disability?
         }
 
