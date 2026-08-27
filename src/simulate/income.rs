@@ -10,14 +10,14 @@ fn update_person_income(person: &mut Person, pars: &ModelPars) {
         WorkStatus::Child | WorkStatus::Teenager | WorkStatus::Student => person.work.income = 0.0,
         WorkStatus::FixedShiftEmployed | WorkStatus::FlexibleShiftEmployed => {
             if person.maternity.is_in_maternity() {
-                let mut maternity_income = person.work.income;
-                if person.maternity.duration() == 0 {
-                    person.work.wage = 0.0;
-                    maternity_income = pars.work.maternity_leave_income_factor * person.work.income;
-                } else if person.maternity.duration() > 2 {
-                    maternity_income = maternity_income.min(pars.work.min_statutory_maternity_pay);
-                }
-                person.work.income = maternity_income;
+                let expected_income =
+                    person.work.wage * pars.work.weekly_hours[person.care.index()] as f64;
+                let maternity_income = pars.work.maternity_leave_income_factor * expected_income;
+                person.work.income = match person.maternity.duration() {
+                    0..2 => maternity_income,
+                    2..10 => maternity_income.min(pars.work.min_statutory_maternity_pay),
+                    _ => 0.0,
+                };
             } else {
                 // FIXME: should be effectively worked hours
                 person.work.income = person.work.wage * person.work.available_working_hours as f64;
