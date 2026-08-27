@@ -1,4 +1,4 @@
-use std::{assert_matches, mem};
+use std::mem;
 
 use rand::RngExt;
 
@@ -20,7 +20,7 @@ use crate::{
 };
 
 fn is_fertile_woman(person: &Person, pars: &ModelPars) -> bool {
-    matches!(person.basic.gender, Gender::Female)
+    person.is_female()
         && person.basic.age >= Age::years(pars.birth.min_pregnancy_age)
         && person.basic.age <= Age::years(pars.birth.max_pregnancy_age)
 }
@@ -169,7 +169,7 @@ pub fn birth(woman_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
     let birth_prob = compute_birth_prob(woman, model, pars, date);
 
     // FIXME: all these should be true by design
-    assert_matches!(woman.basic.gender, Gender::Female);
+    assert!(woman.is_female());
     assert!(!has_young_infant(woman, model));
     assert!(!woman.kinship.is_single());
     assert!(woman.basic.age >= Age::years(pars.birth.min_pregnancy_age));

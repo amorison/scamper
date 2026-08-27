@@ -1,5 +1,3 @@
-use std::debug_assert_matches;
-
 use crate::{
     agents::agent_modules::{
         basic_info::Gender,
@@ -57,11 +55,11 @@ pub fn set_as_partners(p1_id: Id, p2_id: Id, model: &mut Model) {
     reset_partner(p2_id, model);
 
     let p1 = model.pop.alive_mut(p1_id);
-    debug_assert_matches!(p1.basic.gender, Gender::Male);
+    debug_assert!(p1.is_male());
     p1.kinship.partnership = Some(Partnership::new(p2_id));
 
     let p2 = model.pop.alive_mut(p2_id);
-    debug_assert_matches!(p2.basic.gender, Gender::Female);
+    debug_assert!(p2.is_female());
     p2.kinship.partnership = Some(Partnership::new(p1_id));
 }
 

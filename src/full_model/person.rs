@@ -78,12 +78,10 @@ impl Person {
         self.id
     }
 
-    // FIXME: make sure to use this where appropriate
     pub fn partner<'a>(&self, model: &'a Model) -> Option<&'a Self> {
         self.kinship.partner().map(|id| model.pop.alive(id))
     }
 
-    // FIXME: make sure to use this where appropriate
     pub fn house<'a>(&self, model: &'a Model) -> &'a House {
         model.houses.get(&self.house).unwrap()
     }
@@ -92,12 +90,10 @@ impl Person {
         self.task.how_busy_at(hour)
     }
 
-    // FIXME: use where appropriate
     pub fn is_female(&self) -> bool {
         matches!(self.basic.gender, Gender::Female)
     }
 
-    // FIXME: use where appropriate
     pub fn is_male(&self) -> bool {
         matches!(self.basic.gender, Gender::Male)
     }

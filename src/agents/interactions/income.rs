@@ -3,7 +3,7 @@ use crate::full_model::{Model, person::Id};
 // FIXME: should these take a IdHouse directly instead?
 fn hh_income(p_id: Id, model: &Model) -> (f64, usize) {
     let person = model.pop.alive(p_id);
-    let house = model.houses.get(&person.house).unwrap();
+    let house = person.house(model);
     let occupants = house.basic.occupants();
     let income = occupants
         .iter()

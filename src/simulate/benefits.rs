@@ -238,7 +238,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
                 .floor()
                 .max(0.0);
 
-    let house = model.houses.get(&person.house).unwrap();
+    let house = person.house(model);
     let n_uc_deps = n_dependents(house, model);
     let n_mildly_disabled_uc_deps = n_mildly_disabled_dependents(house, model);
     let n_crit_disabled_uc_deps = n_crit_disabled_dependents(house, model);
