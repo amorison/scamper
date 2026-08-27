@@ -134,8 +134,6 @@ pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
     {
         0.0
     } else {
-        // FIXME: double check indices, seems like it is off-by-one in Julia code,
-        // leading to fewer marriages.
         pars.marriage.basic_male_marriage_prob
             * pars.marriage.male_marriage_modifier_by_decade[age_class]
     };

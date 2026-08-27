@@ -21,7 +21,6 @@ fn update_person_income(person: &mut Person, pars: &ModelPars) {
             } else {
                 // FIXME: should be effectively worked hours
                 person.work.income = person.work.wage * person.work.available_working_hours as f64;
-                // FIXME: what is this?
                 person.work.last_income =
                     person.work.wage * pars.work.weekly_hours[person.care.index()] as f64;
             }
@@ -84,7 +83,6 @@ pub fn update_income(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) 
     }
 
     model.pop.for_each(order, |person| {
-        // FIXME: make sure this is updated in the correct order
         person.work.disposable_income += person.benefits.benefits;
         person.work.cumulative_income += person.work.disposable_income;
     });

@@ -231,8 +231,8 @@ struct Work {
     care_education: f64,
     work_discounting_time: f64,
     move_out_prob: f64,
-    tax_brackets: [f64; 3],   // FIXME: why 3?
-    taxation_rates: [f64; 3], // FIXME: why 3?
+    tax_brackets: [f64; 3],
+    taxation_rates: [f64; 3],
     unemployment_age_bias: [f64; N_AGE_BANDS],
     unemployment_class_bias: f64,
     share_financial_wealth: f64,
@@ -250,7 +250,7 @@ struct Work {
 impl Default for Work {
     fn default() -> Self {
         Self {
-            maternity_leave_income_factor: 0.9, // FIXME: used but not present in Julia model!
+            maternity_leave_income_factor: 0.9,
             maternity_leave_duration: 9,
             min_statutory_maternity_pay: 151.97,
             age_teenagers: 13,

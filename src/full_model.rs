@@ -121,7 +121,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
         houses: int_map_with_cap(0), // FIXME: check capacity
         pop,
         shift_pool: ShiftPool::new(pars, &mut rng),
-        tasks: int_map_with_cap(population.len() * 5), // FIXME: check pre alloc is useful
+        tasks: int_map_with_cap(population.len() * 5),
         rng,
         fert_f_by_age_51: fert_post51.normalised_fertility1951(),
         fert_pre51: Pre51Fertility::read_from(&pars.data_files.pre51_fertility),

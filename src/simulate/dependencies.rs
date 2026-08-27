@@ -44,10 +44,6 @@ pub fn process_death_deps(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     let dependents = mem::take(&mut person.dependency.dependents);
     for dep_id in dependents {
-        // FIXME: different from Julia where dead guardians are temporarily left in place until
-        // hopefully removed in assign_guardian. Note that they could stay in the list of guardians
-        // for a while if another guardian stays alive.... This also prevented from relative of
-        // previous dead guardians from being considered more than once in `assign_guardian`.
         let dependent = model.pop.alive_mut(dep_id);
         dependent.dependency.guardians.retain(|&id| id != p_id);
         dependent.dependency.past_guardians.push(p_id);

@@ -138,7 +138,6 @@ fn check_and_add_carer(list: &mut Vec<Id>, agent: AliveOrDead, pars: &ModelPars)
     }
 }
 
-// FIXME: double check no off-by-one since this is an index
 /// Relatedness as a number in order: child, parent, partner, sibling, other
 fn related_status(of_agent: &Person, to_agent: &Person) -> usize {
     if to_agent.kinship.children.contains(&of_agent.id()) {

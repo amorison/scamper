@@ -32,7 +32,6 @@ pub fn social_care_transition(p_id: Id, model: &mut Model, pars: &ModelPars) -> 
     let mut base_prob = pars.care.base_care_prob + age_care_prob;
 
     let class = match person.work.status {
-        // FIXME: julia missed teenager here
         WorkStatus::Child | WorkStatus::Teenager | WorkStatus::Student => person.class.parent_rank,
         WorkStatus::FixedShiftEmployed
         | WorkStatus::FlexibleShiftEmployed

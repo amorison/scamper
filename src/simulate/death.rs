@@ -64,8 +64,6 @@ fn set_dead(p_id: Id, model: &mut Model) {
     process_death_deps(p_id, model);
 
     model.pop.mark_as_dead(p_id);
-    // Comment in Julia: dependents are being taken care of by assignGuardian!
-    // FIXME: check that it is indeed the case
 }
 
 #[derive(Default)]
@@ -177,7 +175,6 @@ fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool 
     try_rand_yearly2monthly(death_prob, &mut model.rng)
 }
 
-// FIXME: currently leaves dead agents in population
 pub fn death(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
     if death_due(p_id, date, model, pars) {
         set_dead(p_id, model);
