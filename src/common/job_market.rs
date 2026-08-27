@@ -1,5 +1,5 @@
-use rand::{Rng, RngExt, seq::IndexedRandom};
-use rand_distr::Uniform;
+use rand::{Rng, RngExt};
+use rand_distr::{Distribution, Uniform, weighted::WeightedAliasIndex};
 
 use crate::{
     ModelPars, N_AGE_BANDS, N_CLASSES,
@@ -142,22 +142,13 @@ fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut
 
 pub fn assign_jobs(hired_agents: &[Id], month: Date, pars: &ModelPars, model: &mut Model) {
     // TODO: draw without replacement?
-    let n_shifts = model.shift_pool.len();
-    let shifts: Vec<_> = (&mut model.rng)
-        .sample_iter(Uniform::new(0, n_shifts).unwrap())
+    // FIXME: abstract this and only build the distribution once
+    let weights = model.shift_pool.iter().map(|s| s.social_index).collect();
+    let distr = WeightedAliasIndex::new(weights).expect("error building shift sampler");
+    let shifts: Vec<_> = distr
+        .sample_iter(&mut model.rng)
         .take(hired_agents.len())
         .map(|i| &model.shift_pool[i])
-        .collect();
-
-    // FIXME: this is equivalent to the Julia code, but seems strange.
-    // Since we've already sampled `hired_agents.len()` shifts, this simply
-    // shuffles them but doesn't make the socially attractive shifts more likely
-    // to be taken. It seems like this sampling should be applied to the full
-    // shift pool instead.
-    let shifts: Vec<_> = shifts
-        .sample_weighted(&mut model.rng, hired_agents.len(), |s| s.social_index)
-        .unwrap()
-        .copied()
         .cloned()
         .collect();
 
