@@ -128,6 +128,13 @@ impl Default for BenefitMap {
     }
 }
 
+/// Initial state setup.
+#[derive(Default, Serialize, Deserialize)]
+#[serde(default)]
+struct Init {
+    reproducible_rng: bool,
+}
+
 /// Population setup and dynamics.
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
@@ -575,6 +582,7 @@ impl Default for DataFiles {
 struct ModelPars {
     map: Map,
     lha: BenefitMap,
+    init: Init,
     population: Population,
     birth: Birth,
     work: Work,

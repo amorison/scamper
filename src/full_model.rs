@@ -1,5 +1,5 @@
 use identity_hash::IntMap;
-use rand::rngs::Xoshiro256PlusPlus;
+use rand::{RngExt, SeedableRng, rngs::Xoshiro256PlusPlus};
 
 use crate::{
     ModelPars,
@@ -87,10 +87,23 @@ pub struct Model {
     pub job_cache: JobCache,
 }
 
+fn init_rng(reproducible_rng: bool) -> Xoshiro256PlusPlus {
+    let mut rng: Xoshiro256PlusPlus = if reproducible_rng {
+        Xoshiro256PlusPlus::seed_from_u64(1)
+    } else {
+        rand::make_rng()
+    };
+
+    // Consume the first 100 64-bit values to ensure we're
+    // out of zeroland: https://doi.org/10.1145/3460772
+    (&mut rng).random_iter::<u64>().nth(100);
+
+    rng
+}
+
 /// Create a model instance from parameters.
 pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
-    // FIXME: allow fixed seed for testing, check for warm-up need
-    let mut rng: Xoshiro256PlusPlus = rand::make_rng();
+    let mut rng: Xoshiro256PlusPlus = init_rng(pars.init.reproducible_rng);
 
     let towns = create_towns(pars)
         .into_iter()
