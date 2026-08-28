@@ -1,6 +1,6 @@
 use crate::{
     full_model::{Model, person::Id},
-    utilities::{Date, DayInWeek},
+    utilities::Date,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -61,7 +61,6 @@ pub struct Work {
     pub financial_wealth: f64,
     /// Potential working hours per week
     pub working_hours: u32,
-    pub days_off: Vec<DayInWeek>,
     /// Sum of actual working hours.
     pub available_working_hours: u32,
     /// Lifetime work.
@@ -102,7 +101,6 @@ impl Default for Work {
             wealth: 0.0,
             financial_wealth: 0.0,
             working_hours: 0,
-            days_off: Vec::new(),
             available_working_hours: 0,
             working_periods: 0.0,
             work_experience: 0.0,

@@ -10,7 +10,7 @@ use crate::{
         person::{Id, Person},
     },
     population::PopIterOrder,
-    utilities::{Date, DayInWeek, HourInWeek, calc_rate_bias},
+    utilities::{Date, HourInWeek, calc_rate_bias},
 };
 
 pub fn can_work(person: &Person) -> bool {
@@ -120,11 +120,6 @@ fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut
 
     person.work.working_hours = pars.work.weekly_hours[person.care.need_level as usize];
     let job_schedule = weekly_schedule(&shift, person.work.working_hours, &mut model.rng);
-
-    person.work.days_off = (0..7)
-        .map(DayInWeek::new)
-        .filter(|d| !shift.days.contains(d))
-        .collect();
 
     for time in HourInWeek::all_hours() {
         let (day, hour) = time.day_hour();
