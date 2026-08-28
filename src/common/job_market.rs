@@ -65,8 +65,6 @@ pub fn calc_age_class_shares(model: &Model, order: &PopIterOrder) -> Shares {
     let mut class = [0.0; N_CLASSES];
     let mut age_band = [[0.0; N_AGE_BANDS]; N_CLASSES];
 
-    // FIXME: double check that this is always called for the active subset of population
-    // in the Julia code
     for person in model.pop.alives(order).filter(|p| is_active(p)) {
         let r = person.class.rank_idx();
         let a = person.basic.age.band();
@@ -144,9 +142,6 @@ pub fn assign_jobs(hired_agents: &[Id], month: Date, pars: &ModelPars, model: &m
     let shifts = model.shift_pool.sample(&mut model.rng, hired_agents.len());
 
     for (i, shift) in shifts.into_iter().enumerate() {
-        // FIXME: Julia version has a check if month = -1, then month = rand(1:12)
-        // This doesn't seem to make much sense since month is a Date!
-
         let p_id = hired_agents[i];
         assign_job(p_id, month, shift, pars, model);
     }

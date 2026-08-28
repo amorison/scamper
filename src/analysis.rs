@@ -118,7 +118,6 @@ impl PopulationStats {
                 stats.n_unemployed += 1;
             }
 
-            // FIXME: shouldn't this be the parent rank for children?
             stats.class_tally[person.class.rank_idx()] += 1;
 
             let iage = person.basic.age.year_month().0 as usize;

@@ -211,7 +211,6 @@ pub fn init_class<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
     person.class.rank = Rank::new(class);
 }
 
-// FIXME: check if normal that everyone seems to be employed at first
 pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
     let age = person.basic.age;
 
