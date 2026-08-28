@@ -1,5 +1,4 @@
 use crate::{
-    agents::shifts::Shift,
     full_model::{Model, person::Id},
     utilities::{Date, DayInWeek},
 };
@@ -62,7 +61,6 @@ pub struct Work {
     pub financial_wealth: f64,
     /// Potential working hours per week
     pub working_hours: u32,
-    pub job_shift: Shift,
     pub days_off: Vec<DayInWeek>,
     /// Sum of actual working hours.
     pub available_working_hours: u32,
@@ -104,7 +102,6 @@ impl Default for Work {
             wealth: 0.0,
             financial_wealth: 0.0,
             working_hours: 0,
-            job_shift: Shift::empty(),
             days_off: Vec::new(),
             available_working_hours: 0,
             working_periods: 0.0,
@@ -122,7 +119,6 @@ pub fn lose_job(p_id: Id, model: &mut Model) {
     person.work.month_hired = Date::new(0);
     person.work.income = 0.0;
     person.work.working_hours = 0;
-    person.work.job_shift = Shift::empty();
     person.work.job_tenure = 0;
 
     person

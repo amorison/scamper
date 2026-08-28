@@ -125,7 +125,6 @@ fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut
         .map(DayInWeek::new)
         .filter(|d| !shift.days.contains(d))
         .collect();
-    person.work.job_shift = shift;
 
     for time in HourInWeek::all_hours() {
         let (day, hour) = time.day_hour();

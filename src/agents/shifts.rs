@@ -13,16 +13,6 @@ pub struct Shift {
     social_index: f64,
 }
 
-impl Shift {
-    pub fn empty() -> Self {
-        Shift {
-            days: Vec::new(),
-            shift_hours: Vec::new(),
-            social_index: 0.0,
-        }
-    }
-}
-
 pub struct ShiftPool {
     shifts: Vec<Shift>,
     sampler: WeightedAliasIndex<f64>,
