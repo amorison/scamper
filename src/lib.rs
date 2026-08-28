@@ -13,9 +13,13 @@ use std::{fs, io, path::Path};
 
 use serde::{Deserialize, Serialize};
 
+use crate::utilities::Age;
+
 pub const N_CLASSES: usize = 5;
 pub const N_CARE_LEVELS: usize = 5;
 pub const N_AGE_BANDS: usize = 6;
+pub const N_AGE_YEARS: usize = 128;
+pub const MAX_AGE: Age = Age::years(N_AGE_YEARS as u32 - 1);
 
 /// Map properties.
 #[derive(Serialize, Deserialize)]
@@ -380,7 +384,7 @@ impl Default for Benefits {
 #[serde(default)]
 struct Divorce {
     basic_divorce_rate: f64,
-    divorce_modifier_by_decade: Vec<f64>,
+    divorce_modifier_by_decade: [f64; (MAX_AGE.year_month().0 / 10) as usize + 1],
     prob_children_with_father: f64,
     the_present: u32,
     variable_divorce: f64,
@@ -391,9 +395,8 @@ impl Default for Divorce {
     fn default() -> Self {
         Self {
             basic_divorce_rate: 0.06,
-            divorce_modifier_by_decade: vec![
-                0.0, 1.0, 0.9, 0.5, 0.4, 0.2, 0.1, 0.03, 0.01, 0.001, 0.001, 0.001, 0.0, 0.0, 0.0,
-                0.0,
+            divorce_modifier_by_decade: [
+                0.0, 1.0, 0.9, 0.5, 0.4, 0.2, 0.1, 0.03, 0.01, 0.001, 0.001, 0.001, 0.0,
             ],
             prob_children_with_father: 0.1,
             the_present: 2012,

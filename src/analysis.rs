@@ -8,7 +8,7 @@ use jiff::{Zoned, tz::TimeZone};
 use serde::Serialize;
 
 use crate::{
-    ModelPars, N_CARE_LEVELS, N_CLASSES, agents::agent_modules::basic_info::Gender,
+    ModelPars, N_AGE_YEARS, N_CARE_LEVELS, N_CLASSES, agents::agent_modules::basic_info::Gender,
     full_model::Model, population::PopIterOrder, utilities::Date,
 };
 
@@ -90,8 +90,8 @@ struct PopulationStats {
     n_working: usize,
     n_unemployed: usize,
     class_tally: [usize; N_CLASSES],
-    age_pyramid_male: [usize; 151], // FIXME: have a constant for max age, lower it?
-    age_pyramid_female: [usize; 151],
+    age_pyramid_male: [usize; N_AGE_YEARS],
+    age_pyramid_female: [usize; N_AGE_YEARS],
     care_level_tally: [usize; N_CARE_LEVELS],
 }
 
@@ -103,8 +103,8 @@ impl PopulationStats {
             n_working: 0,
             n_unemployed: 0,
             class_tally: [0; N_CLASSES],
-            age_pyramid_male: [0; 151],
-            age_pyramid_female: [0; 151],
+            age_pyramid_male: [0; _],
+            age_pyramid_female: [0; _],
             care_level_tally: [0; N_CARE_LEVELS],
         };
         for person in model.pop.alives(order) {

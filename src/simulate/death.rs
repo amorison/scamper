@@ -1,5 +1,5 @@
 use crate::{
-    ModelPars, N_CARE_LEVELS, N_CLASSES,
+    MAX_AGE, ModelPars, N_CARE_LEVELS, N_CLASSES,
     agents::{
         agent_modules::{basic_info::Gender, work::WorkStatus},
         interactions::family::resolve_partnership,
@@ -144,7 +144,7 @@ fn age_die_prob(age: Age, gender: Gender, pars: &ModelPars) -> f64 {
 fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
     let person = model.pop.alive(p_id);
 
-    if person.basic.age >= Age::years(150) {
+    if person.basic.age >= MAX_AGE {
         return true;
     }
 

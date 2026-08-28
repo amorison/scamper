@@ -60,34 +60,34 @@ impl Display for Date {
 }
 
 impl Age {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self(0)
     }
 
-    pub fn months(months: u32) -> Self {
+    pub const fn months(months: u32) -> Self {
         Self(months)
     }
 
-    pub fn years(years: u32) -> Self {
+    pub const fn years(years: u32) -> Self {
         Self(years * 12)
     }
 
     /// Years and months (0-11) corresponding to this age.
-    pub fn year_month(self) -> (u32, MonthInYear) {
+    pub const fn year_month(self) -> (u32, MonthInYear) {
         (self.0 / 12, MonthInYear(self.0 % 12))
     }
 
     /// Floating point number of years.
-    pub fn years_f64(self) -> f64 {
+    pub const fn years_f64(self) -> f64 {
         self.0 as f64 / 12.0
     }
 
-    pub fn add_one_month(&mut self) {
+    pub const fn add_one_month(&mut self) {
         self.0 += 1;
     }
 
     /// Age category (0 to 5 included)
-    pub fn band(self) -> usize {
+    pub const fn band(self) -> usize {
         let (year, _) = self.year_month();
         if year <= 19 {
             0

@@ -3,7 +3,7 @@ use std::mem;
 use rand::RngExt;
 
 use crate::{
-    ModelPars, N_CLASSES,
+    ModelPars, N_AGE_YEARS, N_CLASSES,
     agents::{
         agent_modules::basic_info::Gender,
         interactions::{
@@ -51,9 +51,11 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
     mem::swap(&mut pot_mothers, &mut model.birth_cache.potential_mothers);
     mem::drop(pot_mothers);
 
-    // FIXME: probably don't need to go to 150
-    model.birth_cache.p_potential_mother.resize(150, 0.0);
-    let mut cbp = vec![0.0; 150];
+    model
+        .birth_cache
+        .p_potential_mother
+        .resize(N_AGE_YEARS, 0.0);
+    let mut cbp = [0.0; N_AGE_YEARS];
     for person in model.pop.alives(order) {
         if is_fertile_woman(person, pars) {
             let iy = person.basic.age.year_month().0 as usize;
