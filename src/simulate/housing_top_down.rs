@@ -8,7 +8,7 @@ pub fn house_ownership(model: &mut Model, pars: &ModelPars) {
         .values_mut()
         .filter(|h| h.basic.is_occupied())
         .collect();
-    households.sort_unstable_by(|h1, h2| {
+    households.sort_by(|h1, h2| {
         h1.income
             .household_income
             .partial_cmp(&h2.income.household_income)

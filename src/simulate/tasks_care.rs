@@ -364,7 +364,7 @@ fn task_accept_plan(
     }
 
     // Sort by importance
-    tasks.sort_unstable_by(|t1, t2| t1.1.partial_cmp(&t2.1).unwrap());
+    tasks.sort_by(|t1, t2| t1.1.partial_cmp(&t2.1).unwrap());
 
     let mut f = task.focus();
     // Keep as many important tasks as possible.

@@ -32,7 +32,6 @@ pub fn assign_wealth_by_inc_percentile(model: &mut Model, order: &PopIterOrder, 
             (p.work.cumulative_income > 0.0).then_some((p.id(), p.work.cumulative_income))
         })
         .collect();
-    // FIXME: make sure to remove unstable sorts everywhere it's possible
     pop.sort_by(|p1, p2| p1.1.partial_cmp(&p2.1).unwrap());
 
     let pop_length = pop.len();
@@ -51,7 +50,7 @@ pub fn assign_wealth_by_inc_percentile(model: &mut Model, order: &PopIterOrder, 
 /// Set house holds wealth dependent on cumulative income.
 pub fn assign_wealth_by_inc_percentile_hh(model: &mut Model, pars: &ModelPars) {
     let mut pop: Vec<_> = model.houses.values_mut().collect();
-    pop.sort_unstable_by(|p1, p2| {
+    pop.sort_by(|p1, p2| {
         let inc1 = p1.income.cumulative_income;
         let inc2 = p2.income.cumulative_income;
         inc1.partial_cmp(&inc2).unwrap()
