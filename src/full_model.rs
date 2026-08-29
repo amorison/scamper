@@ -5,7 +5,7 @@ use crate::{
     ModelPars,
     agents::{
         shifts::ShiftPool,
-        tasks::{IdTask, Task},
+        tasks::{Carer, IdTask, Task},
         towns::{IdTown, Town},
     },
     full_model::{
@@ -256,6 +256,19 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
         let person = model.pop.alive(p_id);
         if select_marriage(person, pars) {
             marriage(p_id, model, pars);
+        }
+    }
+
+    // Accept work tasks by default, which might then be replaced by care tasks.
+    for p_id in order.ids() {
+        let person = model.pop.alive_mut(p_id);
+        for &t_id in &person.work.job_tasks {
+            let task = model.tasks.get_mut(&t_id).unwrap();
+            // FIXME: should be unnecessary for work tasks
+            task.worker = Some(Carer::Person(p_id));
+            if person.how_busy_at(task.time) <= 0.0 {
+                person.task.schedule_task(task);
+            }
         }
     }
 

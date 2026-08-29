@@ -62,15 +62,17 @@ impl TaskPerson {
     }
 
     pub fn unschedule_task(&mut self, task: &Task) {
+        self.unschedule_task_if_present(task)
+            .expect("task should be in todo");
+    }
+
+    pub fn unschedule_task_if_present(&mut self, task: &Task) -> Option<()> {
         let (day, hour) = task.day_hour();
         let day = day.index();
         let hour = hour.index();
         let task_id = task.id();
 
-        let idx = self.todo[day]
-            .iter()
-            .position(|&i| i == task_id)
-            .expect("task should be in todo");
+        let idx = self.todo[day].iter().position(|&i| i == task_id)?;
         self.todo[day].swap_remove(idx);
 
         self.task_schedule[day][hour] -= task.focus();
@@ -79,6 +81,8 @@ impl TaskPerson {
             self.care_task_hours -= 1;
         }
         assert!(self.task_schedule[day][hour] >= 0.0);
+
+        Some(())
     }
 
     pub fn how_busy_at(&self, hour: HourInWeek) -> f64 {
@@ -97,9 +101,13 @@ pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {
 
 pub fn mark_task_unassigned(task_id: IdTask, model: &mut Model) {
     let task = model.tasks.get_mut(&task_id).unwrap();
-    let owner = model.pop.alive_mut(task.owner());
-    owner.task.assigned_tasks.remove(&task_id);
-    owner.task.open_tasks.insert(task_id);
+    if task.is_care() {
+        // FIXME: make it impossible to have work tasks going
+        // into the assigned_tasks/open_tasks logic.
+        let owner = model.pop.alive_mut(task.owner());
+        owner.task.assigned_tasks.remove(&task_id);
+        owner.task.open_tasks.insert(task_id);
+    }
     task.worker = None;
 }
 

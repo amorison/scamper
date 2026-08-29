@@ -1,7 +1,10 @@
 use crate::{
     MAX_AGE, ModelPars, N_CARE_LEVELS, N_CLASSES,
     agents::{
-        agent_modules::{basic_info::Gender, work::WorkStatus},
+        agent_modules::{
+            basic_info::Gender,
+            work::{WorkStatus, lose_job},
+        },
         interactions::family::resolve_partnership,
     },
     full_model::{
@@ -51,6 +54,8 @@ fn death_probability(base_rate: f64, person: &Person, model: &Model, pars: &Mode
 }
 
 fn set_dead(p_id: Id, model: &mut Model) {
+    lose_job(p_id, model);
+
     let person = model.pop.alive_mut(p_id);
 
     let house = model.houses.get_mut(&person.house).unwrap();

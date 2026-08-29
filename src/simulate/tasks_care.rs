@@ -251,11 +251,6 @@ fn assign_open_tasks(
     model: &mut Model,
     pars: &ModelPars,
 ) {
-    let work_tasks = get_chunk_of_open_tasks(p_id, TaskKind::Work, model);
-    if !work_tasks.is_empty() {
-        add_asked_tasks(p_id, work_tasks, asked_tasks);
-    }
-
     let agent = model.pop.alive(p_id);
     if !agent.task.has_open_tasks() {
         return;

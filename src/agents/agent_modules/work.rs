@@ -1,4 +1,5 @@
 use crate::{
+    agents::tasks::IdTask,
     full_model::{Model, person::Id},
     utilities::Date,
 };
@@ -59,6 +60,7 @@ pub struct Work {
     pub last_income: f64,
     pub wealth: f64,
     pub financial_wealth: f64,
+    pub job_tasks: Vec<IdTask>,
     /// Potential working hours per week
     pub working_hours: u32,
     /// Sum of actual working hours.
@@ -100,6 +102,7 @@ impl Default for Work {
             last_income: 0.0,
             wealth: 0.0,
             financial_wealth: 0.0,
+            job_tasks: Vec::with_capacity(40),
             working_hours: 0,
             available_working_hours: 0,
             working_periods: 0.0,
@@ -119,19 +122,8 @@ pub fn lose_job(p_id: Id, model: &mut Model) {
     person.work.working_hours = 0;
     person.work.job_tenure = 0;
 
-    person
-        .task
-        .open_tasks
-        .retain(|t_id| model.tasks.get(t_id).unwrap().is_care());
-    person
-        .task
-        .assigned_tasks
-        .retain(|t_id| model.tasks.get(t_id).unwrap().is_care());
-    person
-        .task
-        .todo
-        .iter_mut()
-        .for_each(|todo_day| todo_day.retain(|t_id| model.tasks.get(t_id).unwrap().is_care()));
-
-    // FIXME: should remove work tasks from model.tasks here?
+    for t_id in person.work.job_tasks.drain(..) {
+        let task = model.tasks.remove(&t_id).unwrap();
+        person.task.unschedule_task_if_present(&task);
+    }
 }

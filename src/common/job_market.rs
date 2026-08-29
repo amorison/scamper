@@ -127,7 +127,7 @@ fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut
             let task = Task::work(person.id(), time);
             let t_id = task.id();
             model.tasks.insert(t_id, task);
-            person.task.open_tasks.insert(t_id);
+            person.work.job_tasks.push(t_id);
         }
     }
 }
