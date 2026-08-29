@@ -21,7 +21,7 @@ pub fn weekly_care_supply(person: &Person, pars: &ModelPars) -> u32 {
 }
 
 pub fn social_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {
-    pars.task_care.social_care_demand_per_day[person.care.need_level as usize]
+    pars.task_care.social_care_demand_per_day[person.care.index()]
 }
 
 fn child_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {
@@ -39,6 +39,12 @@ fn child_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {
 
 pub fn init_care_tasks(p_id: Id, pars: &ModelPars, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
+
+    assert!(person.task.assigned_tasks.is_empty());
+    for t_id in person.task.open_tasks.drain() {
+        model.tasks.remove(&t_id).expect("open task did not exist");
+    }
+
     let sc = social_care_demand_per_day(person, pars);
     let cc = child_care_demand_per_day(person, pars);
 

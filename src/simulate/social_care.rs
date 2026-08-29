@@ -2,9 +2,9 @@ use rand_distr::{Distribution, Geometric};
 
 use crate::{
     ModelPars, N_CARE_LEVELS, N_CLASSES,
-    agents::agent_modules::{basic_info::Gender, work::WorkStatus},
+    agents::agent_modules::{basic_info::Gender, tasks::empty_todo, work::WorkStatus},
     full_model::{Model, person::Id},
-    simulate::tasks_care::{care_need_changed, care_supply_changed},
+    simulate::tasks_care::care_need_changed,
     utilities::{calc_rate_bias, try_rand_yearly2monthly},
 };
 
@@ -55,7 +55,8 @@ pub fn social_care_transition(p_id: Id, model: &mut Model, pars: &ModelPars) -> 
     person.care.need_level = care_need.min((N_CARE_LEVELS - 1) as u32);
 
     care_need_changed(p_id, model, pars);
-    care_supply_changed(p_id, model);
+    empty_todo(p_id, model);
+    // FIXME: need to recompute job tasks accordingly?
 
     true
 }

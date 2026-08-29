@@ -9,8 +9,8 @@ use crate::{
         agent_modules::{
             kinship::{are_siblings, siblings},
             tasks::{
-                accept_task, find_tasks_at, mark_task_assigned, mark_task_unassigned,
-                remove_all_care, remove_all_tasks,
+                accept_task, empty_todo, find_tasks_at, mark_task_assigned, mark_task_unassigned,
+                unassign_care_tasks_from,
             },
         },
         tasks::{Carer, IdTask, Task, TaskKind},
@@ -35,8 +35,8 @@ pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPar
 
 // FIXME: misnamed since now this concerns all tasks.
 pub fn process_death_task_care(p_id: Id, model: &mut Model) {
-    // this removes tasks assigned to person.
-    remove_all_care_and_tasks(p_id, model);
+    unassign_care_tasks_from(p_id, model);
+    empty_todo(p_id, model);
 
     // this removes the tasks needed by the person.
     let person = model.pop.alive_mut(p_id);
@@ -49,18 +49,9 @@ pub fn process_death_task_care(p_id: Id, model: &mut Model) {
     // FIXME: older tasks that were forgotten are not removed here
 }
 
-fn remove_all_care_and_tasks(p_id: Id, model: &mut Model) {
-    remove_all_tasks(p_id, model);
-    remove_all_care(p_id, model);
-}
-
 pub fn care_need_changed(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    remove_all_tasks(p_id, model); // FIXME: should probably only remove care
+    unassign_care_tasks_from(p_id, model);
     init_care_tasks(p_id, pars, model);
-}
-
-pub fn care_supply_changed(p_id: Id, model: &mut Model) {
-    remove_all_care(p_id, model);
 }
 
 /// Try to assign cares for open care tasks.
@@ -230,8 +221,8 @@ fn get_chunk_of_open_tasks(p_id: Id, task_kind: TaskKind, model: &mut Model) -> 
     };
 
     for &t_id in &tasks {
-        agent.task.assigned_tasks.insert(t_id);
-        agent.task.open_tasks.remove(&t_id);
+        assert!(agent.task.assigned_tasks.insert(t_id));
+        assert!(agent.task.open_tasks.remove(&t_id));
     }
 
     tasks

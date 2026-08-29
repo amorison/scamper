@@ -111,7 +111,8 @@ pub fn mark_task_unassigned(task_id: IdTask, model: &mut Model) {
     task.worker = None;
 }
 
-pub fn remove_all_tasks(p_id: Id, model: &mut Model) {
+/// Unassign all care tasks currently assigned from this agent.
+pub fn unassign_care_tasks_from(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     let assigned_tasks = mem::take(&mut person.task.assigned_tasks);
 
@@ -131,8 +132,8 @@ pub fn remove_all_tasks(p_id: Id, model: &mut Model) {
     }
 }
 
-// FIXME: this actually empties the todo list completely.
-pub fn remove_all_care(p_id: Id, model: &mut Model) {
+/// Empty to-do list and mark tasks as unassigned.
+pub fn empty_todo(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     let todo = mem::take(&mut person.task.todo);
     person.task.task_schedule = Default::default();
