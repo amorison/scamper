@@ -119,13 +119,16 @@ fn available_care_time(agent: &Person, pars: &ModelPars) -> f64 {
 }
 
 /// Add agent to list if minimum requirements are met.
-fn check_and_add_carer(list: &mut Vec<Id>, agent: AliveOrDead, pars: &ModelPars) {
+fn check_and_add_carer(list: &mut Vec<Id>, p_id: Id, model: &Model, pars: &ModelPars) {
     // TODO: check location (max dist?)
     // FIXME: list should be a set for cheaper check?
-    if agent
-        .is_alive_and(|agent| available_care_time(agent, pars) > 0.0 && !list.contains(&agent.id()))
+    if !list.contains(&p_id)
+        && model
+            .pop
+            .get(p_id)
+            .is_alive_and(|agent| available_care_time(agent, pars) > 0.0)
     {
-        list.push(agent.id());
+        list.push(p_id);
     }
 }
 
@@ -149,23 +152,19 @@ fn create_carer_list(agent: &Person, model: &Model, pars: &ModelPars) -> Vec<Id>
     let mut potential_carers = Vec::new();
 
     for &id_occ in agent.house(model).basic.occupants() {
-        let occ = model.pop.get(id_occ);
-        check_and_add_carer(&mut potential_carers, occ, pars);
+        check_and_add_carer(&mut potential_carers, id_occ, model, pars);
     }
 
     for parent_id in agent.kinship.parents() {
-        let parent = model.pop.get(parent_id);
-        check_and_add_carer(&mut potential_carers, parent, pars);
+        check_and_add_carer(&mut potential_carers, parent_id, model, pars);
     }
 
     for &child_id in &agent.kinship.children {
-        let child = model.pop.get(child_id);
-        check_and_add_carer(&mut potential_carers, child, pars);
+        check_and_add_carer(&mut potential_carers, child_id, model, pars);
     }
 
     for sibling_id in siblings(AliveOrDead::Alive(agent), model) {
-        let sibling = model.pop.get(sibling_id);
-        check_and_add_carer(&mut potential_carers, sibling, pars);
+        check_and_add_carer(&mut potential_carers, sibling_id, model, pars);
     }
 
     potential_carers
