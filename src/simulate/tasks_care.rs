@@ -1,6 +1,6 @@
 use std::mem;
 
-use identity_hash::IntMap;
+use identity_hash::{IntMap, IntSet};
 use rand::{RngExt, seq::IndexedRandom};
 
 use crate::{
@@ -21,7 +21,7 @@ use crate::{
         person::{Id, Person},
     },
     population::{AliveOrDead, PopIterOrder},
-    utilities::{Age, HourInWeek, int_map_with_cap},
+    utilities::{Age, HourInWeek, int_map_with_cap, int_set_with_cap},
 };
 
 pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPars) {
@@ -58,11 +58,12 @@ pub fn care_need_changed(p_id: Id, model: &mut Model, pars: &ModelPars) {
 pub fn distribute_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     // Tasks can be rejected, and more important tasks can override
     // already assigned tasks, so we iterate a couple of times.
+    let mut id_iter: Box<dyn Iterator<Item = Id>> = Box::new(order.ids());
 
     for _ in 0..pars.task_care.n_iter_care_dist {
         // collect all open tasks
         let mut asked_tasks = int_map_with_cap(model.pop.size() * 3);
-        for p_id in order.ids() {
+        for p_id in id_iter {
             let caree = model.pop.alive(p_id);
             if !caree.task.has_open_tasks() {
                 continue;
@@ -71,9 +72,12 @@ pub fn distribute_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
         }
 
         // let carers accept tasks
+        let mut had_dropped_tasks = int_set_with_cap(0);
         for (carer_id, tasks) in asked_tasks {
-            check_accept_tasks(carer_id, &tasks, model, pars);
+            let hdt = check_accept_tasks(carer_id, &tasks, model, pars);
+            had_dropped_tasks.extend(hdt);
         }
+        id_iter = Box::new(had_dropped_tasks.into_iter());
     }
 }
 
@@ -396,18 +400,33 @@ fn task_accept_prob(
 }
 
 /// Check for all tasks whether to accept.
-fn check_accept_tasks(p_id: Id, tasks: &[IdTask], model: &mut Model, pars: &ModelPars) {
+///
+/// Return a set of Id of people how had their tasks dropped.
+fn check_accept_tasks(
+    p_id: Id,
+    tasks: &[IdTask],
+    model: &mut Model,
+    pars: &ModelPars,
+) -> IntSet<Id> {
+    let mut had_dropped_tasks = int_set_with_cap(0);
     for &t_id in tasks {
         let agent = model.pop.alive(p_id);
         let task = model.tasks.get(&t_id).unwrap();
+        let task_owner = task.owner();
         let tasks_to_give_up = task_accept_plan(agent, task, model, pars);
         let prob = task_accept_prob(task, &tasks_to_give_up, agent, model, pars);
 
         if model.rng.random_bool(prob) {
             let tasks_to_clear: Vec<_> = tasks_to_give_up.into_iter().map(|gu| gu.0).collect();
             accept_task(t_id, &tasks_to_clear, Carer::Person(p_id), model);
+            for t_clear_id in tasks_to_clear {
+                let task_to_clear = model.tasks.get(&t_clear_id).unwrap();
+                had_dropped_tasks.insert(task_to_clear.owner());
+            }
         } else {
             mark_task_unassigned(t_id, model);
+            had_dropped_tasks.insert(task_owner);
         }
     }
+    had_dropped_tasks
 }
