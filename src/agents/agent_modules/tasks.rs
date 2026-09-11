@@ -3,7 +3,7 @@ use std::mem;
 use identity_hash::IntSet;
 
 use crate::{
-    agents::tasks::{Carer, IdTask, Task},
+    agents::tasks::{Carer, IdTask, Task, TaskKind},
     full_model::{
         Model,
         person::{Id, Person},
@@ -27,6 +27,7 @@ pub struct TaskPerson {
     task_schedule: [[f64; 24]; 7],
     /// Tasks the agent does, sorted per day
     pub todo: [Vec<IdTask>; 7],
+    pub todo_tally: TaskTally,
     pub care_task_hours: u32,
 }
 
@@ -37,6 +38,7 @@ impl Default for TaskPerson {
             open_tasks: int_set_with_cap(20),
             task_schedule: [[0.0; 24]; 7],
             todo: Default::default(),
+            todo_tally: Default::default(),
             care_task_hours: 0,
         }
     }
@@ -55,6 +57,12 @@ impl TaskPerson {
         let task_id = task.id();
         assert!(!self.todo[day].contains(&task_id));
         self.todo[day].push(task_id);
+
+        match task.kind {
+            TaskKind::ChildCare => self.todo_tally.child_care += 1,
+            TaskKind::SocialCare => self.todo_tally.social_care += 1,
+            TaskKind::Work => self.todo_tally.work += 1,
+        }
 
         if task.is_care() && self.task_schedule[day][hour] <= 0.0 {
             self.care_task_hours += 1;
@@ -83,6 +91,12 @@ impl TaskPerson {
         self.todo[day].swap_remove(idx);
 
         self.task_schedule[day][hour] -= task.focus();
+
+        match task.kind {
+            TaskKind::ChildCare => self.todo_tally.child_care -= 1,
+            TaskKind::SocialCare => self.todo_tally.social_care -= 1,
+            TaskKind::Work => self.todo_tally.work -= 1,
+        }
 
         if task.is_care() && self.task_schedule[day][hour] <= 0.0 {
             self.care_task_hours -= 1;

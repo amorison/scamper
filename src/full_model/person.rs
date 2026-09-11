@@ -111,19 +111,3 @@ impl DeadPerson {
         self.id
     }
 }
-
-pub fn weekly_todo_tally(p_id: Id, model: &Model) -> TaskTally {
-    let person = model.pop.alive(p_id);
-    let mut tally = TaskTally::default();
-
-    person.task.todo.iter().flatten().for_each(|t_id| {
-        let task = model.tasks.get(t_id).unwrap();
-        match task.kind {
-            TaskKind::ChildCare => tally.child_care += 1,
-            TaskKind::SocialCare => tally.social_care += 1,
-            TaskKind::Work => tally.work += 1,
-        }
-    });
-
-    tally
-}

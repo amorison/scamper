@@ -10,7 +10,7 @@ use crate::{
     },
     full_model::{
         Model,
-        person::{Id, Person, weekly_todo_tally},
+        person::{Id, Person},
     },
     population::PopIterOrder,
     utilities::Date,
@@ -28,9 +28,8 @@ pub fn job_pre_calc(date: Date, model: &mut Model, order: &PopIterOrder, pars: &
 
     // FIXME: is that the right place? Ideally we would have stateless diagnostics...
     for p_id in order.ids() {
-        let tally = weekly_todo_tally(p_id, model);
         let person = model.pop.alive_mut(p_id);
-        person.work.available_working_hours = tally.work;
+        person.work.available_working_hours = person.task.todo_tally.work;
     }
 }
 
