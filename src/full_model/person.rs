@@ -17,7 +17,7 @@ use crate::{
             dependencies::Dependency,
             kinship::Kinship,
             maternity::Maternity,
-            tasks::TaskPerson,
+            tasks::{TaskPerson, TaskTally},
             work::Work,
         },
         tasks::TaskKind,
@@ -110,13 +110,6 @@ impl DeadPerson {
     pub fn id(&self) -> Id {
         self.id
     }
-}
-
-#[derive(Default)]
-pub struct TaskTally {
-    pub child_care: u32,
-    pub social_care: u32,
-    pub work: u32,
 }
 
 pub fn weekly_todo_tally(p_id: Id, model: &Model) -> TaskTally {

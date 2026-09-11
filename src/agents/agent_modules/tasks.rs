@@ -13,6 +13,13 @@ use crate::{
 
 // FIXME: rethink how to store assigned vs open tasks
 
+#[derive(Default)]
+pub struct TaskTally {
+    pub child_care: u32,
+    pub social_care: u32,
+    pub work: u32,
+}
+
 pub struct TaskPerson {
     pub assigned_tasks: IntSet<IdTask>,
     pub open_tasks: IntSet<IdTask>,
