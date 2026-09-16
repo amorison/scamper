@@ -8,19 +8,16 @@ use std::{
 use identity_hash::IdentityHashable;
 
 use crate::{
-    agents::{
-        agent_modules::{
-            basic_info::{BasicInfo, Gender},
-            benefits::Benefits,
-            care::Care,
-            class::Class,
-            dependencies::Dependency,
-            kinship::Kinship,
-            maternity::Maternity,
-            tasks::{TaskPerson, TaskTally},
-            work::Work,
-        },
-        tasks::TaskKind,
+    agents::agent_modules::{
+        basic_info::{BasicInfo, Gender},
+        benefits::Benefits,
+        care::Care,
+        class::Class,
+        dependencies::Dependency,
+        kinship::Kinship,
+        maternity::Maternity,
+        tasks::TaskPerson,
+        work::Work,
     },
     full_model::{
         Model,
