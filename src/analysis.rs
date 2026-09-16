@@ -93,6 +93,8 @@ struct PopulationStats {
     age_pyramid_male: [usize; N_AGE_YEARS],
     age_pyramid_female: [usize; N_AGE_YEARS],
     care_level_tally: [usize; N_CARE_LEVELS],
+    n_care_home_occupied: usize,
+    n_care_home_capacity: usize,
 }
 
 impl PopulationStats {
@@ -106,6 +108,8 @@ impl PopulationStats {
             age_pyramid_male: [0; _],
             age_pyramid_female: [0; _],
             care_level_tally: [0; N_CARE_LEVELS],
+            n_care_home_occupied: model.carehomes.occupied(),
+            n_care_home_capacity: model.carehomes.capacity(),
         };
         for person in model.pop.alives(order) {
             if !person.kinship.is_single() {
@@ -140,6 +144,8 @@ struct MainRecord {
     n_married: usize,
     n_working: usize,
     n_unemployed: usize,
+    n_care_home_occupied: usize,
+    n_care_home_capacity: usize,
 }
 
 impl MainRecord {
@@ -152,6 +158,8 @@ impl MainRecord {
             n_married: stats.n_married,
             n_working: stats.n_working,
             n_unemployed: stats.n_unemployed,
+            n_care_home_occupied: stats.n_care_home_occupied,
+            n_care_home_capacity: stats.n_care_home_capacity,
         }
     }
 }

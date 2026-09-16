@@ -1,5 +1,6 @@
 mod agents;
 mod analysis;
+mod carehomes;
 pub mod cli;
 mod common;
 mod full_model;
@@ -503,6 +504,8 @@ struct TaskCare {
     care_weight_related: [[f64; 3]; 5],
     /// Care weight by spatial distance (same house, same town, other).
     care_weight_distance: [f64; 3],
+    /// Capacity of care homes, as fraction of population size.
+    carehomes_fraction: f64,
 }
 
 impl Default for TaskCare {
@@ -524,6 +527,7 @@ impl Default for TaskCare {
                 [0.5, 0.2, 50.0],
             ],
             care_weight_distance: [1.0, 0.5, 0.1],
+            carehomes_fraction: 1e-2,
         }
     }
 }

@@ -8,6 +8,7 @@ use crate::{
         tasks::{Carer, IdTask, Task},
         towns::{IdTown, Town},
     },
+    carehomes::{self, CareHomes},
     full_model::{
         data::{
             Post51Fertility, Post51MortalityFemale, Post51MortalityMale, Pre51Fertility,
@@ -64,6 +65,8 @@ pub struct Model {
 
     /// Set of all tasks.
     pub tasks: IntMap<IdTask, Task>,
+    /// Home care management
+    pub carehomes: CareHomes,
     /// Random number generator.
     pub rng: Xoshiro256PlusPlus,
 
@@ -122,6 +125,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
         pop,
         shift_pool: ShiftPool::new(pars, &mut rng),
         tasks: int_map_with_cap(population.len() * 5),
+        carehomes: CareHomes::new(pars.task_care.carehomes_fraction, population.len()),
         rng,
         fert_f_by_age_51: fert_post51.normalised_fertility1951(),
         fert_pre51: Pre51Fertility::read_from(&pars.data_files.pre51_fertility),
@@ -258,6 +262,8 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
             marriage(p_id, model, pars);
         }
     }
+
+    carehomes::accept_new_residents(model, order);
 
     // Accept work tasks by default, which might then be replaced by care tasks.
     for p_id in order.ids() {

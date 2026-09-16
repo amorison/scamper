@@ -68,6 +68,7 @@ fn set_dead(p_id: Id, model: &mut Model) {
     process_death_task_care(p_id, model);
     process_death_deps(p_id, model);
 
+    model.carehomes.dead(p_id);
     model.pop.mark_as_dead(p_id);
 }
 

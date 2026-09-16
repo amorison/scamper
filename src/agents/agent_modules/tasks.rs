@@ -29,6 +29,7 @@ pub struct TaskPerson {
     pub todo: [Vec<IdTask>; 7],
     pub todo_tally: TaskTally,
     pub care_task_hours: u32,
+    pub in_care_home: bool,
 }
 
 impl Default for TaskPerson {
@@ -40,6 +41,7 @@ impl Default for TaskPerson {
             todo: Default::default(),
             todo_tally: Default::default(),
             care_task_hours: 0,
+            in_care_home: false,
         }
     }
 }

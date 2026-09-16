@@ -15,6 +15,7 @@ use crate::{
         },
         tasks::{Carer, IdTask, Task, TaskKind},
     },
+    carehomes,
     common::tasks_care::{init_care_tasks, weekly_care_supply},
     full_model::{
         Model,
@@ -52,6 +53,10 @@ pub fn process_death_task_care(p_id: Id, model: &mut Model) {
 pub fn care_need_changed(p_id: Id, model: &mut Model, pars: &ModelPars) {
     unassign_care_tasks_from(p_id, model);
     init_care_tasks(p_id, pars, model);
+    let person = model.pop.alive_mut(p_id);
+    if person.task.in_care_home {
+        carehomes::assign_tasks_to_care_home(p_id, model);
+    }
 }
 
 /// Try to assign cares for open care tasks.

@@ -57,6 +57,7 @@ impl TaskKind {
 #[derive(Clone, Copy, Debug)]
 pub enum Carer {
     School,
+    CareHome,
     Person(Id),
 }
 
