@@ -1,4 +1,4 @@
-use crate::N_CARE_LEVELS;
+use crate::N_CLASSES;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Rank(u32);
@@ -10,7 +10,7 @@ pub struct Class {
 
 impl Rank {
     pub fn new(rank: u32) -> Self {
-        assert!((0..N_CARE_LEVELS as u32).contains(&rank));
+        assert!((0..N_CLASSES as u32).contains(&rank));
         Self(rank)
     }
 
@@ -19,7 +19,7 @@ impl Rank {
     }
 
     pub fn increment(&mut self) {
-        self.0 = (self.0 + 1).min(N_CARE_LEVELS as u32 - 1);
+        self.0 = (self.0 + 1).min(N_CLASSES as u32 - 1);
     }
 }
 
