@@ -298,7 +298,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
     }
 
     // extra for social work
-    if person.care.social_work > 35 {
+    if person.care.social_work >= 35 {
         person.benefits.benefits += pars.benefit.carers_component;
         person.benefits.uc = true;
     }
@@ -352,7 +352,7 @@ fn calc_pension_credit(
         benefits += pars.benefit.disability_component_pc;
         guarantee_credit = true;
     }
-    // social carers extra // FIXME: sometimes >, others >=?
+    // social carers extra
     if person.care.social_work >= 35 {
         benefits += pars.benefit.caring_component_pc;
         guarantee_credit = true;
