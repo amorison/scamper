@@ -25,7 +25,7 @@ impl Output {
         let now = Zoned::now()
             .with_time_zone(TimeZone::UTC)
             .strftime("%Y%m%d_%H%M%S");
-        let run_dir = PathBuf::from(format!("lpm_run_{now}"));
+        let run_dir = PathBuf::from(format!("scamper_run_{now}"));
         fs::create_dir(&run_dir)?;
 
         let out_pars = run_dir.join("parameters.toml");
