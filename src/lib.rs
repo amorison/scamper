@@ -182,7 +182,7 @@ impl Default for Population {
             male_age_die_prob: 2.1e-4,
             male_age_scaling: 14.0,
             male_mortality_bias: 0.8,
-            prob_classes: [0.2, 0.35, 0.25, 0.15, 0.05],
+            prob_classes: [0.45, 0.25, 0.1, 0.1, 0.1],
         }
     }
 }
