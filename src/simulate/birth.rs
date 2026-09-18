@@ -110,12 +110,6 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
 fn compute_birth_prob(woman: &Person, model: &Model, pars: &ModelPars, date: Date) -> f64 {
     let (year, _) = date.year_month();
 
-    let rank = if woman.work.is_student() {
-        woman.class.parent_rank
-    } else {
-        woman.class.rank
-    };
-
     let age_years = woman.basic.age.year_month().0;
     let ifert_age = (age_years - pars.birth.min_pregnancy_age) as usize;
 
@@ -132,7 +126,7 @@ fn compute_birth_prob(woman: &Person, model: &Model, pars: &ModelPars, date: Dat
             / model.birth_cache.p_potential_mother[age_years as usize]
     };
 
-    let irank = rank.index();
+    let irank = woman.class.rank_idx();
     // apply class bias
     let mut birth_prob = raw_rate * model.birth_cache.class_bias[irank];
 

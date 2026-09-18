@@ -68,7 +68,9 @@ pub struct DeadPerson {
 
 impl Person {
     pub fn baby(gender: Gender, house: IdHouse) -> Self {
-        PersonAwaitingHouse::new(gender, Age::new()).with_house(house)
+        // FIXME: class is set later via `set_as_guardian_dependent`, maybe this can be abstracted
+        // more neatly.
+        PersonAwaitingHouse::new(gender, Age::new(), Class::new(0)).with_house(house)
     }
 
     pub fn id(&self) -> Id {

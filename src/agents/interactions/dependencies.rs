@@ -1,4 +1,4 @@
-use std::{cmp, mem, ops::Not};
+use std::{mem, ops::Not};
 
 use crate::{
     full_model::{
@@ -38,11 +38,11 @@ pub fn is_orphan(p: &Person) -> bool {
 pub fn set_as_guardian_dependent(guardian: Id, dependent: Id, model: &mut Model) {
     let g = model.pop.alive_mut(guardian);
     g.dependency.dependents.push(dependent);
-    let g_class_rank = g.class.rank;
+    let g_class = g.class;
 
     let d = model.pop.alive_mut(dependent);
     d.dependency.guardians.push(guardian);
-    d.class.parent_rank = cmp::max(d.class.parent_rank, g_class_rank);
+    d.class.set_from_parent_class(g_class);
 }
 
 pub fn resolve_dependency(guardian: Id, dependent: Id, model: &mut Model) {

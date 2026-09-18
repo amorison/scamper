@@ -1,10 +1,7 @@
 use crate::{
     MAX_AGE, ModelPars, N_CARE_LEVELS, N_CLASSES,
     agents::{
-        agent_modules::{
-            basic_info::Gender,
-            work::{WorkStatus, lose_job},
-        },
+        agent_modules::{basic_info::Gender, work::lose_job},
         interactions::family::resolve_partnership,
     },
     full_model::{
@@ -17,13 +14,7 @@ use crate::{
 };
 
 fn death_probability(base_rate: f64, person: &Person, model: &Model, pars: &ModelPars) -> f64 {
-    let irank =
-        if person.work.status == WorkStatus::Child || person.work.status == WorkStatus::Student {
-            person.class.parent_rank
-        } else {
-            person.class.rank
-        }
-        .index();
+    let irank = person.class.rank_idx();
 
     let (mortality_bias, sum_bias) = match person.basic.gender {
         Gender::Female => (

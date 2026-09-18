@@ -20,7 +20,7 @@ use crate::{
     setup::{
         map::{create_towns, initialise_houses_in_town},
         map_pop::assign_couples_to_houses,
-        population::{create_pyramid_population, init_care, init_class, init_jobs, init_work},
+        population::{create_pyramid_population, init_care, init_jobs, init_work},
     },
     simulate::{
         age::age_transition,
@@ -148,7 +148,6 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
     assign_couples_to_houses(population, &mut model);
 
     model.pop.for_each(&order, |person| {
-        init_class(person, pars, &mut model.rng);
         init_work(person, pars, &mut model.rng);
     });
 

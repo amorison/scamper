@@ -4,10 +4,7 @@ use rand_distr::{Distribution, Normal};
 use crate::{
     ModelPars, N_CLASSES,
     agents::{
-        agent_modules::{
-            class::Rank,
-            work::{WorkStatus, lose_job},
-        },
+        agent_modules::work::{WorkStatus, lose_job},
         interactions::{dependencies::set_as_self_providing, income::household_income_per_capita},
     },
     common::{income::set_wage_progression, social::change_status},
@@ -37,7 +34,6 @@ pub fn process_change_1yr_social(p_id: Id, model: &mut Model, pars: &ModelPars) 
         change_status(p_id, WorkStatus::Teenager, model);
     } else if age == Age::years(pars.work.age_adulthood) {
         // all agents first become students, start working in social transition
-        become_student(person);
         change_status(p_id, WorkStatus::Student, model);
     } else if age == Age::years(pars.work.age_retirement) {
         start_retirement(p_id, model, pars);
@@ -63,22 +59,9 @@ pub fn social_pre_calc(model: &mut Model, order: &PopIterOrder) {
         .for_each(|val| *val /= tot);
 }
 
-fn start_studying(person: &mut Person) {
-    person.class.rank.increment();
-    // FIXME: should change status to student?
-}
-
-fn done_studying(person: &Person) -> bool {
-    // FIXME: abstract this?
-    person.class.rank_idx() >= 4
-}
-
-fn become_student(person: &mut Person) {
-    person.class.rank = Rank::new(0);
-}
-
 pub fn student_start_working(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive_mut(p_id);
+    person.class.enter_workforce();
     set_wage_progression(person, &mut model.rng, pars);
     set_as_self_providing(p_id, model);
     change_status(p_id, WorkStatus::Unemployed, model);
@@ -100,7 +83,7 @@ pub fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
 /// Decide whether agent goes on to study or starts working.
 pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive(p_id);
-    let prob_study = if done_studying(person) {
+    let prob_study = if person.class.has_max_education() {
         0.0
     } else {
         start_study_prob(person, model, pars)
@@ -108,7 +91,7 @@ pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
 
     if model.rng.random_bool(prob_study) {
         let person = model.pop.alive_mut(p_id);
-        start_studying(person);
+        person.class.study();
     } else {
         student_start_working(p_id, model, pars);
     }
@@ -136,11 +119,7 @@ fn start_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
     let income_effect = (pars.work.constant_income + 1.0)
         / ((pars.work.edu_wage_sensitivity * rel_cost).exp() + pars.work.constant_income);
 
-    // TODO: factor out class
-    let target_el = person.class.parent_rank.index();
-    let de = target_el as f64 - irank as f64;
-    let exp_edu = (pars.work.edu_rank_sensitivity * de).exp();
-    let education_effect = exp_edu / (exp_edu + pars.work.constant_education);
+    let education_effect = person.class.edu_gap_factor(pars);
 
     let care_work = (person.care.social_work + person.care.child_work) as f64;
     let care_effect = 1.0 / (pars.work.care_education * care_work).exp();

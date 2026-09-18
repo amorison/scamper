@@ -1,5 +1,3 @@
-use std::cmp;
-
 use identity_hash::IntMap;
 use rand::{Rng, RngExt, seq::IndexedRandom};
 use rand_distr::uniform::SampleRange;
@@ -7,7 +5,7 @@ use rand_distr::uniform::SampleRange;
 use crate::{
     ModelPars, N_CLASSES,
     agents::agent_modules::{
-        basic_info::Gender, class::Rank, kinship::Partnership, work::WorkStatus,
+        basic_info::Gender, class::Class, kinship::Partnership, work::WorkStatus,
     },
     common::{
         income::{assign_wealth_by_inc_percentile_hh, compute_wage, set_wage_progression},
@@ -68,11 +66,11 @@ pub fn set_as_guardian_dependent(
 ) {
     let g = population.get_mut(&guardian).unwrap();
     g.dependency.dependents.push(dependent);
-    let g_class_rank = g.class.rank;
+    let g_class = g.class;
 
     let d = population.get_mut(&dependent).unwrap();
     d.dependency.guardians.push(guardian);
-    d.class.parent_rank = cmp::max(d.class.parent_rank, g_class_rank);
+    d.class.set_from_parent_class(g_class);
 }
 
 // FIXME: rm duplication with `agents/interations/dependencies`
@@ -112,7 +110,14 @@ pub fn create_pyramid_population<R: Rng>(
             Gender::Female
         };
         let age = rand_age(&pyramid, gender, rng);
-        let person = PersonAwaitingHouse::new(gender, age);
+        let class = {
+            let classes: Vec<_> = (0..N_CLASSES).collect();
+            let class = *classes
+                .choose_weighted(rng, |&i| pars.population.prob_classes[i])
+                .unwrap() as u32;
+            Class::new(class)
+        };
+        let person = PersonAwaitingHouse::new(gender, age, class);
         order.insert(person.id());
         if age < Age::years(18) {
             population.insert(person.id(), person);
@@ -201,14 +206,6 @@ pub fn create_pyramid_population<R: Rng>(
         .ids()
         .map(|id| population.remove(&id).unwrap())
         .collect()
-}
-
-pub fn init_class<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
-    let classes: Vec<_> = (0..N_CLASSES).collect();
-    let class = *classes
-        .choose_weighted(rng, |&i| pars.population.prob_classes[i])
-        .unwrap() as u32;
-    person.class.rank = Rank::new(class);
 }
 
 pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {

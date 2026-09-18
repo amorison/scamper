@@ -2,10 +2,7 @@ use rand::RngExt;
 
 use crate::{
     ModelPars,
-    agents::{
-        agent_modules::class::Rank,
-        interactions::{dependencies::resolve_dependency, family::resolve_partnership},
-    },
+    agents::interactions::{dependencies::resolve_dependency, family::resolve_partnership},
     full_model::{
         Model,
         person::{Id, Person},
@@ -29,8 +26,9 @@ pub fn divorce_pre_calc(model: &mut Model, pars: &ModelPars) {
     );
 }
 
-fn divorce_probability(raw_rate: f64, rank: Rank, model: &Model) -> f64 {
-    (raw_rate * model.divorce_cache.class_bias[rank.index()]).clamp(0.0, 1.0)
+fn divorce_probability(raw_rate: f64, man: &Person, model: &Model) -> f64 {
+    let class_bias = model.divorce_cache.class_bias[man.class.rank_idx()];
+    (raw_rate * class_bias).clamp(0.0, 1.0)
 }
 
 pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
@@ -47,7 +45,7 @@ pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> b
         pars.divorce.variable_divorce * pars.divorce.divorce_modifier_by_decade[idecade]
     };
 
-    let divorce_prob = divorce_probability(raw_rate, man.class.rank, model);
+    let divorce_prob = divorce_probability(raw_rate, man, model);
 
     if try_rand_yearly2monthly(divorce_prob, &mut model.rng) {
         resolve_partnership(man_id, wife_id, model);

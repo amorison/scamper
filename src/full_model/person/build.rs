@@ -31,7 +31,7 @@ pub struct PersonAwaitingHouse {
 }
 
 impl PersonAwaitingHouse {
-    pub fn new(gender: Gender, age: Age) -> Self {
+    pub fn new(gender: Gender, age: Age, class: Class) -> Self {
         Self {
             id: Id::new(),
             basic: BasicInfo::new(gender, age),
@@ -39,7 +39,7 @@ impl PersonAwaitingHouse {
             maternity: Maternity::default(),
             work: Work::default(),
             care: Care::default(),
-            class: Class::default(),
+            class,
             benefits: Benefits::default(),
             dependency: Dependency::default(),
             task: TaskPerson::default(),

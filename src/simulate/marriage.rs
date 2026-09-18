@@ -80,14 +80,14 @@ fn marry_weight(man_id: Id, woman_id: Id, model: &Model, pars: &ModelPars) -> f6
     let geo_factor =
         1.0 / (pars.marriage.beta_geo_exp * geo_distance(man, woman, model, pars)).exp();
 
-    let (student_factor, woman_rank) = if woman.work.is_student() {
-        (pars.marriage.student_factor, woman.class.parent_rank)
+    let student_factor = if woman.work.is_student() {
+        pars.marriage.student_factor
     } else {
-        (1.0, woman.class.rank)
+        1.0
     };
 
     let man_rank = man.class.rank_idx();
-    let woman_rank = woman_rank.index();
+    let woman_rank = woman.class.rank_idx();
     let status_distance = man_rank.abs_diff(woman_rank) as f64 / (N_CLASSES - 1) as f64;
 
     let beta_exponent = pars.marriage.beta_soc_exp

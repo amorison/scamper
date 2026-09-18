@@ -2,7 +2,7 @@ use rand_distr::{Distribution, Geometric};
 
 use crate::{
     ModelPars, N_CARE_LEVELS, N_CLASSES,
-    agents::agent_modules::{basic_info::Gender, tasks::empty_todo, work::WorkStatus},
+    agents::agent_modules::{basic_info::Gender, tasks::empty_todo},
     full_model::{Model, person::Id},
     simulate::tasks_care::care_need_changed,
     utilities::{calc_rate_bias, try_rand_yearly2monthly},
@@ -31,15 +31,7 @@ pub fn social_care_transition(p_id: Id, model: &mut Model, pars: &ModelPars) -> 
     let age_care_prob = (person.basic.age.years_f64() / scaling).exp() * pars.care.person_care_prob;
     let mut base_prob = pars.care.base_care_prob + age_care_prob;
 
-    let class = match person.work.status {
-        WorkStatus::Child | WorkStatus::Teenager | WorkStatus::Student => person.class.parent_rank,
-        WorkStatus::FixedShiftEmployed
-        | WorkStatus::FlexibleShiftEmployed
-        | WorkStatus::Retired
-        | WorkStatus::Unemployed => person.class.rank,
-    };
-
-    let irank = class.index();
+    let irank = person.class.rank_idx();
     base_prob *= model.social_care_cache.class_bias[irank];
     base_prob = base_prob.clamp(0.0, 1.0);
 
