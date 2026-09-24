@@ -1,16 +1,14 @@
-use crate::{agents::towns::IdTown, full_model::person::Id, utilities::Location};
+use crate::{agents::towns::IdTown, full_model::person::Id};
 
 pub struct BasicHouse {
     town: IdTown,
-    pos: Location,
     occupants: Vec<Id>,
 }
 
 impl BasicHouse {
-    pub fn new(town: IdTown, pos: Location) -> Self {
+    pub fn new(town: IdTown) -> Self {
         Self {
             town,
-            pos,
             occupants: Vec::new(),
         }
     }

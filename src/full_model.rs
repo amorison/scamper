@@ -54,8 +54,6 @@ pub mod person;
 pub struct Model {
     /// Towns, containing houses.
     pub towns: IntMap<IdTown, Town>,
-    /// Size of town grid, for plotting purposes.
-    pub town_size: usize,
     /// Houses, located in towns.
     pub houses: IntMap<IdHouse, House>,
     /// The entire population.
@@ -120,7 +118,6 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
 
     let mut model = Model {
         towns,
-        town_size: 0,
         houses: int_map_with_cap(0), // FIXME: check capacity
         pop,
         shift_pool: ShiftPool::new(pars, &mut rng),

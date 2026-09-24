@@ -47,20 +47,15 @@ pub fn create_towns(pars: &ModelPars) -> Vec<Town> {
 
 pub fn initialise_houses_in_town(model: &mut Model, init_pop: usize) {
     // FIXME: this heuristic works for the default map, should be generalised.
-    let grid_dim = (init_pop as f64 / 10.0).sqrt().ceil() as usize;
-
-    model.town_size = grid_dim + 1; // FIXME: get rid of +1
+    let n_houses = (init_pop as f64 / 10.0).ceil() as usize;
 
     for town in model.towns.values_mut() {
-        for hy in 0..grid_dim {
-            for hx in 0..grid_dim {
-                if model.rng.random_bool(0.6 * town.density) {
-                    let h_loc = Location::new(hx, hy);
-                    let house = House::new(town.id(), h_loc);
-                    let h_id = house.id();
-                    model.houses.insert(h_id, house);
-                    town.houses.push(h_id);
-                }
+        for _ in 0..n_houses {
+            if model.rng.random_bool(0.6 * town.density) {
+                let house = House::new(town.id());
+                let h_id = house.id();
+                model.houses.insert(h_id, house);
+                town.houses.push(h_id);
             }
         }
     }

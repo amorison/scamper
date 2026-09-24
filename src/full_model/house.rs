@@ -11,7 +11,6 @@ use crate::{
         towns::{IdTown, Town},
     },
     full_model::Model,
-    utilities::Location,
 };
 
 static ID_HOUSE: AtomicU64 = AtomicU64::new(0);
@@ -40,10 +39,10 @@ pub struct House {
 }
 
 impl House {
-    pub fn new(town: IdTown, location: Location) -> Self {
+    pub fn new(town: IdTown) -> Self {
         Self {
             id: IdHouse::new(),
-            basic: BasicHouse::new(town, location),
+            basic: BasicHouse::new(town),
             income: IncomeHouse::default(),
         }
     }
