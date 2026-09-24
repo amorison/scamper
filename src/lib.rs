@@ -1,6 +1,7 @@
 mod agents;
 mod analysis;
 mod carehomes;
+mod caretasks;
 pub mod cli;
 mod common;
 mod full_model;

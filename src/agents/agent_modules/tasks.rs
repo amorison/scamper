@@ -1,17 +1,14 @@
 use std::mem;
 
-use identity_hash::IntSet;
-
 use crate::{
     agents::tasks::{Carer, IdTask, Task, TaskKind},
+    caretasks::CareTasks,
     full_model::{
         Model,
         person::{Id, Person},
     },
-    utilities::{HourInWeek, int_set_with_cap},
+    utilities::HourInWeek,
 };
-
-// FIXME: rethink how to store assigned vs open tasks
 
 #[derive(Default)]
 pub struct TaskTally {
@@ -21,8 +18,8 @@ pub struct TaskTally {
 }
 
 pub struct TaskPerson {
-    pub assigned_tasks: IntSet<IdTask>,
-    pub open_tasks: IntSet<IdTask>,
+    pub assigned_tasks: CareTasks,
+    pub open_tasks: CareTasks,
     /// Focus per hour
     task_schedule: [[f64; 24]; 7],
     /// Tasks the agent does, sorted per day
@@ -35,8 +32,8 @@ pub struct TaskPerson {
 impl Default for TaskPerson {
     fn default() -> Self {
         Self {
-            assigned_tasks: int_set_with_cap(20),
-            open_tasks: int_set_with_cap(20),
+            assigned_tasks: CareTasks::with_capacity(20),
+            open_tasks: CareTasks::with_capacity(20),
             task_schedule: [[0.0; 24]; 7],
             todo: Default::default(),
             todo_tally: Default::default(),
@@ -117,7 +114,7 @@ impl TaskPerson {
 pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {
     let task = model.tasks.get_mut(&task_id).unwrap();
     let owner = model.pop.alive_mut(task.owner());
-    owner.task.open_tasks.remove(&task_id);
+    owner.task.open_tasks.remove(task_id);
     owner.task.assigned_tasks.insert(task_id);
     task.worker = None;
 }
@@ -128,7 +125,7 @@ pub fn mark_task_unassigned(task_id: IdTask, model: &mut Model) {
         // FIXME: make it impossible to have work tasks going
         // into the assigned_tasks/open_tasks logic.
         let owner = model.pop.alive_mut(task.owner());
-        owner.task.assigned_tasks.remove(&task_id);
+        owner.task.assigned_tasks.remove(task_id);
         owner.task.open_tasks.insert(task_id);
     }
     task.worker = None;

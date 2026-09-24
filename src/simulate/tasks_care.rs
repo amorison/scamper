@@ -230,7 +230,7 @@ fn get_chunk_of_open_tasks(p_id: Id, task_kind: TaskKind, model: &mut Model) -> 
 
     for &t_id in &tasks {
         assert!(agent.task.assigned_tasks.insert(t_id));
-        assert!(agent.task.open_tasks.remove(&t_id));
+        assert!(agent.task.open_tasks.remove(t_id));
     }
 
     tasks
