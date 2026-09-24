@@ -213,7 +213,7 @@ fn get_chunk_of_open_tasks(p_id: Id, task_kind: TaskKind, model: &mut Model) -> 
     let mut tasks_of_kind = Vec::with_capacity(agent.task.open_tasks.len());
     let tasks_iter = agent.task.open_tasks.iter().filter_map(|t_id| {
         let task = model.tasks.get(t_id).unwrap();
-        (task.kind == task_kind).then_some((task.id(), task.time()))
+        (task.kind == task_kind).then_some((task.id(), task.time().day_hour().0))
     });
     tasks_of_kind.extend(tasks_iter);
 
