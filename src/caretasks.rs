@@ -29,8 +29,8 @@ impl CareTasks {
         self.0.insert(t_id)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = &IdTask> {
-        self.0.iter()
+    pub fn iter(&self) -> impl Iterator<Item = IdTask> {
+        self.0.iter().copied()
     }
 
     pub fn drain(&mut self) -> impl Iterator<Item = IdTask> {
