@@ -24,7 +24,7 @@ pub struct TaskPerson {
     /// Focus per hour
     task_schedule: [[f64; 24]; 7],
     /// Tasks the agent does, sorted per day
-    pub todo: [Vec<IdTask>; 7],
+    pub todo: [Vec<(IdTask, HourInWeek)>; 7],
     pub todo_tally: TaskTally,
     pub care_task_hours: u32,
     pub in_care_home: bool,
@@ -41,8 +41,8 @@ impl TaskPerson {
         let day = day.index();
         let hour = hour.index();
         let task_id = task.id();
-        assert!(!self.todo[day].contains(&task_id));
-        self.todo[day].push(task_id);
+        assert!(!self.todo[day].iter().any(|&(t_id, _)| t_id == task_id));
+        self.todo[day].push((task_id, task.time()));
 
         match task.kind {
             TaskKind::ChildCare => self.todo_tally.child_care += 1,
@@ -73,7 +73,7 @@ impl TaskPerson {
         let hour = hour.index();
         let task_id = task.id();
 
-        let idx = self.todo[day].iter().position(|&i| i == task_id)?;
+        let idx = self.todo[day].iter().position(|&(i, _)| i == task_id)?;
         self.todo[day].swap_remove(idx);
 
         self.task_schedule[day][hour] -= task.focus();
@@ -146,7 +146,7 @@ pub fn empty_todo(p_id: Id, model: &mut Model) {
     person.task.task_schedule = Default::default();
     person.task.care_task_hours = 0;
 
-    for task_id in todo.into_iter().flatten() {
+    for (task_id, _) in todo.into_iter().flatten() {
         mark_task_unassigned(task_id, model);
     }
 }
@@ -168,7 +168,7 @@ pub fn accept_task(task_id: IdTask, tasks_to_clear: &[IdTask], carer: Carer, mod
     }
 }
 
-pub fn find_tasks_at(person: &Person, hiw: HourInWeek, model: &Model) -> Vec<IdTask> {
+pub fn find_tasks_at(person: &Person, hiw: HourInWeek) -> Vec<IdTask> {
     if person.how_busy_at(hiw) <= 0.0 {
         return Vec::new();
     }
@@ -176,6 +176,6 @@ pub fn find_tasks_at(person: &Person, hiw: HourInWeek, model: &Model) -> Vec<IdT
     person.task.todo[hiw.day_idx()]
         .iter()
         .copied()
-        .filter(|t_id| model.tasks.get(t_id).unwrap().time() == hiw)
+        .filter_map(|(t_id, time)| (time == hiw).then_some(t_id))
         .collect()
 }

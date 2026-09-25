@@ -296,7 +296,7 @@ fn get_importance_at(
     model: &Model,
     pars: &ModelPars,
 ) -> Vec<(IdTask, f64)> {
-    find_tasks_at(agent, hiw, model)
+    find_tasks_at(agent, hiw)
         .into_iter()
         .map(|t_id| {
             let task = model.tasks.get(&t_id).unwrap();
