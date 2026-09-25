@@ -32,12 +32,12 @@ impl CareTasks {
         self.0.insert(t_id)
     }
 
-    pub fn remove(&mut self, task: &Task) -> bool {
-        self.0.remove(&task.id())
+    pub fn remove(&mut self, task: &Task) {
+        self.0.remove(&task.id());
     }
 
-    pub fn insert(&mut self, task: &Task) -> bool {
-        self.0.insert(task.id())
+    pub fn insert(&mut self, task: &Task) {
+        self.0.insert(task.id());
     }
 
     pub fn iter(&self) -> impl Iterator<Item = IdTask> {
