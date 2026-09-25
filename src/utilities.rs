@@ -133,6 +133,11 @@ impl DayInWeek {
         (0..7).map(Self)
     }
 
+    /// Iterate through usual working days (Mon-Fri).
+    pub fn work_week() -> impl Iterator<Item = DayInWeek> {
+        (0..5).map(Self)
+    }
+
     pub fn index(&self) -> usize {
         self.0 as usize
     }
@@ -145,6 +150,10 @@ impl HourInDay {
 
     pub fn index(&self) -> usize {
         self.0 as usize
+    }
+
+    pub fn in_school_time(&self) -> bool {
+        10 <= self.0 && self.0 < 17
     }
 }
 

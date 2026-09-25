@@ -76,9 +76,13 @@ impl CareTasks {
     }
 
     pub fn ntasks_on(&self, task_kind: TaskKind, day: DayInWeek) -> usize {
+        self.tasks_on(task_kind, day).len()
+    }
+
+    pub fn tasks_on(&self, task_kind: TaskKind, day: DayInWeek) -> &[IdTask] {
         match task_kind {
-            TaskKind::ChildCare => self.child.0[day.index()].len(),
-            TaskKind::SocialCare => self.health.0[day.index()].len(),
+            TaskKind::ChildCare => &self.child.0[day.index()],
+            TaskKind::SocialCare => &self.health.0[day.index()],
             TaskKind::Work => panic!("only care tasks are handled"),
         }
     }

@@ -86,27 +86,19 @@ pub fn distribute_care(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
     }
 }
 
-fn during_school_time(task: &Task) -> bool {
-    let (d, h) = task.time().day_hour();
-    (0..5).contains(&d.index()) && (10..17).contains(&h.index())
-}
-
-fn is_for_school_care(task: &Task) -> bool {
-    task.kind == TaskKind::ChildCare && during_school_time(task)
-}
-
 fn assign_school_care(p_id: Id, model: &mut Model) {
     let person = model.pop.alive(p_id);
     if person.basic.age < Age::years(4) || person.basic.age >= Age::years(16) {
         return;
     }
-    let tasks_to_assign: Vec<_> = person
-        .task
-        .open_tasks
-        .iter()
+    let open_tasks = &person.task.open_tasks;
+    let tasks_to_assign: Vec<_> = DayInWeek::work_week()
+        .flat_map(|day| open_tasks.tasks_on(TaskKind::ChildCare, day))
+        .copied()
         .filter(|t_id| {
             let task = model.tasks.get(t_id).unwrap();
-            is_for_school_care(task)
+            let (_, h) = task.time().day_hour();
+            h.in_school_time()
         })
         .collect();
 
