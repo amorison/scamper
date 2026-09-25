@@ -161,6 +161,10 @@ impl HourInWeek {
     pub fn day_hour(&self) -> (DayInWeek, HourInDay) {
         (DayInWeek(self.0 / 24), HourInDay(self.0 % 24))
     }
+
+    pub fn day_idx(&self) -> usize {
+        (self.0 / 24) as usize
+    }
 }
 
 /// A location on a Cartesian discrete grid.

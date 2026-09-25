@@ -88,7 +88,7 @@ pub fn assign_tasks_to_care_home(p_id: Id, model: &mut Model) {
     unassign_care_tasks_from(p_id, model);
     let person = model.pop.alive_mut(p_id);
     let care_tasks = mem::take(&mut person.task.open_tasks);
-    for t_id in care_tasks {
+    for t_id in care_tasks.iter() {
         mark_task_assigned(t_id, model);
         accept_task(t_id, &[], Carer::CareHome, model);
     }

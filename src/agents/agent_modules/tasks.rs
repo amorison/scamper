@@ -17,6 +17,7 @@ pub struct TaskTally {
     pub work: u32,
 }
 
+#[derive(Default)]
 pub struct TaskPerson {
     pub assigned_tasks: CareTasks,
     pub open_tasks: CareTasks,
@@ -27,20 +28,6 @@ pub struct TaskPerson {
     pub todo_tally: TaskTally,
     pub care_task_hours: u32,
     pub in_care_home: bool,
-}
-
-impl Default for TaskPerson {
-    fn default() -> Self {
-        Self {
-            assigned_tasks: CareTasks::with_capacity(20),
-            open_tasks: CareTasks::with_capacity(20),
-            task_schedule: [[0.0; 24]; 7],
-            todo: Default::default(),
-            todo_tally: Default::default(),
-            care_task_hours: 0,
-            in_care_home: false,
-        }
-    }
 }
 
 impl TaskPerson {
@@ -138,7 +125,7 @@ pub fn unassign_care_tasks_from(p_id: Id, model: &mut Model) {
 
     // FIXME: is this also where we remove the tasks from model.tasks?
 
-    for task_id in assigned_tasks {
+    for task_id in assigned_tasks.iter() {
         let task = model.tasks.get(&task_id).unwrap();
         // FIXME: clarify whether this check should hold
         // let Some(carer) = task.worker else {

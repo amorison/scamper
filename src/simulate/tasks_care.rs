@@ -22,7 +22,7 @@ use crate::{
         person::{Id, Person},
     },
     population::{AliveOrDead, PopIterOrder},
-    utilities::{Age, HourInWeek, int_map_with_cap, int_set_with_cap},
+    utilities::{Age, DayInWeek, HourInWeek, int_map_with_cap, int_set_with_cap},
 };
 
 pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPars) {
@@ -43,7 +43,7 @@ pub fn process_death_task_care(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     let open_tasks = mem::take(&mut person.task.open_tasks);
     let assigned_tasks = mem::take(&mut person.task.assigned_tasks);
-    for task_id in open_tasks.into_iter().chain(assigned_tasks) {
+    for task_id in open_tasks.iter().chain(assigned_tasks.iter()) {
         model.tasks.remove(&task_id);
     }
 
@@ -207,32 +207,16 @@ fn task_ask_weight(
 /// Return all open tasks of the given kind at a randomly selected day.
 fn get_chunk_of_open_tasks(p_id: Id, task_kind: TaskKind, model: &mut Model) -> Vec<IdTask> {
     let agent = model.pop.alive_mut(p_id);
+    let open_tasks = &mut agent.task.open_tasks;
 
-    // Can be simplified with `collect_into` once it is stabilised.
-    let mut tasks_of_kind = Vec::with_capacity(agent.task.open_tasks.len());
-    let tasks_iter = agent.task.open_tasks.iter().filter_map(|t_id| {
-        let task = model.tasks.get(&t_id).unwrap();
-        (task.kind == task_kind).then_some((t_id, task.time().day_hour().0))
-    });
-    tasks_of_kind.extend(tasks_iter);
-
-    let tasks = if let Some(&(_, time)) = tasks_of_kind.choose(&mut model.rng) {
-        let mut tasks_at_time = Vec::with_capacity(tasks_of_kind.len());
-        let tasks_at_time_iter = tasks_of_kind
-            .into_iter()
-            .filter_map(|(id, t)| (time == t).then_some(id));
-        tasks_at_time.extend(tasks_at_time_iter);
-        tasks_at_time
+    let days: Vec<_> = DayInWeek::all_days().collect();
+    if let Ok(&day) =
+        days.choose_weighted(&mut model.rng, |&day| open_tasks.ntasks_on(task_kind, day))
+    {
+        open_tasks.transfer_to_and_copy(task_kind, day, &mut agent.task.assigned_tasks)
     } else {
         Vec::new()
-    };
-
-    for &t_id in &tasks {
-        assert!(agent.task.assigned_tasks.insert_id(t_id));
-        assert!(agent.task.open_tasks.remove_id(t_id));
     }
-
-    tasks
 }
 
 // FIXME: this should be different for formal care
