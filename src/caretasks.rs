@@ -2,7 +2,10 @@ use std::collections::hash_set;
 
 use identity_hash::IntSet;
 
-use crate::{agents::tasks::IdTask, utilities::int_set_with_cap};
+use crate::{
+    agents::tasks::{IdTask, Task},
+    utilities::int_set_with_cap,
+};
 
 /// Collection of care tasks.
 #[derive(Default)]
@@ -21,12 +24,20 @@ impl CareTasks {
         self.0.len()
     }
 
-    pub fn remove(&mut self, t_id: IdTask) -> bool {
+    pub fn remove_id(&mut self, t_id: IdTask) -> bool {
         self.0.remove(&t_id)
     }
 
-    pub fn insert(&mut self, t_id: IdTask) -> bool {
+    pub fn insert_id(&mut self, t_id: IdTask) -> bool {
         self.0.insert(t_id)
+    }
+
+    pub fn remove(&mut self, task: &Task) -> bool {
+        self.0.remove(&task.id())
+    }
+
+    pub fn insert(&mut self, task: &Task) -> bool {
+        self.0.insert(task.id())
     }
 
     pub fn iter(&self) -> impl Iterator<Item = IdTask> {

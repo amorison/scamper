@@ -114,8 +114,8 @@ impl TaskPerson {
 pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {
     let task = model.tasks.get_mut(&task_id).unwrap();
     let owner = model.pop.alive_mut(task.owner());
-    owner.task.open_tasks.remove(task_id);
-    owner.task.assigned_tasks.insert(task_id);
+    owner.task.open_tasks.remove(task);
+    owner.task.assigned_tasks.insert(task);
     task.worker = None;
 }
 
@@ -125,8 +125,8 @@ pub fn mark_task_unassigned(task_id: IdTask, model: &mut Model) {
         // FIXME: make it impossible to have work tasks going
         // into the assigned_tasks/open_tasks logic.
         let owner = model.pop.alive_mut(task.owner());
-        owner.task.assigned_tasks.remove(task_id);
-        owner.task.open_tasks.insert(task_id);
+        owner.task.assigned_tasks.remove(task);
+        owner.task.open_tasks.insert(task);
     }
     task.worker = None;
 }

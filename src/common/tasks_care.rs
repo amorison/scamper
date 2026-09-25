@@ -68,8 +68,8 @@ pub fn init_care_tasks(p_id: Id, pars: &ModelPars, model: &mut Model) {
             let hiw = HourInWeek::new(day, HourInDay::new(hour));
             let task = Task::social_care(p_id, hiw);
             let t_id = task.id();
+            person.task.open_tasks.insert(&task);
             model.tasks.insert(t_id, task);
-            person.task.open_tasks.insert(t_id);
             hour += 1;
         }
 
@@ -77,8 +77,8 @@ pub fn init_care_tasks(p_id: Id, pars: &ModelPars, model: &mut Model) {
             let hiw = HourInWeek::new(day, HourInDay::new(hour));
             let task = Task::child_care(p_id, hiw);
             let t_id = task.id();
+            person.task.open_tasks.insert(&task);
             model.tasks.insert(t_id, task);
-            person.task.open_tasks.insert(t_id);
             hour += 1;
         }
 
@@ -86,8 +86,8 @@ pub fn init_care_tasks(p_id: Id, pars: &ModelPars, model: &mut Model) {
             let hiw = HourInWeek::new(day, HourInDay::new(hour));
             let task = Task::social_care(p_id, hiw);
             let t_id = task.id();
+            person.task.open_tasks.insert(&task);
             model.tasks.insert(t_id, task);
-            person.task.open_tasks.insert(t_id);
             hour += 1;
         }
     }
