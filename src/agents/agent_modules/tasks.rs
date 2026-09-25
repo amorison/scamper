@@ -173,8 +173,7 @@ pub fn find_tasks_at(person: &Person, hiw: HourInWeek, model: &Model) -> Vec<IdT
         return Vec::new();
     }
 
-    let (day, _) = hiw.day_hour();
-    person.task.todo[day.index()]
+    person.task.todo[hiw.day_idx()]
         .iter()
         .copied()
         .filter(|t_id| model.tasks.get(t_id).unwrap().time() == hiw)
