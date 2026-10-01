@@ -264,9 +264,9 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     // Accept work tasks by default, which might then be replaced by care tasks.
     for p_id in order.ids() {
         let person = model.pop.alive_mut(p_id);
-        for &t_id in &person.work.job_tasks {
-            let task = model.tasks.get(&t_id).unwrap();
-            if person.how_busy_at(task.time) <= 0.0 {
+        for &(t_id, time) in &person.work.job_tasks {
+            if person.how_busy_at(time) <= 0.0 {
+                let task = model.tasks.get(&t_id).unwrap();
                 person.task.schedule_task(task);
             }
         }

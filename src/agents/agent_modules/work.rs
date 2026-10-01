@@ -1,7 +1,7 @@
 use crate::{
     agents::tasks::IdTask,
     full_model::{Model, person::Id},
-    utilities::Date,
+    utilities::{Date, HourInWeek},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -60,7 +60,7 @@ pub struct Work {
     pub last_income: f64,
     pub wealth: f64,
     pub financial_wealth: f64,
-    pub job_tasks: Vec<IdTask>,
+    pub job_tasks: Vec<(IdTask, HourInWeek)>,
     /// Potential working hours per week
     pub working_hours: u32,
     /// Sum of actual working hours.
@@ -122,7 +122,7 @@ pub fn lose_job(p_id: Id, model: &mut Model) {
     person.work.working_hours = 0;
     person.work.job_tenure = 0;
 
-    for t_id in person.work.job_tasks.drain(..) {
+    for (t_id, _) in person.work.job_tasks.drain(..) {
         let task = model.tasks.remove(&t_id).unwrap();
         person.task.unschedule_task_if_present(&task);
     }
