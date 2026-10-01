@@ -103,6 +103,7 @@ pub fn mark_task_assigned(task_id: IdTask, model: &mut Model) {
     let owner = model.pop.alive_mut(task.owner());
     owner.task.open_tasks.remove(task);
     owner.task.assigned_tasks.insert(task);
+    // The worker is only set when the task is accepted by the carer.
     task.worker = None;
 }
 
@@ -123,14 +124,9 @@ pub fn unassign_care_tasks_from(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     let assigned_tasks = mem::take(&mut person.task.assigned_tasks);
 
-    // FIXME: is this also where we remove the tasks from model.tasks?
-
     for task_id in assigned_tasks.iter() {
         let task = model.tasks.get(&task_id).unwrap();
-        // FIXME: clarify whether this check should hold
-        // let Some(carer) = task.worker else {
-        //     panic!("assigned_tasks should have a worker")
-        // };
+        // Tasks that have been assigned and accepted are unscheduled.
         if let Some(Carer::Person(w_id)) = task.worker {
             let worker = model.pop.alive_mut(w_id);
             worker.task.unschedule_task(task);
