@@ -101,7 +101,7 @@ impl Task {
             id: IdTask::new(),
             kind: TaskKind::Work,
             owner,
-            worker: Some(Carer::Person(owner)),
+            worker: None,
             time,
             urgency: 1.0,
             focus: 1.0,
