@@ -11,8 +11,8 @@ use crate::{
     carehomes::{self, CareHomes},
     full_model::{
         data::{
-            Post51Fertility, Post51MortalityFemale, Post51MortalityMale, Pre51Fertility,
-            Pre51Mortality, Unemployment, WealthDistribution,
+            Post51Fertility, Post51Mortality, Pre51Fertility, Pre51Mortality, Unemployment,
+            WealthDistribution,
         },
         house::{House, IdHouse},
     },
@@ -73,8 +73,8 @@ pub struct Model {
     pub fert_pre51: Pre51Fertility,
     pub fert_post51: Post51Fertility,
     pub pre51_deaths: Pre51Mortality,
-    pub female_deaths: Post51MortalityFemale,
-    pub male_deaths: Post51MortalityMale,
+    pub female_deaths: Post51Mortality,
+    pub male_deaths: Post51Mortality,
     pub unemployment_series: Unemployment,
     pub wealth_percentiles: WealthDistribution,
 
@@ -128,8 +128,8 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
         fert_pre51: Pre51Fertility::read_from(&pars.data_files.pre51_fertility),
         fert_post51,
         pre51_deaths: Pre51Mortality::read_from(&pars.data_files.pre51_deaths),
-        female_deaths: Post51MortalityFemale::read_from(&pars.data_files.death_female),
-        male_deaths: Post51MortalityMale::read_from(&pars.data_files.death_male),
+        female_deaths: Post51Mortality::read_from(&pars.data_files.death_female),
+        male_deaths: Post51Mortality::read_from(&pars.data_files.death_male),
         unemployment_series: Unemployment::read_from(&pars.data_files.unemployment_rate),
         wealth_percentiles: WealthDistribution::read_from(&pars.data_files.wealth_distribution),
         birth_cache: BirthCache::default(),

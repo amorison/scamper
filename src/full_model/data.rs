@@ -118,37 +118,16 @@ impl Pre51Mortality {
     }
 }
 
-// FIXME: group these
-pub struct Post51MortalityMale(Vec<Vec<f64>>);
-pub struct Post51MortalityFemale(Vec<Vec<f64>>);
+pub struct Post51Mortality(Vec<Vec<f64>>);
 
-impl Post51MortalityMale {
+impl Post51Mortality {
     pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = csv::ReaderBuilder::new()
             .has_headers(false)
             .from_path(path)
-            .expect("error reading post51 male mortality");
+            .expect("error reading post51 mortality");
         let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().collect();
-        Self(records.expect("error reading post51 male mortality"))
-    }
-
-    pub fn rate(&self, age: Age, date: Date) -> f64 {
-        // FIXME: dodgy indexing
-        let iy = (date.year_month().0 - 1950) as usize;
-        let iage = age.year_month().0.min(109) as usize;
-        // FIXME: double check order of indices
-        self.0[iage][iy]
-    }
-}
-
-impl Post51MortalityFemale {
-    pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
-        let mut reader = csv::ReaderBuilder::new()
-            .has_headers(false)
-            .from_path(path)
-            .expect("error reading post51 female mortality");
-        let records: Result<Vec<Vec<f64>>, _> = reader.deserialize().collect();
-        Self(records.expect("error reading post51 female mortality"))
+        Self(records.expect("error reading post51 mortality"))
     }
 
     pub fn rate(&self, age: Age, date: Date) -> f64 {
