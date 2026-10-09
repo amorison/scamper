@@ -46,8 +46,6 @@ pub fn process_death_task_care(p_id: Id, model: &mut Model) {
     for task_id in open_tasks.iter().chain(assigned_tasks.iter()) {
         model.tasks.remove(&task_id);
     }
-
-    // FIXME: older tasks that were forgotten are not removed here
 }
 
 pub fn care_need_changed(p_id: Id, model: &mut Model, pars: &ModelPars) {

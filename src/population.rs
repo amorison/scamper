@@ -92,7 +92,6 @@ impl Population {
             .living
             .remove(&id)
             .unwrap_or_else(|| panic!("{id:?} is not a living person"));
-        // FIXME: can this be left to grow or will need to be pruned as well?
         let dead = person.into();
         self.dead.insert(id, dead);
     }

@@ -74,13 +74,11 @@ impl Post51Fertility {
     }
 
     pub fn rate_for(&self, ifert_age: usize, year: u32) -> f64 {
-        // FIXME: double check the order of these indices
         self.0[ifert_age][(year - 1951) as usize]
     }
 
     /// Normalised age-specific fertility in 1951
     pub fn normalised_fertility1951(&self) -> Vec<f64> {
-        // FIXME: double check the order of these indices
         let mut fert: Vec<_> = self.0.iter().map(|age| age[0]).collect();
         let norm = fert.iter().sum::<f64>() / fert.len() as f64;
         fert.iter_mut().for_each(|f| *f /= norm);
@@ -134,7 +132,6 @@ impl Post51Mortality {
         // FIXME: dodgy indexing
         let iy = (date.year_month().0 - 1950) as usize;
         let iage = age.year_month().0.min(109) as usize;
-        // FIXME: double check order of indices
         self.0[iage][iy]
     }
 }
