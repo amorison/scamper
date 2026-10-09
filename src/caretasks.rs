@@ -14,6 +14,10 @@ impl TasksPerDay {
         self.0.iter().all(|v| v.is_empty())
     }
 
+    fn len(&self) -> usize {
+        self.0.iter().map(|v| v.len()).sum()
+    }
+
     fn insert_id(&mut self, t_id: IdTask, iday: usize) {
         let slot = &mut self.0[iday];
         if !slot.contains(&t_id) {
@@ -73,6 +77,14 @@ pub struct CareTasks {
 impl CareTasks {
     pub fn is_empty(&self) -> bool {
         self.child.is_empty() && self.health.is_empty()
+    }
+
+    pub fn ntasks(&self, task_kind: TaskKind) -> usize {
+        match task_kind {
+            TaskKind::ChildCare => self.child.len(),
+            TaskKind::SocialCare => self.health.len(),
+            TaskKind::Work => panic!("only care tasks are handled"),
+        }
     }
 
     pub fn ntasks_on(&self, task_kind: TaskKind, day: DayInWeek) -> usize {

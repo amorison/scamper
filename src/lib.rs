@@ -468,6 +468,9 @@ struct Care {
     child_care_demand: u32,
     /// Weekly care supply for child, teen, student, fixed shift, flexible shift, retired, unemployed
     care_supply_by_status: [u32; 7],
+    unmet_need_exp: f64,
+    unmet_need_discount: f64,
+    unmet_need_share_discount: f64,
 }
 
 impl Default for Care {
@@ -482,6 +485,9 @@ impl Default for Care {
             care_transition_rate: 0.7,
             child_care_demand: 168,
             care_supply_by_status: [0, 10, 24, 32, 32, 60, 48],
+            unmet_need_exp: 1.0,
+            unmet_need_discount: 0.5,
+            unmet_need_share_discount: 0.5,
         }
     }
 }
