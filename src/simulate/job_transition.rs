@@ -26,7 +26,6 @@ pub fn job_pre_calc(date: Date, model: &mut Model, order: &PopIterOrder, pars: &
     let unemployment_rate = model.unemployment_series.rate(date);
     model.job_cache.urates = compute_ur_by_class_age(unemployment_rate, shares, pars);
 
-    // FIXME: is that the right place? Ideally we would have stateless diagnostics...
     for p_id in order.ids() {
         let person = model.pop.alive_mut(p_id);
         person.work.available_working_hours = person.task.todo_tally.work;

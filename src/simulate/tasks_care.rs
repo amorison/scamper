@@ -118,7 +118,6 @@ fn available_care_time(agent: &Person, pars: &ModelPars) -> f64 {
 /// Add agent to list if minimum requirements are met.
 fn check_and_add_carer(list: &mut Vec<Id>, p_id: Id, model: &Model, pars: &ModelPars) {
     // TODO: check location (max dist?)
-    // FIXME: list should be a set for cheaper check?
     if !list.contains(&p_id)
         && model
             .pop

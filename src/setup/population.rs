@@ -21,7 +21,6 @@ use crate::{
     utilities::{Age, Date, int_map_with_cap},
 };
 
-// FIXME: this is inefficient, sampling for the entire population in one go would be better
 fn rand_age<R: Rng>(pyramid: &AgePyramid, gender: Gender, rng: &mut R) -> Age {
     let data = pyramid.of_gender(gender);
     let indices: Vec<_> = (0..data.len()).collect();
