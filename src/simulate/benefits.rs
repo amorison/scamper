@@ -393,23 +393,14 @@ fn calc_pension_credit(
     }
 
     if !house.income.owned_by_occupants {
-        if let Some(partner) = maybe_partner
-            && partner_retired
+        let tot_wealth = person.work.financial_wealth
+            + maybe_partner.map_or_default(|p| p.work.financial_wealth);
+        if maybe_partner.is_none_or(|_| partner_retired)
+            && (guarantee_credit || tot_wealth < pars.benefit.housing_benefit_wealth_threshold)
         {
-            let tot_wealth = person.work.financial_wealth + partner.work.financial_wealth;
-            if tot_wealth < pars.benefit.housing_benefit_wealth_threshold || guarantee_credit {
-                let iroom = compute_max_rooms(house, model) - 1;
-                let town = house.town(model);
-                benefits += town.lha[iroom];
-            }
-        } else if maybe_partner.is_none() {
-            if person.work.financial_wealth < pars.benefit.housing_benefit_wealth_threshold
-                || guarantee_credit
-            {
-                let iroom = compute_max_rooms(house, model) - 1;
-                let town = house.town(model);
-                benefits += town.lha[iroom];
-            }
+            let iroom = compute_max_rooms(house, model) - 1;
+            let town = house.town(model);
+            benefits += town.lha[iroom];
         }
     }
     Some((person.id(), benefits, guarantee_credit))
