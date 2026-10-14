@@ -101,10 +101,10 @@ pub fn compute_ur_by_class_age(
             .map(|ab| shares.age_band[r][ab] * pars.work.unemployment_age_bias[ab])
             .sum();
 
-        for age_group in 0..N_AGE_BANDS {
+        for (age_group, uab) in pars.work.unemployment_age_bias.iter().enumerate() {
             let class_rate = ur * class_bias[r];
             let lower_age_band_rate = if a_age > 0.0 { class_rate / a_age } else { 0.0 };
-            rates[r][age_group] = lower_age_band_rate * pars.work.unemployment_age_bias[age_group];
+            rates[r][age_group] = lower_age_band_rate * uab;
         }
     }
 
