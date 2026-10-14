@@ -300,30 +300,27 @@ fn get_importance_at(
 }
 
 /// Get list of tasks that would have to be given up in order to accomodate new task.
+/// None if no plan is acceptable.
 fn task_accept_plan(
     agent: &Person,
     task: &Task,
     model: &Model,
     pars: &ModelPars,
-) -> Vec<(IdTask, f64)> {
+) -> Option<Vec<(IdTask, f64)>> {
     let mut tasks = get_importance_at(agent, task.time(), model, pars);
 
     if tasks.is_empty() {
-        return tasks;
-    }
-
-    // FIXME: Julia has `tasks.is_empty() &&` here. This should probably be `!is_empty`, which is
-    // always true at this point in the Rust code anyway.
-    // tapped out, can't give up free hour
-    if available_care_time(agent, pars) <= 0.0 {
-        return tasks;
+        // If no tasks are scheduled at the same time, the accept plan is either:
+        // - accept task without dropping any other if agent has care time available.
+        // - refuse task if agent doesn't have care time available.
+        return (available_care_time(agent, pars) > 0.0).then_some(tasks);
     }
 
     // If new task is at a different location we'd have to give up all previous
     // tasks. Currently assumes caree determines location.
     let task0 = model.tasks.get(&tasks[0].0).unwrap();
     if !task.is_colocated(task0) {
-        return tasks;
+        return Some(tasks);
     }
 
     // Sort by importance
@@ -340,7 +337,7 @@ fn task_accept_plan(
         tasks.pop();
     }
 
-    tasks
+    Some(tasks)
 }
 
 /// Sigmoid such that f(0) = 0, f(1) = 1, f(1/2) = 1/2.
@@ -387,8 +384,15 @@ fn check_accept_tasks(
         let agent = model.pop.alive(p_id);
         let task = model.tasks.get(&t_id).unwrap();
         let task_owner = task.owner();
-        let tasks_to_give_up = task_accept_plan(agent, task, model, pars);
-        let prob = task_accept_prob(task, &tasks_to_give_up, agent, model, pars);
+        let accept_plan = task_accept_plan(agent, task, model, pars);
+        let (prob, tasks_to_give_up) = if let Some(tasks_to_give_up) = accept_plan {
+            (
+                task_accept_prob(task, &tasks_to_give_up, agent, model, pars),
+                tasks_to_give_up,
+            )
+        } else {
+            (0.0, Vec::new())
+        };
 
         if model.rng.random_bool(prob) {
             let tasks_to_clear: Vec<_> = tasks_to_give_up.into_iter().map(|gu| gu.0).collect();
