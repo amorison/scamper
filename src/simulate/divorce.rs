@@ -21,7 +21,7 @@ pub struct DivorceCache {
 
 pub fn divorce_pre_calc(model: &mut Model, pars: &ModelPars) {
     model.divorce_cache.class_bias = calc_rate_bias(
-        |i| model.social_cache.social_class_shares[i],
+        model.social_cache.social_class_shares,
         pars.divorce.divorce_bias,
     );
 }

@@ -97,12 +97,12 @@ pub fn death_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
     model.death_cache.avg_die_prob_m = s_m / n_m;
     model.death_cache.avg_die_prob_f = s_f / n_f;
 
-    model.death_cache.class_bias_m = sum_class_bias::<_, N_CLASSES>(
-        |i| model.social_cache.social_class_shares[i],
+    model.death_cache.class_bias_m = sum_class_bias(
+        model.social_cache.social_class_shares,
         pars.population.male_mortality_bias,
     );
-    model.death_cache.class_bias_f = sum_class_bias::<_, N_CLASSES>(
-        |i| model.social_cache.social_class_shares[i],
+    model.death_cache.class_bias_f = sum_class_bias(
+        model.social_cache.social_class_shares,
         pars.population.female_mortality_bias,
     );
 

@@ -17,10 +17,8 @@ pub struct SocialCareCache {
 }
 
 pub fn social_care_pre_calc(model: &mut Model, pars: &ModelPars) {
-    model.social_care_cache.class_bias = calc_rate_bias(
-        |i| model.social_cache.social_class_shares[i],
-        pars.care.care_bias,
-    );
+    model.social_care_cache.class_bias =
+        calc_rate_bias(model.social_cache.social_class_shares, pars.care.care_bias);
 }
 
 /// Adjust social care need.

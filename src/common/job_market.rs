@@ -93,7 +93,7 @@ pub fn compute_ur_by_class_age(
     let mut rates = [[0.0; N_AGE_BANDS]; N_CLASSES];
 
     let class_bias: [_; N_CLASSES] =
-        calc_rate_bias(|r| shares.class[r], pars.work.unemployment_class_bias);
+        calc_rate_bias(shares.class, pars.work.unemployment_class_bias);
 
     for r in 0..N_CLASSES {
         // calc normalisation factor for age bias

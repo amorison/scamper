@@ -89,7 +89,7 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
 
     let npotmoms = model.birth_cache.potential_mothers.len().max(1) as f64;
     let pcpm = n_per_class.map(|pc| pc / npotmoms);
-    model.birth_cache.class_bias = calc_rate_bias(|i| pcpm[i], pars.birth.fertility_bias);
+    model.birth_cache.class_bias = calc_rate_bias(pcpm, pars.birth.fertility_bias);
 
     let mut pncpmc = [[0.0; 5]; N_CLASSES];
     model
@@ -103,7 +103,7 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
             pncpmc[ic][nc] /= n_per_class[ic];
         }
         model.birth_cache.n_children_bias[ic] =
-            calc_rate_bias(|nc| pncpmc[ic][nc], pars.birth.prev_child_fertility_bias);
+            calc_rate_bias(pncpmc[ic], pars.birth.prev_child_fertility_bias);
     }
 }
 

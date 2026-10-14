@@ -194,18 +194,12 @@ impl Location {
     }
 }
 
-pub fn sum_class_bias<F, const N: usize>(f: F, bias: f64) -> f64
-where
-    F: Fn(usize) -> f64,
-{
-    (0..N).map(|c| f(c) * bias.powi(c as i32)).sum()
+pub fn sum_class_bias<const N: usize>(f: [f64; N], bias: f64) -> f64 {
+    (0..N).map(|c| f[c] * bias.powi(c as i32)).sum()
 }
 
-pub fn calc_rate_bias<F, const N: usize>(f: F, bias: f64) -> [f64; N]
-where
-    F: Fn(usize) -> f64,
-{
-    let sum = sum_class_bias::<_, N>(f, bias);
+pub fn calc_rate_bias<const N: usize>(f: [f64; N], bias: f64) -> [f64; N] {
+    let sum = sum_class_bias(f, bias);
     let mut rates = [0.0; N];
     for (c, rate) in rates.iter_mut().enumerate() {
         *rate = bias.powi(c as i32) / sum;
