@@ -207,8 +207,8 @@ where
 {
     let sum = sum_class_bias::<_, N>(f, bias);
     let mut rates = [0.0; N];
-    for c in 0..N {
-        rates[c] = bias.powi(c as i32) / sum;
+    for (c, rate) in rates.iter_mut().enumerate() {
+        *rate = bias.powi(c as i32) / sum;
     }
     rates
 }
