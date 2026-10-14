@@ -2,7 +2,7 @@ use crate::{
     ModelPars,
     agents::{
         agent_modules::basic_info::Gender,
-        interactions::{family::has_own_children_at_home, housing::living_together},
+        interactions::{family::has_a_child_at_home, housing::living_together},
     },
     full_model::{
         Model,
@@ -107,7 +107,7 @@ fn is_uc_eligible_young(person: &Person, model: &Model) -> bool {
             && person.kinship.father.is_none()
             && person.kinship.mother.is_none())
             || person.care.social_work >= 35
-            || has_own_children_at_home(person, model))
+            || has_a_child_at_home(person, model))
 }
 
 fn universal_credit(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {

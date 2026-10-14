@@ -72,8 +72,8 @@ pub fn has_young_infant(parent: &Person, model: &Model) -> bool {
     })
 }
 
-// FIXME: slightly misnamed, this checks if at least one child is home.
-pub fn has_own_children_at_home(parent: &Person, model: &Model) -> bool {
+/// Whether `parent` lives with at least one of their children.
+pub fn has_a_child_at_home(parent: &Person, model: &Model) -> bool {
     parent.kinship.children.iter().any(|&c_id| {
         model
             .pop
