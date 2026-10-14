@@ -106,18 +106,18 @@ pub fn death_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
         pars.population.female_mortality_bias,
     );
 
-    for ic in 0..N_CLASSES {
-        let s: f64 = care_need_shares[ic].iter().sum();
-        care_need_shares[ic] = care_need_shares[ic].map(|cns| cns / s);
+    for cns in care_need_shares.iter_mut() {
+        let sum: f64 = cns.iter().sum();
+        *cns = cns.map(|s| s / sum);
     }
 
-    for ic in 0..N_CLASSES {
-        model.death_cache.care_bias[ic] = care_need_shares[ic]
+    for (ic, cns) in care_need_shares.iter().enumerate() {
+        model.death_cache.care_bias[ic] = cns
             .iter()
             .enumerate()
-            .map(|(i_cn, cns)| {
+            .map(|(i_cn, s)| {
                 let exp = N_CARE_LEVELS as i32 - 1 - i_cn as i32;
-                cns * pars.care.care_need_bias.powi(exp)
+                s * pars.care.care_need_bias.powi(exp)
             })
             .sum()
     }
