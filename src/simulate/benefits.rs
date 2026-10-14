@@ -75,7 +75,6 @@ fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
         // attendance allowance
         if person.basic.age >= Age::years(pars.work.age_retirement) && person.care.need_level > 2 {
             person.benefits.benefits += pars.benefit.care_aa[ic];
-            // FIXME: do not set person.benefits.highest_disability?
         }
 
         // carer's allowance
