@@ -1,5 +1,5 @@
 use rand::{Rng, RngExt};
-use rand_distr::Uniform;
+use rand_distr::{Distribution, Uniform};
 
 use crate::{
     ModelPars, N_AGE_BANDS, N_CLASSES,
@@ -112,8 +112,7 @@ pub fn compute_ur_by_class_age(
 }
 
 pub fn assign_job(p_id: Id, pars: &ModelPars, model: &mut Model) {
-    let mut shift = model.shift_pool.sample(&mut model.rng, 1);
-    let shift = shift.pop().unwrap();
+    let shift = model.shift_pool.sample(&mut model.rng);
     change_status(p_id, WorkStatus::FixedShiftEmployed, model);
     let person = model.pop.alive_mut(p_id);
     person.work.unemployment_months = 0;

@@ -13,6 +13,7 @@ pub struct Shift {
     social_index: f64,
 }
 
+/// A [Distribution] of [Shift]s weighted by their social index.
 pub struct ShiftPool {
     shifts: Vec<Shift>,
     sampler: WeightedAliasIndex<f64>,
@@ -105,15 +106,11 @@ impl ShiftPool {
             sampler,
         }
     }
+}
 
-    // TODO: draw without replacement?
-    /// Sample `n` non-distinct shifts, weighted by their social index.
-    pub fn sample<R: Rng>(&self, rng: &mut R, n: usize) -> Vec<Shift> {
-        (&self.sampler)
-            .sample_iter(rng)
-            .take(n)
-            .map(|i| &self.shifts[i])
-            .cloned()
-            .collect()
+impl Distribution<Shift> for ShiftPool {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Shift {
+        let ishift = self.sampler.sample(rng);
+        self.shifts[ishift].clone()
     }
 }
