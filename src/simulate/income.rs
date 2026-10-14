@@ -8,7 +8,7 @@ use crate::{
 fn update_person_income(person: &mut Person, pars: &ModelPars) {
     match person.work.status {
         WorkStatus::Child | WorkStatus::Teenager | WorkStatus::Student => person.work.income = 0.0,
-        WorkStatus::FixedShiftEmployed | WorkStatus::FlexibleShiftEmployed => {
+        WorkStatus::FixedShiftEmployed => {
             if person.maternity.is_in_maternity() {
                 let expected_income =
                     person.work.wage * pars.work.weekly_hours[person.care.index()] as f64;

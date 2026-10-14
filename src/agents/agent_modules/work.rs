@@ -11,8 +11,6 @@ pub enum WorkStatus {
     Student,
     /// Agent is employed at fixed hours.
     FixedShiftEmployed,
-    /// Agent has flexible working hours, working when tasks are available.
-    FlexibleShiftEmployed,
     Retired,
     Unemployed,
 }
@@ -24,7 +22,6 @@ impl WorkStatus {
             WorkStatus::Teenager => false,
             WorkStatus::Student => false,
             WorkStatus::FixedShiftEmployed => true,
-            WorkStatus::FlexibleShiftEmployed => true,
             WorkStatus::Retired => false,
             WorkStatus::Unemployed => false,
         }
@@ -37,7 +34,6 @@ impl WorkStatus {
             WorkStatus::Teenager => 10,
             WorkStatus::Student => 24,
             WorkStatus::FixedShiftEmployed => 32,
-            WorkStatus::FlexibleShiftEmployed => 32,
             WorkStatus::Retired => 60,
             WorkStatus::Unemployed => 48,
         }
