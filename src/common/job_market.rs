@@ -10,7 +10,7 @@ use crate::{
         person::{Id, Person},
     },
     population::PopIterOrder,
-    utilities::{Date, HourInWeek, calc_rate_bias},
+    utilities::{HourInWeek, calc_rate_bias},
 };
 
 pub fn can_work(person: &Person) -> bool {
@@ -111,11 +111,11 @@ pub fn compute_ur_by_class_age(
     rates
 }
 
-fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut Model) {
+fn assign_job(p_id: Id, shift: Shift, pars: &ModelPars, model: &mut Model) {
     change_status(p_id, WorkStatus::FixedShiftEmployed, model);
     let person = model.pop.alive_mut(p_id);
     person.work.unemployment_months = 0;
-    person.work.month_hired = month;
+    person.work.month_hired = model.date;
     person.work.wage = compute_wage(person, &mut model.rng, pars);
 
     person.work.working_hours = pars.work.weekly_hours[person.care.need_level as usize];
@@ -132,11 +132,11 @@ fn assign_job(p_id: Id, month: Date, shift: Shift, pars: &ModelPars, model: &mut
     }
 }
 
-pub fn assign_jobs(hired_agents: &[Id], month: Date, pars: &ModelPars, model: &mut Model) {
+pub fn assign_jobs(hired_agents: &[Id], pars: &ModelPars, model: &mut Model) {
     let shifts = model.shift_pool.sample(&mut model.rng, hired_agents.len());
 
     for (i, shift) in shifts.into_iter().enumerate() {
         let p_id = hired_agents[i];
-        assign_job(p_id, month, shift, pars, model);
+        assign_job(p_id, shift, pars, model);
     }
 }

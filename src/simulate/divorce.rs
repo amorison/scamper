@@ -11,7 +11,7 @@ use crate::{
         move_house::{Proximity, move_people_to_empty_house},
         social::student_start_working,
     },
-    utilities::{Date, calc_rate_bias, try_rand_yearly2monthly},
+    utilities::{calc_rate_bias, try_rand_yearly2monthly},
 };
 
 #[derive(Default)]
@@ -31,7 +31,7 @@ fn divorce_probability(raw_rate: f64, man: &Person, model: &Model) -> f64 {
     (raw_rate * class_bias).clamp(0.0, 1.0)
 }
 
-pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
+pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
     let man = model.pop.alive(man_id);
     assert!(man.is_male());
     let wife_id = man.kinship.partner().expect("a single man cannot divorce");
@@ -39,7 +39,7 @@ pub fn divorce(man_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> b
     // This is here to manage the sweeping through of this parameter
     // but only for the years after 2012
     let idecade = (man.basic.age.year_month().0 / 10) as usize;
-    let raw_rate = if date.year_month().0 < pars.divorce.the_present {
+    let raw_rate = if model.date.year_month().0 < pars.divorce.the_present {
         pars.divorce.basic_divorce_rate * pars.divorce.divorce_modifier_by_decade[idecade]
     } else {
         pars.divorce.variable_divorce * pars.divorce.divorce_modifier_by_decade[idecade]

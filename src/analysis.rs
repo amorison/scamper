@@ -46,7 +46,8 @@ impl Output {
         })
     }
 
-    pub fn output(&mut self, date: Date, model: &Model, order: &PopIterOrder) -> io::Result<()> {
+    pub fn output(&mut self, model: &Model, order: &PopIterOrder) -> io::Result<()> {
+        let date = model.date;
         let stats = PopulationStats::new(model, order);
         let main_rec = MainRecord::new(date, &stats);
         self.main_csv.serialize(main_rec)?;

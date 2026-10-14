@@ -52,6 +52,8 @@ pub mod person;
 // FIXME: separate in smaller components to simplify borrowing and make it clearer which functions
 // need what.
 pub struct Model {
+    /// Current date
+    pub date: Date,
     /// Towns, containing houses.
     pub towns: IntMap<IdTown, Town>,
     /// Houses, located in towns.
@@ -117,6 +119,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
     let fert_post51 = Post51Fertility::read_from(&pars.data_files.fertility);
 
     let mut model = Model {
+        date: Date::new(pars.population.start_year),
         towns,
         houses: int_map_with_cap(0), // FIXME: check capacity
         pop,
@@ -155,7 +158,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
 }
 
 /// Perform one model step.
-pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars: &ModelPars) {
+pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars) {
     // run transitions
     // FIXME: move the `select_` into the transition themselves
 
@@ -166,7 +169,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     social_pre_calc(model, order);
     death_pre_calc(model, order, pars);
     for p_id in order.ids() {
-        death(p_id, date, model, pars);
+        death(p_id, model, pars);
     }
     order.register_dead(&mut model.pop);
 
@@ -175,7 +178,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     social_care_pre_calc(model, pars);
     divorce_pre_calc(model, pars);
     birth_pre_calc(model, order, pars);
-    job_pre_calc(date, model, order, pars);
+    job_pre_calc(model, order, pars);
 
     // adoption
     for p_id in order.ids() {
@@ -189,7 +192,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     for p_id in order.ids() {
         let person = model.pop.alive(p_id);
         if select_birth(person, model, pars) {
-            birth(p_id, date, model, pars);
+            birth(p_id, model, pars);
         }
     }
 
@@ -207,7 +210,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     for p_id in order.ids() {
         let person = model.pop.alive(p_id);
         if select_unemployed(person) {
-            unemployed_transition(p_id, date, model, pars);
+            unemployed_transition(p_id, model, pars);
         }
     }
 
@@ -246,7 +249,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
     for p_id in order.ids() {
         let person = model.pop.alive(p_id);
         if select_divorce(person) {
-            divorce(p_id, date, model, pars);
+            divorce(p_id, model, pars);
         }
     }
 
@@ -276,4 +279,6 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, date: Date, pars:
 
     // include babies in the population iteration
     order.register_new(&mut model.pop, &mut model.rng);
+
+    model.date = model.date.next_month();
 }

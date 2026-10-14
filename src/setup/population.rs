@@ -18,7 +18,7 @@ use crate::{
         person::{Id, Person, build::PersonAwaitingHouse},
     },
     population::PopIterOrder,
-    utilities::{Age, Date, int_map_with_cap},
+    utilities::{Age, int_map_with_cap},
 };
 
 fn rand_age<R: Rng>(pyramid: &AgePyramid, gender: Gender, rng: &mut R) -> Age {
@@ -309,10 +309,7 @@ pub fn init_jobs(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
         .filter_map(|p| p.work.is_worker().then_some(p.id()))
         .collect();
 
-    // FIXME: in Julia, the data passed is -1, which `assign_jobs` sets to a random month between 1
-    // and 12. None of this is a valid `Date`, the date should be picked in the active period for
-    // this agent.
-    assign_jobs(&hired_agents, Date::new(0), pars, model);
+    assign_jobs(&hired_agents, pars, model);
     init_wealth(model, pars);
 }
 

@@ -13,7 +13,6 @@ use crate::{
         person::{Id, Person},
     },
     population::PopIterOrder,
-    utilities::Date,
 };
 
 #[derive(Default)]
@@ -21,9 +20,9 @@ pub struct JobCache {
     urates: [[f64; N_AGE_BANDS]; N_CLASSES],
 }
 
-pub fn job_pre_calc(date: Date, model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
+pub fn job_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     let shares = calc_age_class_shares(model, order);
-    let unemployment_rate = model.unemployment_series.rate(date);
+    let unemployment_rate = model.unemployment_series.rate(model.date);
     model.job_cache.urates = compute_ur_by_class_age(unemployment_rate, shares, pars);
 
     for p_id in order.ids() {
@@ -75,11 +74,11 @@ pub fn select_unemployed(person: &Person) -> bool {
     person.work.is_unemployed()
 }
 
-pub fn unemployed_transition(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
+pub fn unemployed_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let prob_hired = calc_hire_probability(pars);
 
     if model.rng.random_bool(prob_hired) {
         // TODO: adapt
-        assign_jobs(&[p_id], date, pars, model);
+        assign_jobs(&[p_id], pars, model);
     }
 }

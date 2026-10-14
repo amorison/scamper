@@ -10,7 +10,7 @@ use crate::{
     },
     population::PopIterOrder,
     simulate::{dependencies::process_death_deps, tasks_care::process_death_tasks},
-    utilities::{Age, Date, sum_class_bias, try_rand_yearly2monthly},
+    utilities::{Age, sum_class_bias, try_rand_yearly2monthly},
 };
 
 fn death_probability(base_rate: f64, person: &Person, model: &Model, pars: &ModelPars) -> f64 {
@@ -138,7 +138,8 @@ fn age_die_prob(age: Age, gender: Gender, pars: &ModelPars) -> f64 {
     pars.population.base_die_prob + (age / age_scaling).exp() * age_die_prob
 }
 
-fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool {
+fn death_due(p_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
+    let date = model.date;
     let person = model.pop.alive(p_id);
 
     if person.basic.age >= MAX_AGE {
@@ -172,8 +173,8 @@ fn death_due(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) -> bool 
     try_rand_yearly2monthly(death_prob, &mut model.rng)
 }
 
-pub fn death(p_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
-    if death_due(p_id, date, model, pars) {
+pub fn death(p_id: Id, model: &mut Model, pars: &ModelPars) {
+    if death_due(p_id, model, pars) {
         set_dead(p_id, model);
     }
 }

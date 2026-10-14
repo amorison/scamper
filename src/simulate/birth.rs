@@ -16,7 +16,7 @@ use crate::{
         person::{Id, Person},
     },
     population::PopIterOrder,
-    utilities::{Age, Date, calc_rate_bias, try_rand_yearly2monthly},
+    utilities::{Age, calc_rate_bias, try_rand_yearly2monthly},
 };
 
 fn is_fertile_woman(person: &Person, pars: &ModelPars) -> bool {
@@ -105,8 +105,8 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
     }
 }
 
-fn compute_birth_prob(woman: &Person, model: &Model, pars: &ModelPars, date: Date) -> f64 {
-    let (year, _) = date.year_month();
+fn compute_birth_prob(woman: &Person, model: &Model, pars: &ModelPars) -> f64 {
+    let (year, _) = model.date.year_month();
 
     let age_years = woman.basic.age.year_month().0;
     let ifert_age = (age_years - pars.birth.min_pregnancy_age) as usize;
@@ -158,9 +158,9 @@ pub fn select_birth(person: &Person, model: &Model, pars: &ModelPars) -> bool {
     is_potential_mother(person, model, pars)
 }
 
-pub fn birth(woman_id: Id, date: Date, model: &mut Model, pars: &ModelPars) {
+pub fn birth(woman_id: Id, model: &mut Model, pars: &ModelPars) {
     let woman = model.pop.alive(woman_id);
-    let birth_prob = compute_birth_prob(woman, model, pars, date);
+    let birth_prob = compute_birth_prob(woman, model, pars);
 
     // FIXME: all these should be true by design
     assert!(woman.is_female());
