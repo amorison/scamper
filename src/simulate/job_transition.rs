@@ -5,7 +5,7 @@ use crate::{
     agents::agent_modules::work::{WorkStatus, lose_job},
     common::{
         income::compute_wage,
-        job_market::{assign_jobs, calc_age_class_shares, compute_ur_by_class_age},
+        job_market::{assign_job, calc_age_class_shares, compute_ur_by_class_age},
         social::change_status,
     },
     full_model::{
@@ -78,7 +78,6 @@ pub fn unemployed_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let prob_hired = calc_hire_probability(pars);
 
     if model.rng.random_bool(prob_hired) {
-        // TODO: adapt
-        assign_jobs(&[p_id], pars, model);
+        assign_job(p_id, pars, model);
     }
 }

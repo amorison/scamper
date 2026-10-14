@@ -111,7 +111,9 @@ pub fn compute_ur_by_class_age(
     rates
 }
 
-fn assign_job(p_id: Id, shift: Shift, pars: &ModelPars, model: &mut Model) {
+pub fn assign_job(p_id: Id, pars: &ModelPars, model: &mut Model) {
+    let mut shift = model.shift_pool.sample(&mut model.rng, 1);
+    let shift = shift.pop().unwrap();
     change_status(p_id, WorkStatus::FixedShiftEmployed, model);
     let person = model.pop.alive_mut(p_id);
     person.work.unemployment_months = 0;
@@ -129,14 +131,5 @@ fn assign_job(p_id: Id, shift: Shift, pars: &ModelPars, model: &mut Model) {
             model.tasks.insert(t_id, task);
             person.work.job_tasks.push((t_id, time));
         }
-    }
-}
-
-pub fn assign_jobs(hired_agents: &[Id], pars: &ModelPars, model: &mut Model) {
-    let shifts = model.shift_pool.sample(&mut model.rng, hired_agents.len());
-
-    for (i, shift) in shifts.into_iter().enumerate() {
-        let p_id = hired_agents[i];
-        assign_job(p_id, shift, pars, model);
     }
 }

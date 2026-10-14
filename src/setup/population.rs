@@ -9,7 +9,7 @@ use crate::{
     },
     common::{
         income::{assign_wealth_by_inc_percentile_hh, compute_wage, set_wage_progression},
-        job_market::assign_jobs,
+        job_market::assign_job,
         tasks_care::{init_care_tasks, social_care_demand_per_day},
     },
     full_model::{
@@ -309,7 +309,10 @@ pub fn init_jobs(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
         .filter_map(|p| p.work.is_worker().then_some(p.id()))
         .collect();
 
-    assign_jobs(&hired_agents, pars, model);
+    hired_agents
+        .into_iter()
+        .for_each(|p_id| assign_job(p_id, pars, model));
+
     init_wealth(model, pars);
 }
 
