@@ -99,9 +99,7 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
         .map(|&id| model.pop.alive(id))
         .for_each(|p| pncpmc[p.class.rank_idx()][p.kinship.n_children().min(4)] += 1.0);
     for ic in 0..N_CLASSES {
-        for nc in 0..5 {
-            pncpmc[ic][nc] /= n_per_class[ic];
-        }
+        pncpmc[ic].iter_mut().for_each(|n| *n /= n_per_class[ic]);
         model.birth_cache.n_children_bias[ic] =
             calc_rate_bias(pncpmc[ic], pars.birth.prev_child_fertility_bias);
     }
