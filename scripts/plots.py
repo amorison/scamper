@@ -26,19 +26,19 @@ class Data:
 
     @cached_property
     def pyramid_female(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "pyramid_female.csv")
+        return pd.read_csv(self.path / "pyramid_female.csv", header=None)
 
     @cached_property
     def pyramid_male(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "pyramid_male.csv")
+        return pd.read_csv(self.path / "pyramid_male.csv", header=None)
 
     @cached_property
     def care_need(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "care_need.csv")
+        return pd.read_csv(self.path / "care_need.csv", header=None)
 
     @cached_property
     def classes(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "class.csv")
+        return pd.read_csv(self.path / "class.csv", header=None)
 
     @cached_property
     def size(self) -> int:
