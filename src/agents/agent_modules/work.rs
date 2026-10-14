@@ -30,16 +30,16 @@ impl WorkStatus {
         }
     }
 
-    // status index
-    pub fn index(&self) -> usize {
+    /// Base weekly care supply for this status.
+    pub fn base_care_supply(&self) -> u32 {
         match self {
             WorkStatus::Child => 0,
-            WorkStatus::Teenager => 1,
-            WorkStatus::Student => 2,
-            WorkStatus::FixedShiftEmployed => 3,
-            WorkStatus::FlexibleShiftEmployed => 4,
-            WorkStatus::Retired => 5,
-            WorkStatus::Unemployed => 6,
+            WorkStatus::Teenager => 10,
+            WorkStatus::Student => 24,
+            WorkStatus::FixedShiftEmployed => 32,
+            WorkStatus::FlexibleShiftEmployed => 32,
+            WorkStatus::Retired => 60,
+            WorkStatus::Unemployed => 48,
         }
     }
 }
