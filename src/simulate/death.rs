@@ -9,7 +9,7 @@ use crate::{
         person::{Id, Person},
     },
     population::PopIterOrder,
-    simulate::{dependencies::process_death_deps, tasks_care::process_death_task_care},
+    simulate::{dependencies::process_death_deps, tasks_care::process_death_tasks},
     utilities::{Age, Date, sum_class_bias, try_rand_yearly2monthly},
 };
 
@@ -56,7 +56,7 @@ fn set_dead(p_id: Id, model: &mut Model) {
         resolve_partnership(partner_id, p_id, model);
     }
 
-    process_death_task_care(p_id, model);
+    process_death_tasks(p_id, model);
     process_death_deps(p_id, model);
 
     model.carehomes.dead(p_id);

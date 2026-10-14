@@ -34,8 +34,7 @@ pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPar
     }
 }
 
-// FIXME: misnamed since now this concerns all tasks.
-pub fn process_death_task_care(p_id: Id, model: &mut Model) {
+pub fn process_death_tasks(p_id: Id, model: &mut Model) {
     unassign_care_tasks_from(p_id, model);
     empty_todo(p_id, model);
 
