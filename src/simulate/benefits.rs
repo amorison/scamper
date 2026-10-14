@@ -393,14 +393,13 @@ fn calc_pension_credit(
         benefits += tot_disable_child_benefit;
     }
 
-    if !house.income.owned_by_occupants {
-        if maybe_partner.is_none_or(|_| partner_retired)
-            && (guarantee_credit || tot_wealth < pars.benefit.housing_benefit_wealth_threshold)
-        {
-            let iroom = compute_max_rooms(house, model) - 1;
-            let town = house.town(model);
-            benefits += town.lha[iroom];
-        }
+    if !house.income.owned_by_occupants
+        && maybe_partner.is_none_or(|_| partner_retired)
+        && (guarantee_credit || tot_wealth < pars.benefit.housing_benefit_wealth_threshold)
+    {
+        let iroom = compute_max_rooms(house, model) - 1;
+        let town = house.town(model);
+        benefits += town.lha[iroom];
     }
     Some((person.id(), benefits, guarantee_credit))
 }
@@ -428,10 +427,10 @@ fn compute_max_rooms(house: &House, model: &Model) -> usize {
 
     for &o_id in house.basic.occupants() {
         let occ = model.pop.alive(o_id);
-        if let Some(partner) = occ.partner(model) {
-            if living_together(occ, partner) {
-                n_couples += 1;
-            }
+        if let Some(partner) = occ.partner(model)
+            && living_together(occ, partner)
+        {
+            n_couples += 1;
         }
 
         if occ.basic.age >= Age::years(16) {
