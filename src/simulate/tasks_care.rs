@@ -284,9 +284,7 @@ fn task_importance(task: &Task, agent: &Person, model: &Model, pars: &ModelPars)
     pars.task_care.care_weight_related[rel][task.kind.weight_index()] * task.urgency
 }
 
-// FIXME: stale comment: work is tasks now
-/// Get importance of current tasks at a given hour. Returns list of priorities and list of tasks,
-/// an empty array if there are none, or nothing if agent has to work.
+/// Get todo tasks and their importance at given hour.
 fn get_importance_at(
     agent: &Person,
     hiw: HourInWeek,
