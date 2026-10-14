@@ -2,7 +2,7 @@
 name = "scamper"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.97"
+rust-version = "1.99"
 
 [dependencies]
 clap = { version = "4.6.5", features = ["derive"] }
