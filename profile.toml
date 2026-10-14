@@ -1,0 +1,5 @@
+[init]
+reproducible_rng = false
+
+[population]
+init_size = 5000
