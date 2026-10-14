@@ -18,6 +18,7 @@ use crate::{
         person::{Id, Person, build::PersonAwaitingHouse},
     },
     population::PopIterOrder,
+    simulate::social::start_working_age,
     utilities::{Age, int_map_with_cap},
 };
 
@@ -223,9 +224,9 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
         return;
     }
 
-    let working_age = pars.work.start_working_age[person.class.rank_idx()];
+    let working_age = start_working_age(person, pars);
 
-    if age < Age::years(working_age) {
+    if age < working_age {
         person.work.status = WorkStatus::Student;
         return;
     }
@@ -233,6 +234,7 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
     person.work.status = WorkStatus::FixedShiftEmployed;
 
     let mut working_time = 0.0;
+    let working_age = working_age.year_month().0;
     let age_years = age.year_month().0;
     for _ in working_age..=age_years {
         working_time *= pars.work.work_discounting_time;

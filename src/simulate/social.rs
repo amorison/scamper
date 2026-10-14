@@ -67,7 +67,6 @@ pub fn student_start_working(p_id: Id, model: &mut Model, pars: &ModelPars) {
     change_status(p_id, WorkStatus::Unemployed, model);
 }
 
-// FIXME: use where appropriate
 /// Age at which a person can decide to stop studying and start working.
 pub fn start_working_age(person: &Person, pars: &ModelPars) -> Age {
     Age::years(pars.work.start_working_age[person.class.rank_idx()])
