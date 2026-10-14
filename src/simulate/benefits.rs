@@ -318,12 +318,13 @@ fn calc_pension_credit(
     let mut guarantee_credit = false;
     let maybe_partner = person.partner(model);
     let partner_retired = maybe_partner.is_some_and(|p| p.basic.age >= retirement_age);
+    let tot_wealth =
+        person.work.financial_wealth + maybe_partner.map_or_default(|p| p.work.financial_wealth);
 
     if let Some(partner) = maybe_partner
         && partner_retired
     {
         let tot_income = person.work.income + partner.work.income;
-        let tot_wealth = person.work.financial_wealth + partner.work.financial_wealth;
         let aggregate_benefit_income = tot_income
             + ((tot_wealth - pars.benefit.wealth_allowance_pc)
                 / pars.benefit.saving_income_rate_pc)
@@ -336,7 +337,7 @@ fn calc_pension_credit(
         }
     } else if maybe_partner.is_none() {
         let benefit_income = person.work.income
-            + ((person.work.financial_wealth - pars.benefit.wealth_allowance_pc)
+            + ((tot_wealth - pars.benefit.wealth_allowance_pc)
                 / pars.benefit.saving_income_rate_pc)
                 .floor()
                 .max(0.0);
@@ -393,8 +394,6 @@ fn calc_pension_credit(
     }
 
     if !house.income.owned_by_occupants {
-        let tot_wealth = person.work.financial_wealth
-            + maybe_partner.map_or_default(|p| p.work.financial_wealth);
         if maybe_partner.is_none_or(|_| partner_retired)
             && (guarantee_credit || tot_wealth < pars.benefit.housing_benefit_wealth_threshold)
         {
