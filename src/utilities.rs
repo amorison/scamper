@@ -48,7 +48,7 @@ impl Date {
     }
 
     pub fn whole_year(self) -> bool {
-        self.0 % 12 == 0
+        self.0.is_multiple_of(12)
     }
 }
 
