@@ -233,14 +233,7 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
 
     person.work.status = WorkStatus::FixedShiftEmployed;
 
-    let mut working_time = 0.0;
-    let working_age = working_age.year_month().0;
-    let age_years = age.year_month().0;
-    for _ in working_age..=age_years {
-        working_time *= pars.work.work_discounting_time;
-        working_time += 12.0;
-    }
-
+    let working_time = 12.0 * (age.years_f64() - working_age.years_f64());
     person.work.work_experience = working_time;
     person.work.working_periods = working_time;
 
