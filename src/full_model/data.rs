@@ -52,11 +52,18 @@ impl Pre51Fertility {
     pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = csv::Reader::from_path(path).expect("error reading pre51 fertility");
         let records: Result<Vec<Pre51FertilityRecord>, _> = reader.deserialize().collect();
-        Self(records.expect("error reading pre51 fertility"))
+        let records = records.expect("error reading pre51 fertility");
+        assert!(
+            records.windows(2).all(|w| w[0].year + 1 == w[1].year),
+            "years are not sequential in pre51 fertility"
+        );
+        Self(records)
     }
 
     pub fn in_year(&self, year: u32) -> f64 {
-        let iy = year.checked_sub(self.0[0].year).unwrap() as usize;
+        let iy = year
+            .checked_sub(self.0[0].year)
+            .expect("year is out of range") as usize;
         self.0[iy].rate
     }
 }
@@ -99,20 +106,28 @@ impl Pre51Mortality {
     pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
         let mut reader = csv::Reader::from_path(path).expect("error reading pre51 mortality");
         let records: Result<Vec<Pre51MortalityRecord>, _> = reader.deserialize().collect();
-        Self(records.expect("error reading pre51 mortality"))
+        let records = records.expect("error reading pre51 mortality");
+        assert!(
+            records.windows(2).all(|w| w[0].year + 1 == w[1].year),
+            "years are not sequential in pre51 mortality"
+        );
+        Self(records)
+    }
+
+    fn iyear(&self, date: Date) -> usize {
+        date.year_month()
+            .0
+            .checked_sub(self.0[0].year)
+            .expect("year is out of range") as usize
     }
 
     pub fn infant_rate(&self, date: Date) -> f64 {
-        // FIXME: dodgy indexing
-        let iyear = (date.year_month().0 - self.0[0].year) as usize;
         // infant rate is per 1k
-        self.0[iyear].infant_rate / 1e3
+        self.0[self.iyear(date)].infant_rate / 1e3
     }
 
     pub fn rate(&self, date: Date) -> f64 {
-        // FIXME: dodgy indexing
-        let iyear = (date.year_month().0 - self.0[0].year) as usize;
-        self.0[iyear].rate
+        self.0[self.iyear(date)].rate
     }
 }
 
