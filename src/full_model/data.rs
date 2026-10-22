@@ -152,22 +152,29 @@ impl Post51Mortality {
     }
 }
 
-pub struct Unemployment(Vec<f64>);
+pub struct Unemployment {
+    rates: Vec<f64>,
+    start_year: u32,
+}
 
 impl Unemployment {
-    pub fn read_from<P: AsRef<Path>>(path: P) -> Self {
+    pub fn read_from<P: AsRef<Path>>(path: P, start_year: u32) -> Self {
         let mut reader = csv::ReaderBuilder::new()
             .has_headers(false)
             .from_path(path)
             .expect("error reading unemployment");
         let records: Result<Vec<f64>, _> = reader.deserialize().collect();
-        Self(records.expect("error reading unemployment"))
+        let rates = records.expect("error reading unemployment");
+        Self { rates, start_year }
     }
 
     pub fn rate(&self, date: Date) -> f64 {
-        // FIXME: dodgy indexing
-        let iy = (date.year_month().0 - 1860) as usize;
-        self.0[iy]
+        let iy = date
+            .year_month()
+            .0
+            .checked_sub(self.start_year)
+            .expect("year is out of range") as usize;
+        self.rates[iy]
     }
 }
 

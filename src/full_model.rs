@@ -133,7 +133,10 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
         pre51_deaths: Pre51Mortality::read_from(&pars.data_files.pre51_deaths),
         female_deaths: Post51Mortality::read_from(&pars.data_files.death_female),
         male_deaths: Post51Mortality::read_from(&pars.data_files.death_male),
-        unemployment_series: Unemployment::read_from(&pars.data_files.unemployment_rate),
+        unemployment_series: Unemployment::read_from(
+            &pars.data_files.unemployment_rate.path,
+            pars.data_files.unemployment_rate.start_year,
+        ),
         wealth_percentiles: WealthDistribution::read_from(&pars.data_files.wealth_distribution),
         birth_cache: BirthCache::default(),
         death_cache: DeathCache::default(),

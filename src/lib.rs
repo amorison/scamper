@@ -560,6 +560,12 @@ impl Default for Housing {
     }
 }
 
+#[derive(Serialize, Deserialize)]
+struct YearlyRateFile {
+    path: String,
+    start_year: u32,
+}
+
 /// Data files.
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
@@ -570,7 +576,7 @@ struct DataFiles {
     pre51_deaths: String,
     death_female: String,
     death_male: String,
-    unemployment_rate: String,
+    unemployment_rate: YearlyRateFile,
     wealth_distribution: String,
 }
 
@@ -583,7 +589,10 @@ impl Default for DataFiles {
             pre51_deaths: "data/deathrates_early.csv".to_owned(),
             death_female: "data/deathrate.fem.csv".to_owned(),
             death_male: "data/deathrate.male.csv".to_owned(),
-            unemployment_rate: "data/unemploymentrate.csv".to_owned(),
+            unemployment_rate: YearlyRateFile {
+                path: "data/unemploymentrate.csv".to_owned(),
+                start_year: 1860,
+            },
             wealth_distribution: "data/wealthDistribution.csv".to_owned(),
         }
     }
