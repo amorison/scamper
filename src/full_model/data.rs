@@ -81,6 +81,7 @@ impl Post51Fertility {
     }
 
     pub fn rate_for(&self, ifert_age: usize, year: u32) -> f64 {
+        // FIXME: dodgy indexing
         self.0[ifert_age][(year - 1951) as usize]
     }
 
