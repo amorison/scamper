@@ -196,8 +196,10 @@ impl Default for Population {
 struct Birth {
     fertility_bias: f64,
     prev_child_fertility_bias: f64,
-    min_pregnancy_age: u32,
-    max_pregnancy_age: u32,
+    #[serde(with = "year_serde")]
+    min_pregnancy_age: Age,
+    #[serde(with = "year_serde")]
+    max_pregnancy_age: Age,
 }
 
 impl Default for Birth {
@@ -205,8 +207,8 @@ impl Default for Birth {
         Self {
             fertility_bias: 0.9,
             prev_child_fertility_bias: 0.9,
-            min_pregnancy_age: 16,
-            max_pregnancy_age: 50,
+            min_pregnancy_age: Age::years(16),
+            max_pregnancy_age: Age::years(50),
         }
     }
 }

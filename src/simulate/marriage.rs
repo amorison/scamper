@@ -54,9 +54,7 @@ pub fn marriage_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPa
         .pop
         .alives(order)
         .filter(|p| {
-            p.is_female()
-                && p.kinship.is_single()
-                && p.basic.age > Age::years(pars.birth.min_pregnancy_age)
+            p.is_female() && p.kinship.is_single() && p.basic.age > pars.birth.min_pregnancy_age
         })
         .for_each(|w| model.marriage_cache.eligible_women.push(w.id()));
 }

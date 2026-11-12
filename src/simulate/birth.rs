@@ -16,13 +16,13 @@ use crate::{
         person::{Id, Person},
     },
     population::PopIterOrder,
-    utilities::{Age, calc_rate_bias, try_rand_yearly2monthly},
+    utilities::{calc_rate_bias, try_rand_yearly2monthly},
 };
 
 fn is_fertile_woman(person: &Person, pars: &ModelPars) -> bool {
     person.is_female()
-        && person.basic.age >= Age::years(pars.birth.min_pregnancy_age)
-        && person.basic.age <= Age::years(pars.birth.max_pregnancy_age)
+        && person.basic.age >= pars.birth.min_pregnancy_age
+        && person.basic.age <= pars.birth.max_pregnancy_age
 }
 
 fn can_be_pregnant(person: &Person, model: &Model) -> bool {
@@ -67,8 +67,9 @@ pub fn birth_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars)
     }
 
     model.birth_cache.pre51_fert_scaling = 0.0;
+    let min_preg_age = pars.birth.min_pregnancy_age.year_month().0 as usize;
     for (i_fert_age, fert51) in model.fert_f_by_age_51.iter().enumerate() {
-        let iage = pars.birth.min_pregnancy_age as usize + i_fert_age;
+        let iage = min_preg_age + i_fert_age;
         model.birth_cache.pre51_fert_scaling += model.birth_cache.p_potential_mother[iage] * fert51;
     }
     model.birth_cache.pre51_fert_scaling =
@@ -109,7 +110,8 @@ fn compute_birth_prob(woman: &Person, model: &Model, pars: &ModelPars) -> f64 {
     let (year, _) = model.date.year_month();
 
     let age_years = woman.basic.age.year_month().0;
-    let ifert_age = (age_years - pars.birth.min_pregnancy_age) as usize;
+    let min_preg_age = pars.birth.min_pregnancy_age.year_month().0;
+    let ifert_age = (age_years - min_preg_age) as usize;
 
     // FIXME: abstract this in a fertility object
     let raw_rate = if year < 1951 {
@@ -166,8 +168,8 @@ pub fn birth(woman_id: Id, model: &mut Model, pars: &ModelPars) {
     assert!(woman.is_female());
     assert!(!has_young_infant(woman, model));
     assert!(!woman.kinship.is_single());
-    assert!(woman.basic.age >= Age::years(pars.birth.min_pregnancy_age));
-    assert!(woman.basic.age <= Age::years(pars.birth.max_pregnancy_age));
+    assert!(woman.basic.age >= pars.birth.min_pregnancy_age);
+    assert!(woman.basic.age <= pars.birth.max_pregnancy_age);
 
     if try_rand_yearly2monthly(birth_prob, &mut model.rng) {
         let gender = if model.rng.random_bool(0.5) {
