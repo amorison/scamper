@@ -4,7 +4,6 @@ use crate::{
     ModelPars,
     analysis::Output,
     full_model::{create_model, step_model},
-    utilities::Date,
 };
 
 pub fn main(pars: ModelPars) -> io::Result<()> {
@@ -12,7 +11,7 @@ pub fn main(pars: ModelPars) -> io::Result<()> {
 
     let (mut model, mut order) = create_model(&pars);
 
-    let finish = Date::new(pars.population.end_year);
+    let finish = pars.population.end_year;
 
     println!("{} {}", model.date, model.pop.size());
     out.output(&model, &order)?;

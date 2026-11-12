@@ -16,7 +16,7 @@ use std::{fs, io, path::Path};
 
 use serde::{Deserialize, Serialize};
 
-use crate::utilities::Age;
+use crate::utilities::{Age, Date};
 
 pub const N_CLASSES: usize = 5;
 pub const N_CARE_LEVELS: usize = 5;
@@ -149,8 +149,10 @@ struct Init {
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 struct Population {
-    start_year: u32,
-    end_year: u32,
+    #[serde(with = "year_serde")]
+    start_year: Date,
+    #[serde(with = "year_serde")]
+    end_year: Date,
     init_size: u32,
 
     /// From 1921 census, a population of males to be randomly generated in the given age range
@@ -172,8 +174,8 @@ struct Population {
 impl Default for Population {
     fn default() -> Self {
         Self {
-            start_year: 1920,
-            end_year: 2040,
+            start_year: Date::new(1920),
+            end_year: Date::new(2040),
             init_size: 50_000,
             init_male_prop: 0.477,
             start_prob_married: 0.8,

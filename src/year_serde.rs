@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-use crate::utilities::Age;
+use crate::utilities::{Age, Date};
 
 #[derive(Serialize, Deserialize)]
 #[serde(transparent)]
@@ -28,6 +28,25 @@ impl TryFrom<&Age> for Year {
     fn try_from(value: &Age) -> Result<Self, Self::Error> {
         let (year, month) = value.year_month();
         if month.index() == 0 {
+            Ok(Year(year))
+        } else {
+            Err(NotARoundYear)
+        }
+    }
+}
+
+impl From<Year> for Date {
+    fn from(value: Year) -> Self {
+        Date::new(value.0)
+    }
+}
+
+impl TryFrom<&Date> for Year {
+    type Error = NotARoundYear;
+
+    fn try_from(value: &Date) -> Result<Self, Self::Error> {
+        let (year, _) = value.year_month();
+        if value.whole_year() {
             Ok(Year(year))
         } else {
             Err(NotARoundYear)

@@ -119,7 +119,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
     let fert_post51 = Post51Fertility::read_from(&pars.data_files.fertility);
 
     let mut model = Model {
-        date: Date::new(pars.population.start_year),
+        date: pars.population.start_year,
         towns,
         houses: int_map_with_cap(0), // FIXME: check capacity
         pop,
