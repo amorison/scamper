@@ -120,7 +120,7 @@ pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
     // If 16, shouldn't a married person in 16-18 range become independent from their parents?
     person.is_male()
         && person.kinship.is_single()
-        && person.basic.age > Age::years(pars.work.age_adulthood)
+        && person.basic.age > pars.work.age_adulthood
         && person.care.need_level < 4
 }
 

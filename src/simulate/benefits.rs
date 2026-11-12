@@ -67,13 +67,13 @@ fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
         }
 
         // PIP
-        if person.basic.age < Age::years(pars.work.age_retirement) && person.care.need_level > 0 {
+        if person.basic.age < pars.work.age_retirement && person.care.need_level > 0 {
             person.benefits.benefits += pars.benefit.care_pip[ic] + pars.benefit.mobility_pip[ic];
             person.benefits.highest_disability = person.care.need_level > 2;
         }
 
         // attendance allowance
-        if person.basic.age >= Age::years(pars.work.age_retirement) && person.care.need_level > 2 {
+        if person.basic.age >= pars.work.age_retirement && person.care.need_level > 2 {
             person.benefits.benefits += pars.benefit.care_aa[ic];
         }
 
@@ -86,14 +86,14 @@ fn disability_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars
 
 fn is_uc_eligible_adult(person: &Person, pars: &ModelPars) -> bool {
     person.basic.age >= Age::years(18)
-        && person.basic.age < Age::years(pars.work.age_retirement)
+        && person.basic.age < pars.work.age_retirement
         && (person.work.is_worker() || person.work.is_unemployed())
 }
 
 fn is_uc_eligible_student(person: &Person, model: &Model, pars: &ModelPars) -> bool {
     person.work.is_student()
         && (person.dependency.has_dependents()
-            || person.basic.age >= Age::years(pars.work.age_retirement)
+            || person.basic.age >= pars.work.age_retirement
             || person.care.need_level > 0
             || person
                 .partner(model)
@@ -309,7 +309,7 @@ fn calc_pension_credit(
     pars: &ModelPars,
 ) -> Option<(Id, f64, bool)> {
     // condition 1: 65 or older (both if a couple)
-    let retirement_age = Age::years(pars.work.age_retirement);
+    let retirement_age = pars.work.age_retirement;
     if person.basic.age < retirement_age {
         return None;
     }

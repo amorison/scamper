@@ -215,11 +215,11 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
         person.work.status = WorkStatus::Child;
         return;
     }
-    if age < Age::years(pars.work.age_adulthood) {
+    if age < pars.work.age_adulthood {
         person.work.status = WorkStatus::Teenager;
         return;
     }
-    if age >= Age::years(pars.work.age_retirement) {
+    if age >= pars.work.age_retirement {
         person.work.status = WorkStatus::Retired;
         return;
     }

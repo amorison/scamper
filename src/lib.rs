@@ -222,9 +222,12 @@ struct Work {
     min_statutory_maternity_pay: f64,
     #[serde(with = "year_serde")]
     age_teenagers: Age,
-    age_adulthood: u32,
-    age_independence: u32,
-    age_retirement: u32,
+    #[serde(with = "year_serde")]
+    age_adulthood: Age,
+    #[serde(with = "year_serde")]
+    age_independence: Age,
+    #[serde(with = "year_serde")]
+    age_retirement: Age,
     min_contribution_period: u32,
     wage_var: f64,
     income_initial_levels: [f64; N_CLASSES],
@@ -263,9 +266,9 @@ impl Default for Work {
             maternity_leave_duration: 9,
             min_statutory_maternity_pay: 151.97,
             age_teenagers: Age::years(13),
-            age_adulthood: 16,
-            age_independence: 18,
-            age_retirement: 65,
+            age_adulthood: Age::years(16),
+            age_independence: Age::years(18),
+            age_retirement: Age::years(65),
             min_contribution_period: 12 * 35,
             wage_var: 0.2,
             income_initial_levels: [6.0, 8.0, 10.0, 12.0, 15.0],

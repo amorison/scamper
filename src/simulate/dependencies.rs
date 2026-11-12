@@ -24,7 +24,7 @@ use crate::{
 
 pub fn process_change_1yr_deps(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive(p_id);
-    if person.basic.age == Age::years(pars.work.age_independence) {
+    if person.basic.age == pars.work.age_independence {
         set_as_independent(p_id, model);
     }
 }
