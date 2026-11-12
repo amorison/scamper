@@ -312,7 +312,7 @@ pub fn init_jobs(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
 }
 
 fn need_care(person: &Person, pars: &ModelPars) -> bool {
-    person.basic.age < Age::years(pars.task_care.stop_child_care_age)
+    person.basic.age < pars.task_care.stop_child_care_age
         || social_care_demand_per_day(person, pars) > 0
 }
 

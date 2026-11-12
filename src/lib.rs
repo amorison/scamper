@@ -497,8 +497,10 @@ impl Default for Care {
 struct TaskCare {
     /// How often to iterate care distribution.
     n_iter_care_dist: u32,
-    stop_baby_care_age: u32,
-    stop_child_care_age: u32,
+    #[serde(with = "year_serde")]
+    stop_baby_care_age: Age,
+    #[serde(with = "year_serde")]
+    stop_child_care_age: Age,
     baby_care_per_day: u32,
     child_care_per_day: u32,
     social_care_demand_per_day: [u32; N_CARE_LEVELS],
@@ -518,8 +520,8 @@ impl Default for TaskCare {
     fn default() -> Self {
         Self {
             n_iter_care_dist: 3,
-            stop_baby_care_age: 1,
-            stop_child_care_age: 13,
+            stop_baby_care_age: Age::years(1),
+            stop_child_care_age: Age::years(13),
             baby_care_per_day: 14,
             child_care_per_day: 14,
             social_care_demand_per_day: [0, 2, 4, 8, 12],

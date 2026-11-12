@@ -27,8 +27,8 @@ use crate::{
 
 pub fn process_change_1yr_task_care(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive(p_id);
-    if person.basic.age == Age::years(pars.task_care.stop_baby_care_age)
-        || person.basic.age == Age::years(pars.task_care.stop_child_care_age)
+    if person.basic.age == pars.task_care.stop_baby_care_age
+        || person.basic.age == pars.task_care.stop_child_care_age
     {
         care_need_changed(p_id, model, pars);
     }

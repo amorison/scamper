@@ -25,7 +25,7 @@ pub fn social_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {
 }
 
 fn child_care_demand_per_day(person: &Person, pars: &ModelPars) -> u32 {
-    let age = person.basic.age.year_month().0;
+    let age = person.basic.age;
     if age < pars.task_care.stop_child_care_age {
         if age < pars.task_care.stop_baby_care_age {
             pars.task_care.baby_care_per_day
