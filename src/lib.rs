@@ -394,7 +394,8 @@ struct Divorce {
     basic_divorce_rate: f64,
     divorce_modifier_by_decade: [f64; (MAX_AGE.year_month().0 / 10) as usize + 1],
     prob_children_with_father: f64,
-    the_present: u32,
+    #[serde(with = "year_serde")]
+    the_present: Date,
     variable_divorce: f64,
     divorce_bias: f64,
 }
@@ -407,7 +408,7 @@ impl Default for Divorce {
                 0.0, 1.0, 0.9, 0.5, 0.4, 0.2, 0.1, 0.03, 0.01, 0.001, 0.001, 0.001, 0.0,
             ],
             prob_children_with_father: 0.1,
-            the_present: 2012,
+            the_present: Date::new(2012),
             variable_divorce: 0.06,
             divorce_bias: 0.9,
         }
