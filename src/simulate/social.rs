@@ -30,7 +30,7 @@ fn start_retirement(p_id: Id, model: &mut Model, pars: &ModelPars) {
 pub fn process_change_1yr_social(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive_mut(p_id);
     let age = person.basic.age;
-    if age == Age::years(pars.work.age_teenagers) {
+    if age == pars.work.age_teenagers {
         change_status(p_id, WorkStatus::Teenager, model);
     } else if age == Age::years(pars.work.age_adulthood) {
         // all agents first become students, start working in social transition

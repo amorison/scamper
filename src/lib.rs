@@ -10,6 +10,7 @@ mod run_model;
 mod setup;
 mod simulate;
 mod utilities;
+mod year_serde;
 
 use std::{fs, io, path::Path};
 
@@ -217,7 +218,8 @@ struct Work {
     maternity_leave_income_factor: f64,
     maternity_leave_duration: u32,
     min_statutory_maternity_pay: f64,
-    age_teenagers: u32,
+    #[serde(with = "year_serde")]
+    age_teenagers: Age,
     age_adulthood: u32,
     age_independence: u32,
     age_retirement: u32,
@@ -258,7 +260,7 @@ impl Default for Work {
             maternity_leave_income_factor: 0.9,
             maternity_leave_duration: 9,
             min_statutory_maternity_pay: 151.97,
-            age_teenagers: 13,
+            age_teenagers: Age::years(13),
             age_adulthood: 16,
             age_independence: 18,
             age_retirement: 65,

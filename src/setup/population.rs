@@ -211,7 +211,7 @@ pub fn create_pyramid_population<R: Rng>(
 pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
     let age = person.basic.age;
 
-    if age < Age::years(pars.work.age_teenagers) {
+    if age < pars.work.age_teenagers {
         person.work.status = WorkStatus::Child;
         return;
     }
