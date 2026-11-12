@@ -53,6 +53,7 @@ impl Class {
 
     /// Influence of education gap with parents on probability of studying.
     pub fn edu_gap_factor(&self, pars: &ModelPars) -> f64 {
+        // FIXME: this should be 1.0 and then above or below depending on sign of de.
         let de = self.parent_rank.0 as f64 - self.education.0 as f64;
         let exp_edu = (pars.work.edu_rank_sensitivity * de).exp();
         exp_edu / (exp_edu + pars.work.constant_education)
