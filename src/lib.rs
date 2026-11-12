@@ -158,7 +158,6 @@ struct Population {
     start_prob_orphan: f64,
 
     base_die_prob: f64,
-    baby_die_prob: f64,
     female_age_die_prob: f64,
     female_age_scaling: f64,
     female_mortality_bias: f64,
@@ -179,7 +178,6 @@ impl Default for Population {
             start_prob_married: 0.8,
             start_prob_orphan: 0.01,
             base_die_prob: 1e-4,
-            baby_die_prob: 5e-3,
             female_age_die_prob: 1.9e-4,
             female_age_scaling: 15.5,
             female_mortality_bias: 0.85,
@@ -251,7 +249,6 @@ struct Work {
     sunday_social_index: f64,
     shift_beta: f64,
     day_beta: f64,
-    probation_period: u32, // FIXME: unused
     hire_rate: f64,
 }
 
@@ -294,7 +291,6 @@ impl Default for Work {
             sunday_social_index: 0.5,
             shift_beta: 0.1,
             day_beta: 0.1,
-            probation_period: 3,
             hire_rate: (4.0f64 / 3.0).ln(), // expected mean unemployment time of 4 months
         }
     }
@@ -466,7 +462,6 @@ struct Care {
     person_care_prob: f64,
     base_care_prob: f64,
     care_transition_rate: f64,
-    child_care_demand: u32,
     unmet_need_exp: f64,
     unmet_need_discount: f64,
     unmet_need_share_discount: f64,
@@ -482,7 +477,6 @@ impl Default for Care {
             person_care_prob: 8e-4,
             base_care_prob: 2e-4,
             care_transition_rate: 0.7,
-            child_care_demand: 168,
             unmet_need_exp: 1.0,
             unmet_need_discount: 0.5,
             unmet_need_share_discount: 0.5,
@@ -541,21 +535,15 @@ impl Default for TaskCare {
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 struct Housing {
-    ownership_prob_exp: f64,            // FIXME: unused
-    income_ownership_shares: [f64; 10], // FIXME: unused
-    age_ownership_shares: Vec<f64>,     // FIXME: related to number of ho_age_ranges
+    age_ownership_shares: Vec<f64>, // FIXME: related to number of ho_age_ranges
     ho_age_ranges: Vec<f64>,
-    ho_age_biases: Vec<f64>,
 }
 
 impl Default for Housing {
     fn default() -> Self {
         Self {
-            ownership_prob_exp: 0.1,
-            income_ownership_shares: [0.2, 0.4, 0.5, 0.57, 0.63, 0.67, 0.71, 0.75, 0.79, 0.83],
             age_ownership_shares: vec![0.12, 0.44, 0.61, 0.71, 0.77, 0.79],
             ho_age_ranges: vec![24.0, 34.0, 44.0, 54.0, 64.0], // FIXME: this needs to be sorted
-            ho_age_biases: vec![1.0, 3.67, 5.0, 5.9, 6.4, 6.6],
         }
     }
 }
