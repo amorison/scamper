@@ -74,3 +74,39 @@ where
     let year = Year::deserialize(de)?;
     Ok(year.into())
 }
+
+pub(crate) mod array {
+    use std::fmt::Display;
+
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    use crate::year_serde::Year;
+
+    pub(crate) fn serialize<T, S, E, const N: usize>(
+        value: &[T; N],
+        ser: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        for<'a> &'a T: TryInto<Year, Error = E>,
+        E: Display,
+        S: Serializer,
+    {
+        let years: Result<Vec<Year>, _> = value.into_iter().map(|v| v.try_into()).collect();
+        match years {
+            Ok(years) => years.serialize(ser),
+            Err(err) => Err(serde::ser::Error::custom(err)),
+        }
+    }
+
+    pub(crate) fn deserialize<'de, T, D, const N: usize>(de: D) -> Result<[T; N], D::Error>
+    where
+        T: From<Year>,
+        D: Deserializer<'de>,
+    {
+        let years = Vec::<Year>::deserialize(de)?;
+        let vals: Vec<T> = years.into_iter().map(T::from).collect();
+        vals.try_into().map_err(|e: Vec<T>| {
+            serde::de::Error::custom(format!("expected {N} elements, got {}", e.len()))
+        })
+    }
+}

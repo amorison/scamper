@@ -237,7 +237,8 @@ struct Work {
     final_income_sigma: [f64; N_CLASSES],
     income_growth_rate: [f64; N_CLASSES],
     /// Age at which people can stop studying and start working.
-    start_working_age: [u32; N_CLASSES],
+    #[serde(with = "year_serde::array")]
+    start_working_age: [Age; N_CLASSES],
     /// Working hours by care requirements.
     weekly_hours: [u32; N_CARE_LEVELS],
     constant_income: f64,
@@ -277,7 +278,7 @@ impl Default for Work {
             final_income_mu: [2.5, 2.8, 3.2, 3.7, 4.5],
             final_income_sigma: [0.25, 0.3, 0.35, 0.4, 0.5],
             income_growth_rate: [0.4 / 12.0, 0.35 / 12.0, 0.3 / 12.0, 0.25 / 12.0, 0.2 / 12.0],
-            start_working_age: [16, 18, 20, 22, 24],
+            start_working_age: [16, 18, 20, 22, 24].map(Age::years),
             weekly_hours: [40, 20, 10, 0, 0],
             constant_income: 50.0,
             constant_education: 4.0,

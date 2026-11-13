@@ -69,7 +69,7 @@ pub fn student_start_working(p_id: Id, model: &mut Model, pars: &ModelPars) {
 
 /// Age at which a person can decide to stop studying and start working.
 pub fn start_working_age(person: &Person, pars: &ModelPars) -> Age {
-    Age::years(pars.work.start_working_age[person.class.rank_idx()])
+    pars.work.start_working_age[person.class.rank_idx()]
 }
 
 pub fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
