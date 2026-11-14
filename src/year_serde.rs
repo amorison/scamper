@@ -91,7 +91,7 @@ pub(crate) mod array {
         E: Display,
         S: Serializer,
     {
-        let years: Result<Vec<Year>, _> = value.into_iter().map(|v| v.try_into()).collect();
+        let years: Result<Vec<Year>, _> = value.iter().map(|v| v.try_into()).collect();
         match years {
             Ok(years) => years.serialize(ser),
             Err(err) => Err(serde::ser::Error::custom(err)),
