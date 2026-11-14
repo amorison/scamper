@@ -5,7 +5,7 @@ use std::{
 
 use identity_hash::IdentityHashable;
 
-use crate::{full_model::house::IdHouse, utilities::Location};
+use crate::{full_model::house::IdHouse, per_time::Weekly, utilities::Location};
 
 static ID_TOWN: AtomicU64 = AtomicU64::new(0);
 
@@ -33,11 +33,11 @@ pub struct Town {
     pub density: f64,
     pub houses: Vec<IdHouse>,
     pub adjacent: Vec<IdTown>,
-    pub lha: [f64; 4],
+    pub lha: [Weekly; 4],
 }
 
 impl Town {
-    pub fn new(loc: Location, density: f64, lha: [f64; 4]) -> Self {
+    pub fn new(loc: Location, density: f64, lha: [Weekly; 4]) -> Self {
         Self {
             id: IdTown::new(),
             loc,

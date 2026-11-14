@@ -241,8 +241,10 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
 
     person.work.wage = compute_wage(person, rng, pars);
     let icare = person.care.index();
-    let weekly_hours = pars.work.weekly_hours[icare] as f64;
-    person.work.income = person.work.wage * weekly_hours;
+    person.work.income = person
+        .work
+        .wage
+        .for_weekly_hours(pars.work.weekly_hours[icare]);
     person.work.job_tenure = (1..=50).sample_single(rng).unwrap();
 }
 

@@ -1,6 +1,7 @@
 use crate::{
     agents::tasks::IdTask,
     full_model::{Model, person::Id},
+    per_time::{Hourly, Weekly},
     utilities::{Date, HourInWeek},
 };
 
@@ -43,17 +44,16 @@ impl WorkStatus {
 pub struct Work {
     /// Work status.
     pub status: WorkStatus,
-    pub initial_wage: f64,
-    pub final_wage: f64,
+    pub initial_wage: Hourly,
+    pub final_wage: Hourly,
     /// Hourly income for current job.
-    pub wage: f64,
-    // FIXME: seems to be weekly?
-    /// Monthly income dependent on wage/work schedule.
-    pub income: f64,
+    pub wage: Hourly,
+    /// Income dependent on wage/work schedule.
+    pub income: Weekly,
     pub cumulative_income: f64,
-    pub disposable_income: f64,
+    pub disposable_income: Weekly,
     /// Last income, used for pension
-    pub last_income: f64,
+    pub last_income: Weekly,
     pub wealth: f64,
     pub financial_wealth: f64,
     pub job_tasks: Vec<(IdTask, HourInWeek)>,
@@ -64,7 +64,7 @@ pub struct Work {
     /// Lifetime work.
     pub working_periods: f64,
     pub work_experience: f64,
-    pub pension: f64,
+    pub pension: Weekly,
     pub unemployment_months: u32,
     /// Period worked so far in current job.
     pub job_tenure: u32,
@@ -89,13 +89,13 @@ impl Default for Work {
     fn default() -> Self {
         Self {
             status: WorkStatus::Child,
-            initial_wage: 0.0,
-            final_wage: 0.0,
-            wage: 0.0,
-            income: 0.0,
+            initial_wage: Hourly::zero(),
+            final_wage: Hourly::zero(),
+            wage: Hourly::zero(),
+            income: Weekly::zero(),
             cumulative_income: 0.0,
-            disposable_income: 0.0,
-            last_income: 0.0,
+            disposable_income: Weekly::zero(),
+            last_income: Weekly::zero(),
             wealth: 0.0,
             financial_wealth: 0.0,
             job_tasks: Vec::with_capacity(40),
@@ -103,7 +103,7 @@ impl Default for Work {
             available_working_hours: 0,
             working_periods: 0.0,
             work_experience: 0.0,
-            pension: 0.0,
+            pension: Weekly::zero(),
             unemployment_months: 0,
             job_tenure: 0,
             month_hired: Date::new(0),
@@ -114,7 +114,7 @@ impl Default for Work {
 pub fn lose_job(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     person.work.month_hired = Date::new(0);
-    person.work.income = 0.0;
+    person.work.income = Weekly::zero();
     person.work.working_hours = 0;
     person.work.job_tenure = 0;
 

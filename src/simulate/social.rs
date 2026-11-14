@@ -12,6 +12,7 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    per_time::Weekly,
     population::PopIterOrder,
     utilities::Age,
 };
@@ -107,13 +108,13 @@ fn start_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
     }
 
     let per_capital_disposable_income = household_income_per_capita(person.id(), model);
-    if per_capital_disposable_income <= 0.0 {
+    if per_capital_disposable_income <= Weekly::zero() {
         return 0.0;
     }
 
     let irank = person.class.rank_idx();
-    let forgone_salary =
-        pars.work.income_initial_levels[irank] * pars.work.weekly_hours[person.care.index()] as f64;
+    let forgone_salary = pars.work.income_initial_levels[irank]
+        .for_weekly_hours(pars.work.weekly_hours[person.care.index()]);
     let rel_cost = forgone_salary / per_capital_disposable_income;
     let income_effect = (pars.work.constant_income + 1.0)
         / ((pars.work.edu_wage_sensitivity * rel_cost).exp() + pars.work.constant_income);

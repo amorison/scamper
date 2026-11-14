@@ -15,6 +15,7 @@ use crate::{
         Model,
         person::{Id, Person},
     },
+    per_time::Weekly,
     population::PopIterOrder,
     utilities::{calc_rate_bias, try_rand_yearly2monthly},
 };
@@ -145,7 +146,7 @@ fn effects_of_maternity(woman_id: Id, model: &mut Model) {
     // FIXME: work tasks need to be suspended while on maternity leave and then accepted again when
     // leave ends.
     woman.work.working_hours = 0;
-    woman.work.income = 0.0;
+    woman.work.income = Weekly::zero();
     woman.work.available_working_hours = 0;
 
     // TODO: not necessarily true in many cases

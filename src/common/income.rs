@@ -4,6 +4,7 @@ use rand_distr::{LogNormal, Normal};
 use crate::{
     ModelPars,
     full_model::{Model, person::Person},
+    per_time::Hourly,
     population::PopIterOrder,
 };
 
@@ -20,7 +21,7 @@ pub fn set_wage_progression<R: Rng>(person: &mut Person, rng: &mut R, pars: &Mod
         pars.work.final_income_sigma[r],
     )
     .unwrap();
-    person.work.final_wage = rng.sample(fw_dist);
+    person.work.final_wage = Hourly::new(rng.sample(fw_dist));
 }
 
 /// Set agent wealth dependent on cumulative income.
@@ -68,7 +69,7 @@ pub fn assign_wealth_by_inc_percentile_hh(model: &mut Model, pars: &ModelPars) {
 }
 
 /// Calculate current wage dependent on initial and final wage and work experience.
-pub fn compute_wage<R: Rng>(person: &Person, rng: &mut R, pars: &ModelPars) -> f64 {
+pub fn compute_wage<R: Rng>(person: &Person, rng: &mut R, pars: &ModelPars) -> Hourly {
     let fw = person.work.final_wage;
     let iw = person.work.initial_wage;
     let r = person.class.rank_idx();

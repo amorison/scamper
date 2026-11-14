@@ -5,6 +5,7 @@ mod caretasks;
 pub mod cli;
 mod common;
 mod full_model;
+mod per_time;
 mod population;
 mod run_model;
 mod setup;
@@ -16,7 +17,10 @@ use std::{fs, io, path::Path};
 
 use serde::{Deserialize, Serialize};
 
-use crate::utilities::{Age, Date};
+use crate::{
+    per_time::{Hourly, Weekly},
+    utilities::{Age, Date},
+};
 
 pub const N_CLASSES: usize = 5;
 pub const N_CARE_LEVELS: usize = 5;
@@ -65,7 +69,7 @@ impl Map {
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 struct BenefitMap {
-    local_housing_allowances: [Vec<Vec<f64>>; 4],
+    local_housing_allowances: [Vec<Vec<Weekly>>; 4],
 }
 
 impl Default for BenefitMap {
@@ -132,6 +136,12 @@ impl Default for BenefitMap {
                 vec![0.0, 0.0, 185.29, 182.45, 0.0, 0.0, 0.0, 0.0, 0.0],
             ],
         ];
+        let local_housing_allowances = local_housing_allowances.map(|lhanb| {
+            lhanb
+                .into_iter()
+                .map(|row| row.into_iter().map(Weekly::new).collect())
+                .collect()
+        });
         Self {
             local_housing_allowances,
         }
@@ -221,7 +231,7 @@ impl Default for Birth {
 struct Work {
     maternity_leave_income_factor: f64,
     maternity_leave_duration: u32,
-    min_statutory_maternity_pay: f64,
+    min_statutory_maternity_pay: Weekly,
     #[serde(with = "year_serde")]
     age_teenagers: Age,
     #[serde(with = "year_serde")]
@@ -232,7 +242,7 @@ struct Work {
     age_retirement: Age,
     min_contribution_period: u32,
     wage_var: f64,
-    income_initial_levels: [f64; N_CLASSES],
+    income_initial_levels: [Hourly; N_CLASSES],
     final_income_mu: [f64; N_CLASSES],
     final_income_sigma: [f64; N_CLASSES],
     income_growth_rate: [f64; N_CLASSES],
@@ -247,7 +257,7 @@ struct Work {
     edu_rank_sensitivity: f64,
     care_education: f64,
     move_out_prob: f64,
-    tax_brackets: [f64; 3],
+    tax_brackets: [Weekly; 3],
     taxation_rates: [f64; 3],
     unemployment_age_bias: [f64; N_AGE_BANDS],
     unemployment_class_bias: f64,
@@ -267,14 +277,14 @@ impl Default for Work {
         Self {
             maternity_leave_income_factor: 0.9,
             maternity_leave_duration: 9,
-            min_statutory_maternity_pay: 151.97,
+            min_statutory_maternity_pay: Weekly::new(151.97),
             age_teenagers: Age::years(13),
             age_adulthood: Age::years(16),
             age_independence: Age::years(18),
             age_retirement: Age::years(65),
             min_contribution_period: 12 * 35,
             wage_var: 0.2,
-            income_initial_levels: [6.0, 8.0, 10.0, 12.0, 15.0],
+            income_initial_levels: [6.0, 8.0, 10.0, 12.0, 15.0].map(Hourly::new),
             final_income_mu: [2.5, 2.8, 3.2, 3.7, 4.5],
             final_income_sigma: [0.25, 0.3, 0.35, 0.4, 0.5],
             income_growth_rate: [0.4 / 12.0, 0.35 / 12.0, 0.3 / 12.0, 0.25 / 12.0, 0.2 / 12.0],
@@ -286,7 +296,7 @@ impl Default for Work {
             edu_rank_sensitivity: 4.0,
             care_education: 0.0,
             move_out_prob: 0.1,
-            tax_brackets: [663.0, 228.0, 0.0],
+            tax_brackets: [663.0, 228.0, 0.0].map(Weekly::new),
             taxation_rates: [0.4, 0.2, 0.0],
             unemployment_age_bias: [1.0, 0.55, 0.35, 0.25, 0.2, 0.2],
             unemployment_class_bias: 0.75,
@@ -310,79 +320,79 @@ impl Default for Work {
 #[derive(Serialize, Deserialize)]
 #[serde(default)]
 struct Benefits {
-    child_benefit_income_threshold: f64,
-    first_child_benefit: f64,
-    other_children_benefit: f64,
+    child_benefit_income_threshold: Weekly,
+    first_child_benefit: Weekly,
+    other_children_benefit: Weekly,
 
-    care_dla: [f64; N_CARE_LEVELS],
-    mobility_dla: [f64; N_CARE_LEVELS],
-    care_pip: [f64; N_CARE_LEVELS],
-    mobility_pip: [f64; N_CARE_LEVELS],
-    care_aa: [f64; N_CARE_LEVELS],
-    carers_allowance: f64,
+    care_dla: [Weekly; N_CARE_LEVELS],
+    mobility_dla: [Weekly; N_CARE_LEVELS],
+    care_pip: [Weekly; N_CARE_LEVELS],
+    mobility_pip: [Weekly; N_CARE_LEVELS],
+    care_aa: [Weekly; N_CARE_LEVELS],
+    carers_allowance: Weekly,
 
     capital_high_threshold: f64,
     capital_low_threshold: f64,
-    capital_income: f64,
+    capital_income: Weekly,
     saving_uc_rate: f64,
-    work_allowance_hs: f64,
-    work_allowance_no_hs: f64,
+    work_allowance_hs: Weekly,
+    work_allowance_no_hs: Weekly,
     income_reduction: f64,
-    single_below25: f64,
-    single_25plus: f64,
-    couple_below25: f64,
-    couple_25plus: f64,
-    ea_children: f64,
-    ea_disabled_children: [f64; 2],
-    lcfw_component: f64,
-    carers_component: f64,
+    single_below25: Weekly,
+    single_25plus: Weekly,
+    couple_below25: Weekly,
+    couple_25plus: Weekly,
+    ea_children: Weekly,
+    ea_disabled_children: [Weekly; 2],
+    lcfw_component: Weekly,
+    carers_component: Weekly,
 
-    single_pc: f64,
-    couple_pc: f64,
+    single_pc: Weekly,
+    couple_pc: Weekly,
     wealth_allowance_pc: f64,
     saving_income_rate_pc: f64,
-    disability_component_pc: f64,
-    caring_component_pc: f64,
-    child_component_pc: f64,
-    disabled_child_component: [f64; 2],
+    disability_component_pc: Weekly,
+    caring_component_pc: Weekly,
+    child_component_pc: Weekly,
+    disabled_child_component: [Weekly; 2],
     housing_benefit_wealth_threshold: f64,
 }
 
 impl Default for Benefits {
     fn default() -> Self {
         Self {
-            child_benefit_income_threshold: 5e4,
-            first_child_benefit: 21.15,
-            other_children_benefit: 14.0,
-            care_dla: [0.0, 23.7, 60.0, 60.0, 89.6],
-            mobility_dla: [0.0, 23.7, 23.7, 62.55, 62.55],
-            care_pip: [0.0, 60.0, 60.0, 89.6, 89.6],
-            mobility_pip: [0.0, 0.0, 23.7, 23.7, 62.55],
-            care_aa: [0.0, 0.0, 0.0, 60.0, 89.6],
-            carers_allowance: 67.6,
+            child_benefit_income_threshold: Weekly::new(5e4), // FIXME: seems high
+            first_child_benefit: Weekly::new(21.15),
+            other_children_benefit: Weekly::new(14.0),
+            care_dla: [0.0, 23.7, 60.0, 60.0, 89.6].map(Weekly::new),
+            mobility_dla: [0.0, 23.7, 23.7, 62.55, 62.55].map(Weekly::new),
+            care_pip: [0.0, 60.0, 60.0, 89.6, 89.6].map(Weekly::new),
+            mobility_pip: [0.0, 0.0, 23.7, 23.7, 62.55].map(Weekly::new),
+            care_aa: [0.0, 0.0, 0.0, 60.0, 89.6].map(Weekly::new),
+            carers_allowance: Weekly::new(67.6),
             capital_high_threshold: 1.6e4,
             capital_low_threshold: 6e3,
-            capital_income: 4.35,
+            capital_income: Weekly::new(4.35),
             saving_uc_rate: 250.0,
-            work_allowance_hs: (293.0 * 12.0) / 52.0,
-            work_allowance_no_hs: (515.0 * 12.0) / 52.0,
+            work_allowance_hs: Weekly::from_monthly(293.0),
+            work_allowance_no_hs: Weekly::from_monthly(515.0),
             income_reduction: 0.63,
-            single_below25: (257.33 * 12.0) / 52.0,
-            single_25plus: (324.84 * 12.0) / 52.0,
-            couple_below25: ((403.93 * 12.0) / 52.0) / 2.0,
-            couple_25plus: ((509.91 * 12.0) / 52.0) / 2.0,
-            ea_children: (237.08 * 12.0) / 52.0,
-            ea_disabled_children: [(128.89 * 12.0) / 52.0, (402.41 * 12.0) / 52.0],
-            lcfw_component: (343.63 * 12.0) / 52.0,
-            carers_component: (163.73 * 12.0) / 52.0,
-            single_pc: 177.10, // top-up
-            couple_pc: 270.30, // top-up
+            single_below25: Weekly::from_monthly(257.33),
+            single_25plus: Weekly::from_monthly(324.84),
+            couple_below25: Weekly::from_monthly(403.93) / 2.0,
+            couple_25plus: Weekly::from_monthly(509.91) / 2.0,
+            ea_children: Weekly::from_monthly(237.08),
+            ea_disabled_children: [128.89, 402.41].map(Weekly::from_monthly),
+            lcfw_component: Weekly::from_monthly(343.63),
+            carers_component: Weekly::from_monthly(163.73),
+            single_pc: Weekly::new(177.10), // top-up FIXME: seems to be monthly
+            couple_pc: Weekly::new(270.30), // top-up FIXME: seems to be monthly
             wealth_allowance_pc: 1e4,
             saving_income_rate_pc: 5e2,
-            disability_component_pc: 67.3,
-            caring_component_pc: 37.7,
-            child_component_pc: 54.6,
-            disabled_child_component: [29.66, 92.54],
+            disability_component_pc: Weekly::new(67.3),
+            caring_component_pc: Weekly::new(37.7),
+            child_component_pc: Weekly::new(54.6),
+            disabled_child_component: [29.66, 92.54].map(Weekly::new),
             housing_benefit_wealth_threshold: 1.6e4,
         }
     }

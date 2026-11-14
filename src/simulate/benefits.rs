@@ -9,13 +9,14 @@ use crate::{
         house::House,
         person::{Id, Person},
     },
+    per_time::Weekly,
     population::PopIterOrder,
     utilities::Age,
 };
 
 pub fn compute_benefits(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     model.pop.for_each(order, |agent| {
-        agent.benefits.benefits = 0.0;
+        agent.benefits.benefits = Weekly::zero();
         agent.benefits.highest_disability = false;
         agent.benefits.uc = false;
     });
@@ -220,7 +221,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
             partner.basic.age < Age::years(25),
         )
     } else {
-        (0.0, 0.0, false)
+        (0.0, Weekly::zero(), false)
     };
 
     let total_wealth = person.work.financial_wealth + partner_fw;
@@ -246,29 +247,29 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
     if (!person.dependency.has_guardians() && n_uc_deps > 0) || person.care.need_level > 0 {
         if !house.income.owned_by_occupants {
             // assuming the agent with get the housing cost element
-            uc_income = (uc_income - pars.benefit.work_allowance_hs).max(0.0);
+            uc_income = (uc_income - pars.benefit.work_allowance_hs).max(Weekly::zero());
         } else {
-            uc_income = (uc_income - pars.benefit.work_allowance_no_hs).max(0.0);
+            uc_income = (uc_income - pars.benefit.work_allowance_no_hs).max(Weekly::zero());
         }
     }
 
     let uc_reduction = uc_income * pars.benefit.income_reduction;
     let benefit = if person.kinship.is_single() {
         if person.basic.age < Age::years(25) {
-            (pars.benefit.single_below25 - uc_reduction).max(0.0)
+            (pars.benefit.single_below25 - uc_reduction).max(Weekly::zero())
         } else {
-            (pars.benefit.single_25plus - uc_reduction).max(0.0)
+            (pars.benefit.single_25plus - uc_reduction).max(Weekly::zero())
         }
     } else {
         if person.basic.age < Age::years(25) && partner_below25 {
-            (pars.benefit.couple_below25 - uc_reduction).max(0.0) / 2.0
+            (pars.benefit.couple_below25 - uc_reduction).max(Weekly::zero()) / 2.0
         } else {
-            (pars.benefit.couple_25plus - uc_reduction).max(0.0) / 2.0
+            (pars.benefit.couple_25plus - uc_reduction).max(Weekly::zero()) / 2.0
         }
     };
 
     let person = model.pop.alive_mut(p_id);
-    if benefit > 0.0 {
+    if benefit > Weekly::zero() {
         person.benefits.uc = true;
     }
     person.benefits.benefits += benefit;
@@ -277,7 +278,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let num_child_benefits = n_uc_deps.min(2) as f64;
     let benefit = pars.benefit.ea_children * num_child_benefits;
     person.benefits.benefits += benefit / (if person.kinship.is_single() { 1.0 } else { 2.0 });
-    if benefit > 0.0 {
+    if benefit > Weekly::zero() {
         person.benefits.uc = true;
     }
 
@@ -285,7 +286,7 @@ fn compute_uc(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let benefit = pars.benefit.ea_disabled_children[0] * n_mildly_disabled_uc_deps as f64
         + pars.benefit.ea_disabled_children[1] * n_crit_disabled_uc_deps as f64;
     person.benefits.benefits += benefit / (if person.kinship.is_single() { 1.0 } else { 2.0 });
-    if benefit > 0.0 {
+    if benefit > Weekly::zero() {
         person.benefits.uc = true;
     }
 
@@ -307,13 +308,13 @@ fn calc_pension_credit(
     person: &Person,
     model: &Model,
     pars: &ModelPars,
-) -> Option<(Id, f64, bool)> {
+) -> Option<(Id, Weekly, bool)> {
     // condition 1: 65 or older (both if a couple)
     let retirement_age = pars.work.age_retirement;
     if person.basic.age < retirement_age {
         return None;
     }
-    let mut benefits = 0.0;
+    let mut benefits = Weekly::zero();
     let mut guarantee_credit = false;
     let maybe_partner = person.partner(model);
     let partner_retired = maybe_partner.is_some_and(|p| p.basic.age >= retirement_age);
@@ -325,23 +326,27 @@ fn calc_pension_credit(
     {
         let tot_income = person.work.income + partner.work.income;
         let aggregate_benefit_income = tot_income
-            + ((tot_wealth - pars.benefit.wealth_allowance_pc)
-                / pars.benefit.saving_income_rate_pc)
-                .floor()
-                .max(0.0);
-        let b = (pars.benefit.couple_pc - aggregate_benefit_income).max(0.0) / 2.0;
-        if b > 0.0 {
+            + Weekly::new(
+                ((tot_wealth - pars.benefit.wealth_allowance_pc)
+                    / pars.benefit.saving_income_rate_pc)
+                    .floor()
+                    .max(0.0),
+            );
+        let b = (pars.benefit.couple_pc - aggregate_benefit_income).max(Weekly::zero()) / 2.0;
+        if b > Weekly::zero() {
             benefits += b;
             guarantee_credit = true;
         }
     } else if maybe_partner.is_none() {
         let benefit_income = person.work.income
-            + ((tot_wealth - pars.benefit.wealth_allowance_pc)
-                / pars.benefit.saving_income_rate_pc)
-                .floor()
-                .max(0.0);
-        let b = (pars.benefit.single_pc - benefit_income).max(0.0);
-        if b > 0.0 {
+            + Weekly::new(
+                ((tot_wealth - pars.benefit.wealth_allowance_pc)
+                    / pars.benefit.saving_income_rate_pc)
+                    .floor()
+                    .max(0.0),
+            );
+        let b = (pars.benefit.single_pc - benefit_income).max(Weekly::zero());
+        if b > Weekly::zero() {
             benefits += b;
             guarantee_credit = true;
         }
