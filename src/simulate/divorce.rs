@@ -73,8 +73,7 @@ pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
             }
         }
 
-        // FIXME: maybe have this probability as a parameter?
-        let prox = if model.rng.random_bool(0.5) {
+        let prox = if model.rng.random_bool(pars.divorce.prob_moving_near) {
             Proximity::Near
         } else {
             Proximity::Far

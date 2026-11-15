@@ -409,6 +409,7 @@ struct Divorce {
     the_present: Date,
     variable_divorce: f64,
     divorce_bias: f64,
+    prob_moving_near: f64,
 }
 
 impl Default for Divorce {
@@ -422,6 +423,7 @@ impl Default for Divorce {
             the_present: Date::new(2012),
             variable_divorce: 0.06,
             divorce_bias: 0.9,
+            prob_moving_near: 0.5,
         }
     }
 }
