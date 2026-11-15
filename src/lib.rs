@@ -385,8 +385,8 @@ impl Default for Benefits {
             ea_disabled_children: [128.89, 402.41].map(Weekly::from_monthly),
             lcfw_component: Weekly::from_monthly(343.63),
             carers_component: Weekly::from_monthly(163.73),
-            single_pc: Weekly::new(177.10), // top-up FIXME: seems to be monthly
-            couple_pc: Weekly::new(270.30), // top-up FIXME: seems to be monthly
+            single_pc: Weekly::new(177.10), // top-up
+            couple_pc: Weekly::new(270.30), // top-up
             wealth_allowance_pc: 1e4,
             saving_income_rate_pc: 5e2,
             disability_component_pc: Weekly::new(67.3),
