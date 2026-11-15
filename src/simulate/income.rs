@@ -24,11 +24,10 @@ fn update_person_income(person: &mut Person, pars: &ModelPars) {
                     _ => Weekly::zero(),
                 };
             } else {
-                // FIXME: should be effectively worked hours
                 person.work.income = person
                     .work
                     .wage
-                    .for_weekly_hours(person.work.available_working_hours);
+                    .for_weekly_hours(person.task.todo_tally.work);
                 person.work.last_income = person
                     .work
                     .wage
