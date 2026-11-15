@@ -5,7 +5,7 @@ use crate::{
     ModelPars, N_CLASSES,
     agents::{
         agent_modules::work::{WorkStatus, lose_job},
-        interactions::{dependencies::set_as_self_providing, income::household_income_per_capita},
+        interactions::dependencies::set_as_self_providing,
     },
     common::{income::set_wage_progression, social::change_status},
     full_model::{
@@ -107,7 +107,8 @@ fn start_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
         return 0.0;
     }
 
-    let per_capital_disposable_income = household_income_per_capita(person.id(), model);
+    let house = person.house(model);
+    let per_capital_disposable_income = house.income_per_capita(model);
     if per_capital_disposable_income <= Weekly::zero() {
         return 0.0;
     }

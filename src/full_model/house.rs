@@ -11,6 +11,7 @@ use crate::{
         towns::{IdTown, Town},
     },
     full_model::Model,
+    per_time::Weekly,
 };
 
 static ID_HOUSE: AtomicU64 = AtomicU64::new(0);
@@ -53,5 +54,14 @@ impl House {
 
     pub fn town<'a>(&self, model: &'a Model) -> &'a Town {
         model.towns.get(&self.basic.town()).unwrap()
+    }
+
+    pub fn income_per_capita(&self, model: &Model) -> Weekly {
+        let occupants = self.basic.occupants();
+        let income: Weekly = occupants
+            .iter()
+            .map(|&id| model.pop.alive(id).work.income)
+            .sum();
+        income / occupants.len() as f64
     }
 }
