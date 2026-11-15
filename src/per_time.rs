@@ -5,7 +5,8 @@ use std::{
 
 use serde::{Deserialize, Serialize};
 
-const WEEKS_PER_MONTH: f64 = 365.24 / 7.0 / 12.0;
+const WEEKS_PER_YEAR: f64 = 365.24 / 7.0;
+const WEEKS_PER_MONTH: f64 = WEEKS_PER_YEAR / 12.0;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, PartialOrd, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -18,6 +19,10 @@ impl Weekly {
 
     pub const fn from_monthly(value: f64) -> Self {
         Self(value / WEEKS_PER_MONTH)
+    }
+
+    pub const fn from_yearly(value: f64) -> Self {
+        Self(value / WEEKS_PER_YEAR)
     }
 
     pub const fn zero() -> Self {

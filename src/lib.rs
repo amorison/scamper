@@ -361,7 +361,7 @@ struct Benefits {
 impl Default for Benefits {
     fn default() -> Self {
         Self {
-            child_benefit_income_threshold: Weekly::new(5e4), // FIXME: seems high
+            child_benefit_income_threshold: Weekly::from_yearly(5e4),
             first_child_benefit: Weekly::new(21.15),
             other_children_benefit: Weekly::new(14.0),
             care_dla: [0.0, 23.7, 60.0, 60.0, 89.6].map(Weekly::new),
