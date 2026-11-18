@@ -1,4 +1,4 @@
-use crate::utilities::Months;
+use crate::{ModelPars, per_time::Weekly, utilities::Months};
 
 #[derive(Default)]
 pub struct Maternity {
@@ -28,5 +28,17 @@ impl Maternity {
     pub fn end(&mut self) {
         self.status = false;
         self.months_since_birth = 0;
+    }
+
+    pub fn adjust_income(&self, base_income: Weekly, pars: &ModelPars) -> Weekly {
+        if !self.status {
+            return base_income;
+        }
+        let maternity_income = pars.work.maternity_leave_income_factor * base_income;
+        match self.months_since_birth {
+            0..2 => maternity_income,
+            2..10 => maternity_income.min(pars.work.min_statutory_maternity_pay),
+            _ => Weekly::zero(),
+        }
     }
 }
