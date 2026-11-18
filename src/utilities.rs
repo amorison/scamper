@@ -5,6 +5,7 @@ use rand::{
     Rng, RngExt,
     distr::{Distribution, Uniform},
 };
+use serde::{Deserialize, Serialize};
 
 /// Date (accurate to the month)
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -15,7 +16,8 @@ pub struct Date(u32);
 pub struct Age(u32);
 
 /// Duration in months
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Months(u32);
 
 /// Age interval
@@ -140,6 +142,10 @@ impl Sub<Date> for Date {
 impl Months {
     pub const fn new(months: u32) -> Self {
         Self(months)
+    }
+
+    pub const fn months(self) -> u32 {
+        self.0
     }
 }
 

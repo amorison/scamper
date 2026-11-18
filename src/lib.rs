@@ -19,7 +19,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     per_time::{Hourly, Weekly},
-    utilities::{Age, Date},
+    utilities::{Age, Date, Months},
 };
 
 pub const N_CLASSES: usize = 5;
@@ -230,7 +230,7 @@ impl Default for Birth {
 #[serde(default)]
 struct Work {
     maternity_leave_income_factor: f64,
-    maternity_leave_duration: u32,
+    maternity_leave_duration: Months,
     min_statutory_maternity_pay: Weekly,
     #[serde(with = "year_serde")]
     age_teenagers: Age,
@@ -276,7 +276,7 @@ impl Default for Work {
     fn default() -> Self {
         Self {
             maternity_leave_income_factor: 0.9,
-            maternity_leave_duration: 9,
+            maternity_leave_duration: Months::new(9),
             min_statutory_maternity_pay: Weekly::new(151.97),
             age_teenagers: Age::years(13),
             age_adulthood: Age::years(16),

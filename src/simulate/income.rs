@@ -12,13 +12,14 @@ fn update_person_income(person: &mut Person, pars: &ModelPars) {
             person.work.income = Weekly::zero()
         }
         WorkStatus::FixedShiftEmployed => {
+            // FIMXE: maternity status needs to be abstracted
             if person.maternity.is_in_maternity() {
                 let expected_income = person
                     .work
                     .wage
                     .for_weekly_hours(pars.work.weekly_hours[person.care.index()]);
                 let maternity_income = pars.work.maternity_leave_income_factor * expected_income;
-                person.work.income = match person.maternity.duration() {
+                person.work.income = match person.maternity.duration().months() {
                     0..2 => maternity_income,
                     2..10 => maternity_income.min(pars.work.min_statutory_maternity_pay),
                     _ => Weekly::zero(),

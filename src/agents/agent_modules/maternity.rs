@@ -1,3 +1,5 @@
+use crate::utilities::Months;
+
 #[derive(Default)]
 pub struct Maternity {
     status: bool,
@@ -9,9 +11,9 @@ impl Maternity {
         self.status
     }
 
-    /// Duration in months since birth.
-    pub fn duration(&self) -> u32 {
-        self.months_since_birth
+    /// Duration since birth.
+    pub fn duration(&self) -> Months {
+        Months::new(self.months_since_birth)
     }
 
     pub fn start(&mut self) {
