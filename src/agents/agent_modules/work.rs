@@ -1,6 +1,11 @@
+use identity_hash::IntMap;
+
 use crate::{
-    agents::tasks::IdTask,
-    full_model::{Model, person::Id},
+    agents::tasks::{IdTask, Task},
+    full_model::{
+        Model,
+        person::{Id, Person},
+    },
     per_time::{Hourly, Weekly},
     utilities::{Date, HourInWeek},
 };
@@ -108,14 +113,17 @@ impl Default for Work {
     }
 }
 
+pub fn rm_job_tasks(person: &mut Person, task_pool: &mut IntMap<IdTask, Task>) {
+    for (t_id, _) in person.work.job_tasks.drain(..) {
+        let task = task_pool.remove(&t_id).unwrap();
+        person.task.unschedule_task_if_present(&task);
+    }
+}
+
 pub fn lose_job(p_id: Id, model: &mut Model) {
     let person = model.pop.alive_mut(p_id);
     person.work.month_hired = Date::new(0);
     person.work.income = Weekly::zero();
     person.work.working_hours = 0;
-
-    for (t_id, _) in person.work.job_tasks.drain(..) {
-        let task = model.tasks.remove(&t_id).unwrap();
-        person.task.unschedule_task_if_present(&task);
-    }
+    rm_job_tasks(person, &mut model.tasks);
 }
