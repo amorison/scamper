@@ -12,20 +12,15 @@ use crate::{
 #[derive(Debug)]
 pub struct Partnership {
     with: Id,
-    duration: u32,
 }
 
 impl Partnership {
     pub fn new(with: Id) -> Self {
-        Self { with, duration: 0 }
+        Self { with }
     }
 
     pub fn with(&self) -> Id {
         self.with
-    }
-
-    pub fn step_one_month(&mut self) {
-        self.duration += 1;
     }
 }
 

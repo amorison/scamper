@@ -13,11 +13,6 @@ pub fn age_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     person.maternity.step(pars);
     person.basic.age.add_one_month();
 
-    // FIXME: currently unused
-    if let Some(partnership) = &mut person.kinship.partnership {
-        partnership.step_one_month();
-    }
-
     if person.basic.has_birthday() {
         process_change_1yr_deps(p_id, model, pars);
         process_change_1yr_social(p_id, model, pars);
