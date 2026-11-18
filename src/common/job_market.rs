@@ -5,7 +5,7 @@ use rand_distr::{Distribution, Uniform};
 use crate::{
     ModelPars, N_AGE_BANDS, N_CLASSES,
     agents::{
-        agent_modules::work::WorkStatus,
+        agent_modules::work::{WorkStatus, rm_job_tasks},
         shifts::{Shift, ShiftPool},
         tasks::{IdTask, Task},
     },
@@ -136,6 +136,18 @@ fn create_job_tasks<R: Rng>(
             person.work.job_tasks.push((t_id, time));
         }
     }
+}
+
+pub fn recreate_job_tasks(p_id: Id, model: &mut Model, pars: &ModelPars) {
+    let person = model.pop.alive_mut(p_id);
+    rm_job_tasks(person, &mut model.tasks);
+    create_job_tasks(
+        person,
+        &mut model.shift_pool,
+        &mut model.tasks,
+        &mut model.rng,
+        pars,
+    );
 }
 
 pub fn assign_job(p_id: Id, pars: &ModelPars, model: &mut Model) {
