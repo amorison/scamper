@@ -38,20 +38,20 @@ pub struct HourInDay(u32);
 pub struct HourInWeek(u32);
 
 impl Date {
-    pub fn new(year: u32) -> Self {
+    pub const fn new(year: u32) -> Self {
         Self(year * 12)
     }
 
     /// Year and month (1-12) of this date.
-    pub fn year_month(self) -> (u32, u32) {
+    pub const fn year_month(self) -> (u32, u32) {
         (self.0 / 12, self.0 % 12 + 1)
     }
 
-    pub fn next_month(self) -> Self {
+    pub const fn next_month(self) -> Self {
         Self(self.0 + 1)
     }
 
-    pub fn whole_year(self) -> bool {
+    pub const fn whole_year(self) -> bool {
         self.0.is_multiple_of(12)
     }
 }
@@ -103,7 +103,7 @@ impl Age {
     }
 
     /// Age interval around this age
-    pub fn range_around_years(&self, min_offset: i32, max_offset: i32) -> AgeRange {
+    pub const fn range_around_years(&self, min_offset: i32, max_offset: i32) -> AgeRange {
         let min_offset = min_offset * 12;
         let max_offset = max_offset * 12;
 
@@ -138,19 +138,19 @@ impl Sub<Date> for Date {
 }
 
 impl Months {
-    pub fn new(months: u32) -> Self {
+    pub const fn new(months: u32) -> Self {
         Self(months)
     }
 }
 
 impl AgeRange {
-    pub fn contains(&self, age: Age) -> bool {
+    pub const fn contains(&self, age: Age) -> bool {
         self.0 <= age.0 && age.0 < self.1
     }
 }
 
 impl MonthInYear {
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         self.0 as usize
     }
 }
@@ -172,27 +172,27 @@ impl DayInWeek {
         (0..5).map(Self)
     }
 
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         self.0 as usize
     }
 }
 
 impl HourInDay {
-    pub fn new(hour: u32) -> HourInDay {
+    pub const fn new(hour: u32) -> HourInDay {
         HourInDay(hour % 24)
     }
 
-    pub fn index(&self) -> usize {
+    pub const fn index(&self) -> usize {
         self.0 as usize
     }
 
-    pub fn in_school_time(&self) -> bool {
+    pub const fn in_school_time(&self) -> bool {
         10 <= self.0 && self.0 < 17
     }
 }
 
 impl HourInWeek {
-    pub fn new(day: DayInWeek, hour: HourInDay) -> Self {
+    pub const fn new(day: DayInWeek, hour: HourInDay) -> Self {
         Self(day.0 * 24 + hour.0)
     }
 
@@ -201,11 +201,11 @@ impl HourInWeek {
         (0..168).map(Self)
     }
 
-    pub fn day_hour(&self) -> (DayInWeek, HourInDay) {
+    pub const fn day_hour(&self) -> (DayInWeek, HourInDay) {
         (DayInWeek(self.0 / 24), HourInDay(self.0 % 24))
     }
 
-    pub fn day_idx(&self) -> usize {
+    pub const fn day_idx(&self) -> usize {
         (self.0 / 24) as usize
     }
 }
