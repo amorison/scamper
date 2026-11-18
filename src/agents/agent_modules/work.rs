@@ -66,8 +66,6 @@ pub struct Work {
     pub work_experience: f64,
     pub pension: Weekly,
     pub unemployment_months: u32,
-    /// Period worked so far in current job.
-    pub job_tenure: u32,
     pub month_hired: Date,
 }
 
@@ -105,7 +103,6 @@ impl Default for Work {
             work_experience: 0.0,
             pension: Weekly::zero(),
             unemployment_months: 0,
-            job_tenure: 0,
             month_hired: Date::new(0),
         }
     }
@@ -116,7 +113,6 @@ pub fn lose_job(p_id: Id, model: &mut Model) {
     person.work.month_hired = Date::new(0);
     person.work.income = Weekly::zero();
     person.work.working_hours = 0;
-    person.work.job_tenure = 0;
 
     for (t_id, _) in person.work.job_tasks.drain(..) {
         let task = model.tasks.remove(&t_id).unwrap();

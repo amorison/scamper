@@ -245,7 +245,6 @@ pub fn init_work<R: Rng>(person: &mut Person, pars: &ModelPars, rng: &mut R) {
         .work
         .wage
         .for_weekly_hours(pars.work.weekly_hours[icare]);
-    person.work.job_tenure = (1..=50).sample_single(rng).unwrap();
 }
 
 fn init_wealth(model: &mut Model, pars: &ModelPars) {

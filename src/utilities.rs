@@ -129,6 +129,14 @@ impl Sub<Months> for Date {
     }
 }
 
+impl Sub<Date> for Date {
+    type Output = Months;
+
+    fn sub(self, rhs: Date) -> Self::Output {
+        Months(self.0.checked_sub(rhs.0).expect("negative date difference"))
+    }
+}
+
 impl Months {
     pub fn new(months: u32) -> Self {
         Self(months)
