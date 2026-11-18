@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{fmt::Display, ops::Sub};
 
 use identity_hash::{BuildIdentityHasher, IntMap, IntSet};
 use rand::{
@@ -13,6 +13,10 @@ pub struct Date(u32);
 /// Age
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Age(u32);
+
+/// Duration in months
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Months(u32);
 
 /// Age interval
 pub struct AgeRange(u32, u32);
@@ -106,6 +110,28 @@ impl Age {
         let age_min = self.0.saturating_add_signed(min_offset);
         let age_max = self.0.saturating_add_signed(max_offset);
         AgeRange(age_min, age_max)
+    }
+}
+
+impl Sub<Age> for Age {
+    type Output = Months;
+
+    fn sub(self, rhs: Age) -> Self::Output {
+        Months(self.0.checked_sub(rhs.0).expect("negative age difference"))
+    }
+}
+
+impl Sub<Months> for Date {
+    type Output = Date;
+
+    fn sub(self, rhs: Months) -> Self::Output {
+        Date(self.0.checked_sub(rhs.0).expect("negative date"))
+    }
+}
+
+impl Months {
+    pub fn new(months: u32) -> Self {
+        Self(months)
     }
 }
 
