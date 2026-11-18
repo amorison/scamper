@@ -306,9 +306,13 @@ pub fn init_jobs(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
         .filter_map(|p| p.work.is_worker().then_some(p.id()))
         .collect();
 
-    hired_agents
-        .into_iter()
-        .for_each(|p_id| assign_job(p_id, pars, model));
+    hired_agents.into_iter().for_each(|p_id| {
+        assign_job(p_id, pars, model);
+        let person = model.pop.alive_mut(p_id);
+        let working_age = start_working_age(person, pars);
+        let work_duration = person.basic.age - working_age;
+        person.work.month_hired = model.date - work_duration;
+    });
 
     init_wealth(model, pars);
 }
