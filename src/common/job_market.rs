@@ -1,9 +1,14 @@
+use identity_hash::IntMap;
 use rand::{Rng, RngExt};
 use rand_distr::{Distribution, Uniform};
 
 use crate::{
     ModelPars, N_AGE_BANDS, N_CLASSES,
-    agents::{agent_modules::work::WorkStatus, shifts::Shift, tasks::Task},
+    agents::{
+        agent_modules::work::WorkStatus,
+        shifts::{Shift, ShiftPool},
+        tasks::{IdTask, Task},
+    },
     common::{income::compute_wage, social::change_status},
     full_model::{
         Model,
@@ -111,24 +116,40 @@ pub fn compute_ur_by_class_age(
     rates
 }
 
-pub fn assign_job(p_id: Id, pars: &ModelPars, model: &mut Model) {
-    let shift = model.shift_pool.sample(&mut model.rng);
-    change_status(p_id, WorkStatus::FixedShiftEmployed, model);
-    let person = model.pop.alive_mut(p_id);
-    person.work.unemployment_months = 0;
-    person.work.month_hired = model.date;
-    person.work.wage = compute_wage(person, &mut model.rng, pars);
-
+fn create_job_tasks<R: Rng>(
+    person: &mut Person,
+    shift_pool: &mut ShiftPool,
+    task_pool: &mut IntMap<IdTask, Task>,
+    rng: &mut R,
+    pars: &ModelPars,
+) {
+    let shift = shift_pool.sample(rng);
     person.work.working_hours = pars.work.weekly_hours[person.care.need_level as usize];
-    let job_schedule = weekly_schedule(&shift, person.work.working_hours, &mut model.rng);
+    let job_schedule = weekly_schedule(&shift, person.work.working_hours, rng);
 
     for time in HourInWeek::all_hours() {
         let (day, hour) = time.day_hour();
         if job_schedule[day.index()][hour.index()] {
             let task = Task::work(person.id(), time);
             let t_id = task.id();
-            model.tasks.insert(t_id, task);
+            task_pool.insert(t_id, task);
             person.work.job_tasks.push((t_id, time));
         }
     }
+}
+
+pub fn assign_job(p_id: Id, pars: &ModelPars, model: &mut Model) {
+    change_status(p_id, WorkStatus::FixedShiftEmployed, model);
+    let person = model.pop.alive_mut(p_id);
+    person.work.unemployment_months = 0;
+    person.work.month_hired = model.date;
+    person.work.wage = compute_wage(person, &mut model.rng, pars);
+
+    create_job_tasks(
+        person,
+        &mut model.shift_pool,
+        &mut model.tasks,
+        &mut model.rng,
+        pars,
+    );
 }
