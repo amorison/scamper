@@ -10,14 +10,7 @@ use crate::{
 pub fn age_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive_mut(p_id);
 
-    if person.maternity.is_in_maternity() {
-        person.maternity.step();
-        // FIXME: this should be abstracted by Maternity
-        if person.maternity.duration() >= pars.work.maternity_leave_duration {
-            person.maternity.end();
-        }
-    }
-
+    person.maternity.step(pars);
     person.basic.age.add_one_month();
 
     // FIXME: currently unused

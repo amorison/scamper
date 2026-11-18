@@ -3,7 +3,7 @@ use crate::{ModelPars, per_time::Weekly, utilities::Months};
 #[derive(Default)]
 pub struct Maternity {
     status: bool,
-    months_since_birth: u32, // FIXME: proper wrapper type?
+    months_since_birth: u32,
 }
 
 impl Maternity {
@@ -12,7 +12,7 @@ impl Maternity {
     }
 
     /// Duration since birth.
-    pub fn duration(&self) -> Months {
+    fn duration(&self) -> Months {
         Months::new(self.months_since_birth)
     }
 
@@ -21,13 +21,14 @@ impl Maternity {
         self.months_since_birth = 0;
     }
 
-    pub fn step(&mut self) {
-        self.months_since_birth += 1;
-    }
-
-    pub fn end(&mut self) {
-        self.status = false;
-        self.months_since_birth = 0;
+    pub fn step(&mut self, pars: &ModelPars) {
+        if self.status {
+            self.months_since_birth += 1;
+            if self.duration() >= pars.work.maternity_leave_duration {
+                self.status = false;
+                self.months_since_birth = 0;
+            }
+        }
     }
 
     pub fn adjust_income(&self, base_income: Weekly, pars: &ModelPars) -> Weekly {
