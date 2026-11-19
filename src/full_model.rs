@@ -159,9 +159,6 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
 
 /// Perform one model step.
 pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars) {
-    // run transitions
-    // FIXME: move the `select_` into the transition themselves
-
     // FIXME: make cache up-to-date by construction, otherwise
     // this is very brittle... death needs social class shares,
     // hence why `social_pre_calc` is called both before and
