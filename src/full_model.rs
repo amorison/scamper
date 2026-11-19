@@ -27,7 +27,7 @@ use crate::{
         benefits::compute_benefits,
         birth::{BirthCache, birth, birth_pre_calc, select_birth},
         death::{DeathCache, death, death_pre_calc},
-        dependencies::{assign_guardian, select_assign_guardian},
+        dependencies::assign_guardian,
         divorce::{DivorceCache, divorce, divorce_pre_calc, select_divorce},
         housing_top_down::house_ownership,
         income::update_income,
@@ -185,10 +185,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars)
 
     // adoption
     for p_id in order.ids() {
-        let person = model.pop.alive(p_id);
-        if select_assign_guardian(person) {
-            assign_guardian(p_id, model, order);
-        }
+        assign_guardian(p_id, model, order);
     }
 
     // birth

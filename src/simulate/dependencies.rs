@@ -16,7 +16,7 @@ use crate::{
     },
     full_model::{
         Model,
-        person::{Id, Person},
+        person::Id,
     },
     population::PopIterOrder,
     utilities::Age,
@@ -50,11 +50,12 @@ pub fn process_death_deps(p_id: Id, model: &mut Model) {
     }
 }
 
-pub fn select_assign_guardian(person: &Person) -> bool {
-    is_orphan(person)
-}
-
 pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) {
+    let person = model.pop.alive(p_id);
+    if !is_orphan(person) {
+        return;
+    }
+
     let mut g_id = find_family_guardian(p_id, model);
     if g_id.is_none() {
         g_id = find_other_guardian(model, order);
