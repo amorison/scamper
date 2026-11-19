@@ -164,13 +164,6 @@ pub fn birth(woman_id: Id, model: &mut Model, pars: &ModelPars) {
     }
     let birth_prob = compute_birth_prob(woman, model, pars);
 
-    // FIXME: all these should be true by design
-    assert!(woman.is_female());
-    assert!(!has_young_infant(woman, model));
-    assert!(!woman.kinship.is_single());
-    assert!(woman.basic.age >= pars.birth.min_pregnancy_age);
-    assert!(woman.basic.age <= pars.birth.max_pregnancy_age);
-
     if try_rand_yearly2monthly(birth_prob, &mut model.rng) {
         let gender = if model.rng.random_bool(0.5) {
             Gender::Male
