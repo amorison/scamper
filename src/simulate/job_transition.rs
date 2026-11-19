@@ -69,11 +69,12 @@ fn calc_hire_probability(pars: &ModelPars) -> f64 {
     1.0 - 1.0 / pars.work.hire_rate.exp()
 }
 
-pub fn select_unemployed(person: &Person) -> bool {
-    person.work.is_unemployed()
-}
-
 pub fn unemployed_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
+    let person = model.pop.alive(p_id);
+    if !person.work.is_unemployed() {
+        return;
+    }
+
     let prob_hired = calc_hire_probability(pars);
 
     if model.rng.random_bool(prob_hired) {
