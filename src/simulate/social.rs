@@ -73,7 +73,7 @@ pub fn start_working_age(person: &Person, pars: &ModelPars) -> Age {
     pars.work.start_working_age[person.class.rank_idx()]
 }
 
-pub fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
+fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
     // check once a year
     person.basic.has_birthday()
         && person.basic.age == start_working_age(person, pars)
@@ -83,6 +83,9 @@ pub fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
 /// Decide whether agent goes on to study or starts working.
 pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive(p_id);
+    if !select_social_transition(person, pars) {
+        return;
+    }
     let prob_study = if person.class.has_max_education() {
         0.0
     } else {
