@@ -43,11 +43,12 @@ fn calc_fire_probability(p_id: Id, model: &Model, pars: &ModelPars) -> f64 {
     1.0 - 1.0 / (pars.work.hire_rate / (1.0 / ur - 1.0)).exp()
 }
 
-pub fn select_employed(person: &Person) -> bool {
-    person.work.is_worker()
-}
-
 pub fn employed_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
+    let person = model.pop.alive(p_id);
+    if !person.work.is_worker() {
+        return;
+    }
+
     let prob_fired = calc_fire_probability(p_id, model, pars);
 
     if model.rng.random_bool(prob_fired) {
