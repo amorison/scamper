@@ -32,7 +32,7 @@ use crate::{
         housing_top_down::house_ownership,
         income::update_income,
         job_transition::{JobCache, employed_transition, job_pre_calc, unemployed_transition},
-        marriage::{MarriageCache, marriage, marriage_pre_calc, select_marriage},
+        marriage::{MarriageCache, marriage, marriage_pre_calc},
         relocate::relocate,
         social::{SocialCache, social_pre_calc, social_transition},
         social_care::{SocialCareCache, social_care_pre_calc, social_care_transition},
@@ -235,10 +235,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars)
     // marriage
     marriage_pre_calc(model, order, pars);
     for p_id in order.ids() {
-        let person = model.pop.alive(p_id);
-        if select_marriage(person, pars) {
-            marriage(p_id, model, pars);
-        }
+        marriage(p_id, model, pars);
     }
 
     carehomes::accept_new_residents(model, order);

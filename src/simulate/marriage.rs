@@ -115,7 +115,7 @@ fn geo_distance(man: &Person, woman: &Person, model: &Model, pars: &ModelPars) -
     mdist / scale
 }
 
-pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
+fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
     // FIXME: should it be age of adulthood (16), or 18?
     // If 16, shouldn't a married person in 16-18 range become independent from their parents?
     person.is_male()
@@ -126,6 +126,9 @@ pub fn select_marriage(person: &Person, pars: &ModelPars) -> bool {
 
 pub fn marriage(man_id: Id, model: &mut Model, pars: &ModelPars) {
     let man = model.pop.alive(man_id);
+    if !select_marriage(man, pars) {
+        return;
+    }
 
     let age_class = age_class(man);
     let mut man_marriage_prob = if age_class >= pars.marriage.male_marriage_modifier_by_decade.len()
