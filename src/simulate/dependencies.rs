@@ -50,7 +50,7 @@ pub fn process_death_deps(p_id: Id, model: &mut Model) {
     }
 }
 
-pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) {
+pub fn assign_guardian_if_orphan(p_id: Id, model: &mut Model, order: &PopIterOrder) {
     let person = model.pop.alive(p_id);
     if !is_orphan(person) {
         return;
