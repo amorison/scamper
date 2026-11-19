@@ -16,7 +16,7 @@ use crate::{
     },
     full_model::{
         Model,
-        person::Id,
+        person::{Id, Person},
     },
     population::PopIterOrder,
     utilities::Age,
@@ -56,7 +56,7 @@ pub fn assign_guardian_if_orphan(p_id: Id, model: &mut Model, order: &PopIterOrd
         return;
     }
 
-    let mut g_id = find_family_guardian(p_id, model);
+    let mut g_id = find_family_guardian(person, model);
     if g_id.is_none() {
         g_id = find_other_guardian(model, order);
     }
@@ -73,8 +73,7 @@ fn is_potential_guardian(p_id: Id, model: &Model) -> bool {
         .is_alive_and(|p| p.basic.age >= Age::years(18))
 }
 
-fn find_family_guardian(p_id: Id, model: &Model) -> Option<Id> {
-    let person = model.pop.alive(p_id);
+fn find_family_guardian(person: &Person, model: &Model) -> Option<Id> {
     let parents = person.kinship.parents();
 
     for &g_id in &parents {
