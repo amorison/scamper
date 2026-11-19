@@ -118,7 +118,7 @@ pub fn create_model(pars: &ModelPars) -> (Model, PopIterOrder) {
     let mut model = Model {
         date: pars.population.start_year,
         towns,
-        houses: int_map_with_cap(0), // FIXME: check capacity
+        houses: int_map_with_cap(0),
         pop,
         shift_pool: ShiftPool::new(pars, &mut rng),
         tasks: int_map_with_cap(population.len() * 5),

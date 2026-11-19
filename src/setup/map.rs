@@ -48,8 +48,10 @@ pub fn create_towns(pars: &ModelPars) -> Vec<Town> {
 pub fn initialise_houses_in_town(model: &mut Model, init_pop: usize) {
     // FIXME: this heuristic works for the default map, should be generalised.
     let n_houses = (init_pop as f64 / 10.0).ceil() as usize;
+    model.houses.reserve(model.towns.len() * n_houses);
 
     for town in model.towns.values_mut() {
+        town.houses.reserve(n_houses);
         for _ in 0..n_houses {
             if model.rng.random_bool(0.6 * town.density) {
                 let house = House::new(town.id());
