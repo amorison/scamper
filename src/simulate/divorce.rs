@@ -31,7 +31,7 @@ fn divorce_probability(raw_rate: f64, man: &Person, model: &Model) -> f64 {
     (raw_rate * class_bias).clamp(0.0, 1.0)
 }
 
-pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
+pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) {
     let man = model.pop.alive(man_id);
     assert!(man.is_male());
     let wife_id = man.kinship.partner().expect("a single man cannot divorce");
@@ -79,10 +79,6 @@ pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
             Proximity::Far
         };
         move_people_to_empty_house(&people_to_move, prox, model);
-
-        true
-    } else {
-        false
     }
 }
 
