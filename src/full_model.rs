@@ -33,7 +33,7 @@ use crate::{
         income::update_income,
         job_transition::{JobCache, employed_transition, job_pre_calc, unemployed_transition},
         marriage::{MarriageCache, marriage, marriage_pre_calc, select_marriage},
-        relocate::{relocate, select_relocate},
+        relocate::relocate,
         social::{SocialCache, select_social_transition, social_pre_calc, social_transition},
         social_care::{SocialCareCache, social_care_pre_calc, social_care_transition},
         tasks_care::distribute_care,
@@ -219,10 +219,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars)
 
     // relocate
     for p_id in order.ids() {
-        let person = model.pop.alive(p_id);
-        if select_relocate(person, model) {
-            relocate(p_id, model, pars);
-        }
+        relocate(p_id, model, pars);
     }
 
     // sort new adults into students and workers

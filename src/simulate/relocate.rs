@@ -13,7 +13,7 @@ use crate::{
     simulate::move_house::{Proximity, move_people_to_empty_house},
 };
 
-pub fn select_relocate(person: &Person, model: &Model) -> bool {
+fn select_relocate(person: &Person, model: &Model) -> bool {
     can_live_alone(person)
         && person.work.is_worker()
         && person.kinship.is_single()
@@ -21,7 +21,8 @@ pub fn select_relocate(person: &Person, model: &Model) -> bool {
 }
 
 pub fn relocate(p_id: Id, model: &mut Model, pars: &ModelPars) {
-    if model.rng.random_bool(pars.work.move_out_prob) {
+    let person = model.pop.alive(p_id);
+    if select_relocate(person, model) && model.rng.random_bool(pars.work.move_out_prob) {
         let mut people_to_move = vec![p_id];
         let person = model.pop.alive(p_id);
         for &dep_id in &person.dependency.dependents {
