@@ -28,7 +28,7 @@ use crate::{
         birth::{BirthCache, birth, birth_pre_calc},
         death::{DeathCache, death, death_pre_calc},
         dependencies::assign_guardian_if_orphan,
-        divorce::{DivorceCache, divorce, divorce_pre_calc, select_divorce},
+        divorce::{DivorceCache, divorce, divorce_pre_calc},
         housing_top_down::house_ownership,
         income::update_income,
         job_transition::{JobCache, employed_transition, job_pre_calc, unemployed_transition},
@@ -229,10 +229,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars)
 
     // divorce
     for p_id in order.ids() {
-        let person = model.pop.alive(p_id);
-        if select_divorce(person) {
-            divorce(p_id, model, pars);
-        }
+        divorce(p_id, model, pars);
     }
 
     // marriage

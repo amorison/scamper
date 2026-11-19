@@ -32,9 +32,14 @@ fn divorce_probability(raw_rate: f64, man: &Person, model: &Model) -> f64 {
 }
 
 pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) {
+    // To attempt divorce only once per couple, this routine applies to married men only
     let man = model.pop.alive(man_id);
-    assert!(man.is_male());
-    let wife_id = man.kinship.partner().expect("a single man cannot divorce");
+    if !man.is_male() {
+        return;
+    }
+    let Some(wife_id) = man.kinship.partner() else {
+        return;
+    };
 
     // This is here to manage the sweeping through of this parameter
     // but only for the years after 2012
@@ -80,8 +85,4 @@ pub fn divorce(man_id: Id, model: &mut Model, pars: &ModelPars) {
         };
         move_people_to_empty_house(&people_to_move, prox, model);
     }
-}
-
-pub fn select_divorce(person: &Person) -> bool {
-    person.is_male() && !person.kinship.is_single()
 }
