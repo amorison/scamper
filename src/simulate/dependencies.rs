@@ -54,7 +54,7 @@ pub fn select_assign_guardian(person: &Person) -> bool {
     is_orphan(person)
 }
 
-pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> bool {
+pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) {
     let mut g_id = find_family_guardian(p_id, model);
     if g_id.is_none() {
         g_id = find_other_guardian(model, order);
@@ -66,9 +66,6 @@ pub fn assign_guardian(p_id: Id, model: &mut Model, order: &PopIterOrder) -> boo
 
     if let Some(guard_id) = g_id {
         adopt(guard_id, p_id, model);
-        true
-    } else {
-        false
     }
 }
 
