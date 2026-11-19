@@ -157,12 +157,11 @@ fn effects_of_maternity(woman_id: Id, model: &mut Model) {
     }
 }
 
-pub fn select_birth(person: &Person, model: &Model, pars: &ModelPars) -> bool {
-    is_potential_mother(person, model, pars)
-}
-
 pub fn birth(woman_id: Id, model: &mut Model, pars: &ModelPars) {
     let woman = model.pop.alive(woman_id);
+    if !is_potential_mother(woman, model, pars) {
+        return;
+    }
     let birth_prob = compute_birth_prob(woman, model, pars);
 
     // FIXME: all these should be true by design

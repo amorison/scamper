@@ -25,7 +25,7 @@ use crate::{
     simulate::{
         age::age_transition,
         benefits::compute_benefits,
-        birth::{BirthCache, birth, birth_pre_calc, select_birth},
+        birth::{BirthCache, birth, birth_pre_calc},
         death::{DeathCache, death, death_pre_calc},
         dependencies::assign_guardian_if_orphan,
         divorce::{DivorceCache, divorce, divorce_pre_calc, select_divorce},
@@ -190,10 +190,7 @@ pub fn step_model(model: &mut Model, order: &mut PopIterOrder, pars: &ModelPars)
 
     // birth
     for p_id in order.ids() {
-        let person = model.pop.alive(p_id);
-        if select_birth(person, model, pars) {
-            birth(p_id, model, pars);
-        }
+        birth(p_id, model, pars);
     }
 
     // aging
