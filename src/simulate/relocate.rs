@@ -20,7 +20,7 @@ pub fn select_relocate(person: &Person, model: &Model) -> bool {
         && lives_in_shared_house(person.id(), model)
 }
 
-pub fn relocate(p_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
+pub fn relocate(p_id: Id, model: &mut Model, pars: &ModelPars) {
     if model.rng.random_bool(pars.work.move_out_prob) {
         let mut people_to_move = vec![p_id];
         let person = model.pop.alive(p_id);
@@ -37,9 +37,5 @@ pub fn relocate(p_id: Id, model: &mut Model, pars: &ModelPars) -> bool {
             Proximity::Far
         };
         move_people_to_empty_house(&people_to_move, prox, model);
-
-        true
-    } else {
-        false
     }
 }
