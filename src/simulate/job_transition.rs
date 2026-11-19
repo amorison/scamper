@@ -32,9 +32,8 @@ pub fn job_pre_calc(model: &mut Model, order: &PopIterOrder, pars: &ModelPars) {
     }
 }
 
-fn calc_fire_probability(p_id: Id, model: &Model, pars: &ModelPars) -> f64 {
+fn calc_fire_probability(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
     // TODO: (Julia comment) From old version, keep?
-    let person = model.pop.alive(p_id);
     if model.date - person.work.month_hired < Months::new(1) {
         return 0.0;
     }
@@ -49,7 +48,7 @@ pub fn employed_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
         return;
     }
 
-    let prob_fired = calc_fire_probability(p_id, model, pars);
+    let prob_fired = calc_fire_probability(person, model, pars);
 
     if model.rng.random_bool(prob_fired) {
         lose_job(p_id, model);
