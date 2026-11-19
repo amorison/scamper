@@ -61,10 +61,6 @@ pub fn assign_guardian_if_orphan(p_id: Id, model: &mut Model, order: &PopIterOrd
         g_id = find_other_guardian(model, order);
     }
 
-    // Get rid of previous guardians.
-    let person = model.pop.alive_mut(p_id);
-    person.dependency.guardians.clear();
-
     if let Some(guard_id) = g_id {
         adopt(guard_id, p_id, model);
     }
