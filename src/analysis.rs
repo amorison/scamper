@@ -8,8 +8,11 @@ use jiff::{Zoned, tz::TimeZone};
 use serde::Serialize;
 
 use crate::{
-    ModelPars, N_AGE_YEARS, N_CARE_LEVELS, N_CLASSES, agents::agent_modules::basic_info::Gender,
-    full_model::Model, population::PopIterOrder, utilities::Date,
+    ModelPars, N_AGE_YEARS, N_CARE_LEVELS, N_CLASSES,
+    agents::agent_modules::{basic_info::Gender, work::WorkStatus},
+    full_model::Model,
+    population::PopIterOrder,
+    utilities::Date,
 };
 
 pub struct Output {
@@ -88,7 +91,11 @@ impl Output {
 struct PopulationStats {
     pop_size: usize,
     n_married: usize,
+    n_child: usize,
+    n_teen: usize,
+    n_student: usize,
     n_working: usize,
+    n_retired: usize,
     n_unemployed: usize,
     class_tally: [usize; N_CLASSES],
     age_pyramid_male: [usize; N_AGE_YEARS],
@@ -103,7 +110,11 @@ impl PopulationStats {
         let mut stats = Self {
             pop_size: model.pop.size(),
             n_married: 0,
+            n_child: 0,
+            n_teen: 0,
+            n_student: 0,
             n_working: 0,
+            n_retired: 0,
             n_unemployed: 0,
             class_tally: [0; N_CLASSES],
             age_pyramid_male: [0; _],
@@ -117,10 +128,13 @@ impl PopulationStats {
                 stats.n_married += 1;
             }
 
-            if person.work.is_worker() {
-                stats.n_working += 1;
-            } else if person.work.is_unemployed() {
-                stats.n_unemployed += 1;
+            match person.work.status {
+                WorkStatus::Child => stats.n_child += 1,
+                WorkStatus::Teenager => stats.n_teen += 1,
+                WorkStatus::Student => stats.n_student += 1,
+                WorkStatus::FixedShiftEmployed => stats.n_working += 1,
+                WorkStatus::Retired => stats.n_retired += 1,
+                WorkStatus::Unemployed => stats.n_unemployed += 1,
             }
 
             stats.class_tally[person.class.rank_idx()] += 1;
@@ -143,7 +157,11 @@ struct MainRecord {
     month: u32,
     pop_size: usize,
     n_married: usize,
+    n_child: usize,
+    n_teen: usize,
+    n_student: usize,
     n_working: usize,
+    n_retired: usize,
     n_unemployed: usize,
     n_care_home_occupied: usize,
     n_care_home_capacity: usize,
@@ -157,7 +175,11 @@ impl MainRecord {
             month,
             pop_size: stats.pop_size,
             n_married: stats.n_married,
+            n_child: stats.n_child,
+            n_teen: stats.n_teen,
+            n_student: stats.n_student,
             n_working: stats.n_working,
+            n_retired: stats.n_retired,
             n_unemployed: stats.n_unemployed,
             n_care_home_occupied: stats.n_care_home_occupied,
             n_care_home_capacity: stats.n_care_home_capacity,
