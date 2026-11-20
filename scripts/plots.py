@@ -5,7 +5,7 @@
 # dependencies = [
 #     "numpy>=2.5",
 #     "matplotlib>=3.11.1",
-#     "pandas>=3.0.5",
+#     "polars>=2.1.0",
 # ]
 # ///
 import sys
@@ -15,7 +15,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import polars as pl
 from matplotlib.animation import FuncAnimation
 from numpy.typing import NDArray
 
@@ -25,8 +25,15 @@ class Data:
     path: Path
 
     @cached_property
-    def stats(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "stats.csv")
+    def stats(self) -> pl.DataFrame:
+        year_f64 = pl.col("year") + (pl.col("month") - 1) / 12
+        return (
+            pl.scan_csv(self.path / "stats.csv")
+            .with_columns(
+                year_f64.alias("year_f64"),
+            )
+            .collect()
+        )
 
     @cached_property
     def pyramid_female(self) -> NDArray[np.float64]:
@@ -69,16 +76,16 @@ class AnimPlot:
             ax.clear()
 
         dat = self.data.stats
-        years = dat["year"] + (dat["month"] - 1) / 12
-        year = dat["year"].iloc[i]
-        month = dat["month"].iloc[i]
+        years = dat.get_column("year_f64")
+        year = dat.get_column("year")[i]
+        month = dat.get_column("month")[i]
         fig.suptitle(f"{year}/{month:02}", fontsize=20)
 
         for series in ("n_married", "n_working", "n_unemployed", "pop_size"):
             (lines,) = axes[0, 0].plot(years, dat[series], label=series)
             axes[0, 0].plot(
-                years.iloc[i],
-                dat[series].iloc[i],
+                years[i],
+                dat.get_column(series)[i],
                 "o",
                 color=lines.get_color(),
             )
@@ -87,11 +94,11 @@ class AnimPlot:
         axes[0, 0].set_ylabel("number of persons")
 
         for series in ("n_married", "n_working", "n_unemployed"):
-            norm_series = dat[series] / dat["pop_size"]
+            norm_series = dat.get_column(series) / dat.get_column("pop_size")
             (lines,) = axes[0, 1].plot(years, norm_series, label=series)
             axes[0, 1].plot(
-                years.iloc[i],
-                norm_series.iloc[i],
+                years[i],
+                norm_series[i],
                 "o",
                 color=lines.get_color(),
             )
@@ -99,7 +106,7 @@ class AnimPlot:
         axes[0, 1].set_xlabel("year")
         axes[0, 1].set_ylabel("population share")
 
-        npersons = dat["pop_size"].iloc[i]
+        npersons = dat.get_column("pop_size")[i]
 
         men = self.data.pyramid_male
         women = self.data.pyramid_female
