@@ -76,11 +76,11 @@ pub fn start_working_age(person: &Person, pars: &ModelPars) -> Age {
 fn select_social_transition(person: &Person, pars: &ModelPars) -> bool {
     // check once a year
     person.basic.has_birthday()
-        && person.basic.age == start_working_age(person, pars)
+        && person.basic.age >= start_working_age(person, pars)
         && person.work.is_student()
 }
 
-/// Decide whether agent goes on to study or starts working.
+/// Decide whether agent continues studying or starts working.
 pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let person = model.pop.alive(p_id);
     if !select_social_transition(person, pars) {
@@ -89,7 +89,7 @@ pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     let prob_study = if person.class.has_max_education() {
         0.0
     } else {
-        start_study_prob(person, model, pars)
+        continue_study_prob(person, model, pars)
     };
 
     if model.rng.random_bool(prob_study) {
@@ -100,8 +100,8 @@ pub fn social_transition(p_id: Id, model: &mut Model, pars: &ModelPars) {
     }
 }
 
-/// Probability to start studying instead of working.
-fn start_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
+/// Probability to study instead of working.
+fn continue_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
     if person.kinship.father.is_none() && person.kinship.mother.is_none() {
         return 0.0;
     }
@@ -116,8 +116,9 @@ fn start_study_prob(person: &Person, model: &Model, pars: &ModelPars) -> f64 {
         return 0.0;
     }
 
-    let irank = person.class.rank_idx();
-    let forgone_salary = pars.work.income_initial_levels[irank]
+    let forgone_salary = person
+        .class
+        .expected_wage(pars)
         .for_weekly_hours(pars.work.weekly_hours[person.care.index()]);
     let rel_cost = forgone_salary / per_capita_disposable_income;
     let income_effect = (pars.work.constant_income + 1.0)

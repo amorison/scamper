@@ -1,4 +1,4 @@
-use crate::{ModelPars, N_CLASSES};
+use crate::{ModelPars, N_CLASSES, per_time::Hourly};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Rank(u32);
@@ -49,6 +49,12 @@ impl Class {
 
     pub fn has_max_education(&self) -> bool {
         self.education.0 >= N_CLASSES as u32 - 1
+    }
+
+    /// Expected income if joined workforce now.
+    pub fn expected_wage(&self, pars: &ModelPars) -> Hourly {
+        let irank = self.education.index();
+        pars.work.income_initial_levels[irank]
     }
 
     /// Influence of education gap with parents on probability of studying.
