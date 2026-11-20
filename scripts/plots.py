@@ -14,8 +14,10 @@ from functools import cached_property
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 from matplotlib.animation import FuncAnimation
+from numpy.typing import NDArray
 
 
 @dataclass(frozen=True)
@@ -27,20 +29,20 @@ class Data:
         return pd.read_csv(self.path / "stats.csv")
 
     @cached_property
-    def pyramid_female(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "pyramid_female.csv", header=None)
+    def pyramid_female(self) -> NDArray[np.float64]:
+        return np.loadtxt(self.path / "pyramid_female.csv", delimiter=",")
 
     @cached_property
-    def pyramid_male(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "pyramid_male.csv", header=None)
+    def pyramid_male(self) -> NDArray[np.float64]:
+        return np.loadtxt(self.path / "pyramid_male.csv", delimiter=",")
 
     @cached_property
-    def care_need(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "care_need.csv", header=None)
+    def care_need(self) -> NDArray[np.float64]:
+        return np.loadtxt(self.path / "care_need.csv", delimiter=",")
 
     @cached_property
-    def classes(self) -> pd.DataFrame:
-        return pd.read_csv(self.path / "class.csv", header=None)
+    def classes(self) -> NDArray[np.float64]:
+        return np.loadtxt(self.path / "class.csv", delimiter=",")
 
     @cached_property
     def size(self) -> int:
@@ -101,18 +103,18 @@ class AnimPlot:
 
         men = self.data.pyramid_male
         women = self.data.pyramid_female
-        axes[0, 2].stairs(men.iloc[i, 2:] / npersons, label="male")
-        axes[0, 2].stairs(women.iloc[i, 2:] / npersons, label="female")
+        axes[0, 2].stairs(men[i, 2:] / npersons, label="male")
+        axes[0, 2].stairs(women[i, 2:] / npersons, label="female")
         axes[0, 2].legend()
         axes[0, 2].set_xlabel("age")
 
         care_level = self.data.care_need
-        axes[1, 1].bar(range(1, 6), care_level.iloc[i, 2:] / npersons)
+        axes[1, 1].bar(range(1, 6), care_level[i, 2:] / npersons)
         axes[1, 1].set_xlabel("care need level")
         axes[1, 1].set_ylabel("population share")
 
         classes = self.data.classes
-        axes[1, 2].bar(range(1, 6), classes.iloc[i, 2:] / npersons)
+        axes[1, 2].bar(range(1, 6), classes[i, 2:] / npersons)
         axes[1, 2].set_xlabel("social class")
         if save:
             fig.savefig(self.plot_dir / f"plot_{year}_{month:02}.svg")
