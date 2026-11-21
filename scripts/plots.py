@@ -102,13 +102,15 @@ class AnimPlot:
         month = dat.get_column("month")[i]
         fig.suptitle(f"{year}/{month:02}", fontsize=20)
 
+        colors = {}
         for series in (*STATS, "pop_size"):
             (lines,) = axes[0, 0].plot(years, dat[series], label=series)
+            colors[series] = lines.get_color()
             axes[0, 0].plot(
                 years[i],
                 dat.get_column(series)[i],
                 "o",
-                color=lines.get_color(),
+                color=colors[series],
             )
         axes[0, 0].legend()
         axes[0, 0].set_xlabel("year")
@@ -116,27 +118,25 @@ class AnimPlot:
 
         for series in STATS[:N_LARGE_STATS]:
             norm_series = dat.get_column(series + "-share")
-            (lines,) = axes[0, 1].plot(years, norm_series, label=series)
+            axes[0, 1].plot(years, norm_series, label=series, color=colors[series])
             axes[0, 1].plot(
                 years[i],
                 norm_series[i],
                 "o",
-                color=lines.get_color(),
+                color=colors[series],
             )
-        axes[0, 1].legend()
         axes[0, 1].set_xlabel("year")
         axes[0, 1].set_ylabel("population share")
 
         for series in STATS[N_LARGE_STATS:]:
             norm_series = dat.get_column(series + "-share")
-            (lines,) = axes[1, 0].plot(years, norm_series, label=series)
+            axes[1, 0].plot(years, norm_series, label=series, color=colors[series])
             axes[1, 0].plot(
                 years[i],
                 norm_series[i],
                 "o",
-                color=lines.get_color(),
+                color=colors[series],
             )
-        axes[1, 0].legend()
         axes[1, 0].set_xlabel("year")
         axes[1, 0].set_ylabel("population share")
 
