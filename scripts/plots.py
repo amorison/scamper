@@ -20,6 +20,16 @@ import polars as pl
 from matplotlib.animation import FuncAnimation
 from numpy.typing import NDArray
 
+STATS = [
+    "n_married",
+    "n_working",
+    "n_child",
+    "n_teen",
+    "n_student",
+    "n_retired",
+    "n_unemployed",
+]
+
 
 @dataclass(frozen=True)
 class Data:
@@ -32,6 +42,7 @@ class Data:
             pl.scan_csv(self.path / "stats.csv")
             .with_columns(
                 year_f64.alias("year_f64"),
+                (pl.col(STATS) / pl.col("pop_size")).name.suffix("-share"),
             )
             .collect()
         )
@@ -88,7 +99,7 @@ class AnimPlot:
         month = dat.get_column("month")[i]
         fig.suptitle(f"{year}/{month:02}", fontsize=20)
 
-        for series in ("n_married", "n_working", "n_unemployed", "pop_size"):
+        for series in (*STATS, "pop_size"):
             (lines,) = axes[0, 0].plot(years, dat[series], label=series)
             axes[0, 0].plot(
                 years[i],
@@ -100,8 +111,8 @@ class AnimPlot:
         axes[0, 0].set_xlabel("year")
         axes[0, 0].set_ylabel("number of persons")
 
-        for series in ("n_married", "n_working", "n_unemployed"):
-            norm_series = dat.get_column(series) / dat.get_column("pop_size")
+        for series in STATS:
+            norm_series = dat.get_column(series + "-share")
             (lines,) = axes[0, 1].plot(years, norm_series, label=series)
             axes[0, 1].plot(
                 years[i],
