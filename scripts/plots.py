@@ -8,7 +8,8 @@
 #     "polars>=2.1.0",
 # ]
 # ///
-import sys
+import shutil
+from argparse import ArgumentParser
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
@@ -65,10 +66,16 @@ class AnimPlot:
         return plt.subplots(2, 3, figsize=(19.2, 9.6))
 
     @cached_property
+    def _plot_dir(self) -> Path:
+        return self.data.path / "plots"
+
+    @cached_property
     def plot_dir(self) -> Path:
-        plot_dir = self.data.path / "plots"
-        plot_dir.mkdir(parents=True)
-        return plot_dir
+        self._plot_dir.mkdir(parents=True)
+        return self._plot_dir
+
+    def rm_plot_dir(self) -> None:
+        shutil.rmtree(self._plot_dir)
 
     def plot_at(self, i: int, save: bool):
         fig, axes = self.fig_axes
@@ -126,7 +133,7 @@ class AnimPlot:
         if save:
             fig.savefig(self.plot_dir / f"plot_{year}_{month:02}.svg")
 
-    def make_anim(self, save_each_plot):
+    def make_anim(self, *, save_each_plot: bool) -> None:
         fig, _ = self.fig_axes
         ani = FuncAnimation(
             fig,
@@ -137,6 +144,22 @@ class AnimPlot:
 
 
 if __name__ == "__main__":
-    run_dir = Path(sys.argv[1])
-    anim = AnimPlot(data=Data(run_dir))
-    anim.make_anim(True)
+    parser = ArgumentParser()
+    parser.add_argument(
+        "path",
+        type=Path,
+        help="scamper run directory",
+    )
+    parser.add_argument(
+        "-f",
+        "--force",
+        help="overwrite existing plots",
+        action="store_true",
+    )
+    args = parser.parse_args()
+
+    data = Data(args.path)
+    anim = AnimPlot(data)
+    if args.force:
+        anim.rm_plot_dir()
+    anim.make_anim(save_each_plot=True)
