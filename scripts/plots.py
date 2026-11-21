@@ -29,6 +29,7 @@ STATS = [
     "n_retired",
     "n_unemployed",
 ]
+N_LARGE_STATS = 2
 
 
 @dataclass(frozen=True)
@@ -113,7 +114,7 @@ class AnimPlot:
         axes[0, 0].set_xlabel("year")
         axes[0, 0].set_ylabel("number of persons")
 
-        for series in STATS:
+        for series in STATS[:N_LARGE_STATS]:
             norm_series = dat.get_column(series + "-share")
             (lines,) = axes[0, 1].plot(years, norm_series, label=series)
             axes[0, 1].plot(
@@ -125,6 +126,19 @@ class AnimPlot:
         axes[0, 1].legend()
         axes[0, 1].set_xlabel("year")
         axes[0, 1].set_ylabel("population share")
+
+        for series in STATS[N_LARGE_STATS:]:
+            norm_series = dat.get_column(series + "-share")
+            (lines,) = axes[1, 0].plot(years, norm_series, label=series)
+            axes[1, 0].plot(
+                years[i],
+                norm_series[i],
+                "o",
+                color=lines.get_color(),
+            )
+        axes[1, 0].legend()
+        axes[1, 0].set_xlabel("year")
+        axes[1, 0].set_ylabel("population share")
 
         npersons = dat.get_column("pop_size")[i]
 
