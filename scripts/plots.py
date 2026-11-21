@@ -49,19 +49,21 @@ class Data:
 
     @cached_property
     def pyramid_female(self) -> NDArray[np.float64]:
-        return np.loadtxt(self.path / "pyramid_female.csv", delimiter=",")
+        return pl.read_csv(
+            self.path / "pyramid_female.csv", has_header=False
+        ).to_numpy()
 
     @cached_property
     def pyramid_male(self) -> NDArray[np.float64]:
-        return np.loadtxt(self.path / "pyramid_male.csv", delimiter=",")
+        return pl.read_csv(self.path / "pyramid_male.csv", has_header=False).to_numpy()
 
     @cached_property
     def care_need(self) -> NDArray[np.float64]:
-        return np.loadtxt(self.path / "care_need.csv", delimiter=",")
+        return pl.read_csv(self.path / "care_need.csv", has_header=False).to_numpy()
 
     @cached_property
     def classes(self) -> NDArray[np.float64]:
-        return np.loadtxt(self.path / "class.csv", delimiter=",")
+        return pl.read_csv(self.path / "class.csv", has_header=False).to_numpy()
 
     @cached_property
     def size(self) -> int:
